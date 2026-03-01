@@ -1,0 +1,82 @@
+.collections-con {
+  width: 100%;
+}
+
+.collections {
+  min-width: 0;
+  width: 100%;
+}
+
+.requests {
+  min-width: 0;
+}
+
+.dropdown-icon {
+  display: flex;
+  vertical-align: center;
+  margin-right: 8px;
+}
+
+.collection-item {
+  display: flex;
+  position: relative;
+  align-items: center;
+  cursor: pointer;
+  padding: 1px 10px 1px 6px;
+}
+
+.collection-item:hover {
+  .actions-icon {
+    opacity: 1;
+  }
+  background-color: rgba(155, 155, 155, 0.1);
+}
+
+.collection-name {
+  white-space: nowrap;        /* не переносить текст */
+  overflow: hidden;           /* скрыть обрезанное */
+  text-overflow: ellipsis;    /* многоточие */
+}
+
+.collection-actions {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.actions-menu {
+  position: absolute;
+  top: 135%;
+  left: 88%;
+  background: #313131;
+  border-radius: 6px;
+  padding: 4px 0;
+  min-width: 120px;
+  z-index: 2;
+  border: 1px solid rgba(155, 155, 155, 0.315);
+}
+
+.action-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  min-width: 150px;
+}
+
+.action-item:hover {
+  background: #3a3a3a;
+}
+
+.action-item.danger {
+  color: #ff6b6b;
+}
+
+.actions-icon {
+  opacity: 0;
+}
+
+.requests{
+  width: 100%;
+}
+

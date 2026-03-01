@@ -1,0 +1,26 @@
+.side-bar {
+    display: flex;
+    height: 100%;
+    position: relative; 
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.side-bar-main {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    flex: 1;
+}
+
+.side-bar-content {
+    flex: 1;
+    min-width: 0;
+}
+
+
+
+
+
+
+

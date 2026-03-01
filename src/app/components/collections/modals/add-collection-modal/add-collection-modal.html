@@ -1,0 +1,32 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <p>Create collection</p>
+    </div>
+
+    <div class="modal-content">
+      <label for="collectionName">Название</label>
+      <input
+        [(ngModel)]="collectionName"
+        placeholder="Название коллекции"
+        id="collectionName"
+        class="input"
+      />
+      <p class="error-message">Name is required</p>
+
+      <label for="collectionPath">Путь</label>
+      <input
+        [(ngModel)]="collectionPath"
+        (click)="selectFolder()"
+        placeholder="Путь к папке"
+        id="collectionPath"
+        class="input"
+      />
+
+      <div class="modal-actions">
+        <button (click)="addCollection()" class="btn-primary">Создать</button>
+        <button (click)="close()" class="btn-secondary">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>

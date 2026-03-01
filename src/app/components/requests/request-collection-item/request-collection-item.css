@@ -1,0 +1,73 @@
+.request-item{
+    padding: 1.5px;
+}
+
+.request-item:hover {
+    background-color: rgba(155, 155, 155, 0.1);
+}
+
+.request-item-info{
+    display: flex;
+    padding: 1px;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.request-item-info > *{
+    display: flex;
+}
+
+.http-method {
+    padding-right: 10px;
+    padding-right: 10px;
+}
+
+.http-request-info {
+    display: flex;
+    width: 100%;
+    padding-left: 24px;
+}
+
+.request-name{
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; 
+    flex: 1;
+    padding-right: 2.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.request-item {
+  display: flex;
+  min-width: 0;
+}
+
+.http-request-info {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  vertical-align: center;
+}
+
+.request-actions {
+    padding-right: 10px;
+}
+
+.request-item:hover {
+  .actions-icon {
+    opacity: 1;
+  }
+  background-color: rgba(155, 155, 155, 0.1);
+}
+
+
+.actions-icon {
+  opacity: 0;
+}
+

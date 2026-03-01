@@ -1,0 +1,77 @@
+<div class="add-request-modal">
+  <div class="add-request-header">
+    <span>Добавить запрос</span>
+  </div>
+
+  <div class="add-request-content">
+    <div class="reguest-type field">
+      <label>Тип</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="type" value="HTTP" [(ngModel)]="type" />
+          HTTP
+        </label>
+        <label>
+          <input type="radio" name="type" value="gRPC" [(ngModel)]="type" />
+          gRPC
+        </label>
+        <label>
+          <input type="radio" name="type" value="WebSocket" [(ngModel)]="type" />
+          WebSocket
+        </label>
+      </div>
+    </div>
+
+    <div class="request-name field">
+      <label>Название запроса</label>
+      <input
+        placeholder="Название запроса"
+        class="request-name-input"
+        type="text"
+        [(ngModel)]="name"
+      />
+    </div>
+
+    <div class="url-con field">
+      <label>Путь запроса</label>
+
+      <div class="url-row">
+        <div class="method-select-con" (click)="$event.stopPropagation()">
+          <div class="method-select">
+            <button
+              type="button"
+              class="method-button"
+              [ngClass]="[selectedMethod.toLowerCase() + `-hover`, selectedMethod.toLowerCase()]"
+              (click)="toggleMethods()"
+            >
+              {{ selectedMethod }}
+              <span class="arrow" [ngClass]="[selectedMethod.toLowerCase() + `-arrow`]">▼</span>
+            </button>
+          </div>
+        </div>
+        <input placeholder="Путь запроса" class="url-input" type="text" [(ngModel)]="url" />
+      </div>
+
+      @if (showMethods) {
+        <div class="methods-dropdown">
+          @for (m of methods; track m) {
+            <div
+              class="method-item-con"
+              (click)="selectMethod(m); $event.stopPropagation()"
+              [ngClass]="[selectedMethod === m ? 'active-method' : '']"
+            >
+              <div class="method-item">
+                {{ m }}
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="close action-button" (click)="onClose()">Закрыть</button>
+      <button class="create action-button" (click)="onCreate()">Создать</button>
+    </div>
+  </div>
+</div>

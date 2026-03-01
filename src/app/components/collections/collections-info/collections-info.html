@@ -1,0 +1,87 @@
+<div class="collections-con">
+  <collections-header></collections-header>
+
+  <div class="collections">
+    @if (collections$ | async; as collections) {
+      @if (collections.length === 0) {
+        <div>No collections found</div>
+        <div><a>Create</a> or <a>import</a> collection</div>
+      } @else {
+        @for (collection of collections; track collection.path) {
+          <div class="collection-item" (click)="toggleCollection(collection.id)">
+            <i class="dropdown-icon">
+              <svg
+                class="open-collection-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                stroke-width="2.5"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M 9.08,17 8.53,16.56 10.94,14.58 13.34,12.61 10.94,10.63 8.53,8.66 9.08,8.21 9.62,7.75 12.57,10.19 15.51,12.64 12.57,15.08 9.62,17.52
+Z"
+                ></path></svg
+            ></i>
+            <div class="collection-name">{{ collection.name }}</div>
+            <div
+              class="collection-actions"
+              (click)="toggleCollectionActions($event, collection.id)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="actions-icon"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <circle cx="5" cy="12" r="1"></circle>
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+              </svg>
+
+              @if ((currentOpenedCollectionId$ | async) === collection.id) {
+                <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
+                  <div class="action-item" (click)="addRequest(collection)">Добавить запрос</div>
+                  <div class="action-item" (click)="closeCollection()">Закрыть коллекцию</div>
+                  <div class="action-item" (click)="deleteCollection()">Удалить коллекцию</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (isCollectionActionsOpen(collection.id)) {
+            <div class="requests">
+              @for (req of getRequestsByCollectionId(collection.id) | async; track req.id) {
+                <request-collection-item
+                  [request]="req"
+                  [collection]="collection"
+                ></request-collection-item>
+              }
+            </div>
+          }
+
+          <ng-template cdkPortal>
+            <add-request-modal
+              (close)="overlayRef?.dispose()"
+              (create)="onCreateRequest($event)"
+              [collectionId]="collection.id"
+            />
+          </ng-template>
+        }
+      }
+    } @else {
+      <div>Loading...</div>
+    }
+  </div>
+</div>

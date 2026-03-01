@@ -1,0 +1,39 @@
+<div class="collection-header">
+  <p style="font-weight: bold">Collections</p>
+
+  <div class="collection-menu">
+    <div class="collection-header-actions" (click)="toggleMenu($event)">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="actions-icon"
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <circle cx="5" cy="12" r="1"></circle>
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+      </svg>
+    </div>
+
+    <div
+      class="collection-actions"
+      [class.collection-actions-show]="(currentOpenedCollectionId$ | async) === HEADER_MENU_ID"
+    >
+      <div class="collection-action" (click)="showAddCollectionModal()">Добавить коллекцию</div>
+      <div class="collection-action" (click)="openCollection()">Открыть коллекцию</div>
+    </div>
+  </div>
+  @if (isShowAddCollectionModalActive) {
+    <add-collection-modal
+      (closeModal)="closeModal()"
+      (addCollecton)="addCollection($event)"
+    ></add-collection-modal>
+  }
+</div>

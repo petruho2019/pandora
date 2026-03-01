@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "yarn"
+    "packageManager": "yarn",
+    "analytics": "5d24de3e-ca4b-49a3-ac24-787db207a090"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -11,7 +12,7 @@
       "schematics": {},
       "root": "",
       "sourceRoot": "src",
-      "prefix": "app",
+      "prefix": "",
       "architect": {
         "build": {
           "builder": "@angular/build:application",

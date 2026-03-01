@@ -1,1 +1,43 @@
 /* You can add global styles to this file, and also import other style files */
+* {
+  margin: 0;
+  padding: 0;
+  color: rgb(212, 212, 212);
+  font-size: 14px;
+}
+html, body {
+  height: 100%;  
+  width: 100%;
+  overflow: hidden; 
+  background-color: #222222;
+  font-family: 'Open Sans', 'Raleway';
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.get,
+.get-arrow {
+  color: rgb(133, 235, 106);
+}
+
+.post,
+.post-arrow {
+  color: rgb(133, 235, 235);
+}
+
+.put,
+.put-arrow {
+  color: rgb(235, 133, 192);
+}
+
+.patch,
+.patch-arrow {
+  color: rgb(175, 133, 192);
+}
+
+.delete,
+.delete-arrow {
+  color: rgb(255, 67, 67);
+}

@@ -1,0 +1,13 @@
+<div class="side-bar" [style.width.px]="currentWidth()">
+  <div class="side-bar-main">
+    <!-- <div class="header">
+      <side-bar-header></side-bar-header>
+    </div> -->
+
+    <div class="side-bar-content">
+      <collections-info></collections-info>
+    </div>
+  </div>
+
+  <resizable-bar (onWidthChanged)="updateCurrentWidth($event)"></resizable-bar>
+</div>
