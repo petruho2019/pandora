@@ -11,3 +11,6 @@ yarn run start:angular
 ```bash
 yarn run start:electron
 ```
+
+
+В компоненте collection-info можно указать тестовые данные
