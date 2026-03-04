@@ -37,9 +37,6 @@
     white-space: nowrap; 
     flex: 1;
     padding-right: 2.5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 

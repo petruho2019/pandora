@@ -1,32 +1,29 @@
-<div class="modal-overlay" (click)="close()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <p>Create collection</p>
+<div class="add-collection-modal" (click)="$event.stopPropagation()">
+  <div class="modal-header">
+    <p>Создать коллекцию</p>
+  </div>
+
+  <div class="add-collection-content">
+    <div class="collection-name">
+      <label class="modal-label">Название коллекции</label>
+      <input placeholder="Название коллекции" class="pandora-input" type="text" />
     </div>
 
-    <div class="modal-content">
-      <label for="collectionName">Название</label>
-      <input
-        [(ngModel)]="collectionName"
-        placeholder="Название коллекции"
-        id="collectionName"
-        class="input"
-      />
-      <p class="error-message">Name is required</p>
-
-      <label for="collectionPath">Путь</label>
+    <div class="collection-path" (click)="$event.stopPropagation()">
+      <label class="modal-label" for="collectionPath" style="pointer-events: none">Путь</label>
       <input
         [(ngModel)]="collectionPath"
         (click)="selectFolder()"
         placeholder="Путь к папке"
         id="collectionPath"
-        class="input"
+        class="pandora-input"
+        readonly
       />
+    </div>
 
-      <div class="modal-actions">
-        <button (click)="addCollection()" class="btn-primary">Создать</button>
-        <button (click)="close()" class="btn-secondary">Отмена</button>
-      </div>
+    <div class="modal-actions">
+      <button (click)="close()" class="modal-close-button action-button">Закрыть</button>
+      <button (click)="addCollection()" class="modal-create-button action-button">Создать</button>
     </div>
   </div>
 </div>

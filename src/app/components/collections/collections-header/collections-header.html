@@ -26,14 +26,17 @@
       class="collection-actions"
       [class.collection-actions-show]="(currentOpenedCollectionId$ | async) === HEADER_MENU_ID"
     >
-      <div class="collection-action" (click)="showAddCollectionModal()">Добавить коллекцию</div>
-      <div class="collection-action" (click)="openCollection()">Открыть коллекцию</div>
+      <div class="collection-action pointer" (click)="showAddCollectionModal()">
+        Добавить коллекцию
+      </div>
+      <div class="collection-action pointer" (click)="openCollection()">Открыть коллекцию</div>
     </div>
   </div>
-  @if (isShowAddCollectionModalActive) {
+
+  <ng-template cdkPortal>
     <add-collection-modal
-      (closeModal)="closeModal()"
+      (closeModal)="overlayRef?.dispose()"
       (addCollecton)="addCollection($event)"
-    ></add-collection-modal>
-  }
+    />
+  </ng-template>
 </div>

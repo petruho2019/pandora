@@ -32,12 +32,6 @@
   background-color: rgba(155, 155, 155, 0.1);
 }
 
-.collection-name {
-  white-space: nowrap;        /* не переносить текст */
-  overflow: hidden;           /* скрыть обрезанное */
-  text-overflow: ellipsis;    /* многоточие */
-}
-
 .collection-actions {
   display: flex;
   flex-direction: row;

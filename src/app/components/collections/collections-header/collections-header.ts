@@ -1,21 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, viewChild } from '@angular/core';
 import { AddCollectionModal } from "../modals/add-collection-modal/add-collection-modal";
 import { ActionsMenuService } from '../../../services/actions-menu-service';
-import { ElectronService } from '../../../services/electron-service';
 import { Store } from '@ngrx/store';
 import { addCollection, openCollection } from '../../../store/actions/collections.actions';
 import { take } from 'rxjs';
+import { CdkPortal, PortalModule } from '@angular/cdk/portal';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 
 @Component({
   selector: 'collections-header',
-  imports: [CommonModule, AddCollectionModal],
+  imports: [CommonModule, AddCollectionModal, PortalModule],
   templateUrl: './collections-header.html',
   styleUrl: './collections-header.css',
 })
 export class CollectionsHeader {
 
   readonly store = inject(Store);
+  private overlay = inject(Overlay)
   private actionsMenuService = inject(ActionsMenuService);
 
   readonly HEADER_MENU_ID = '__header__';
@@ -23,6 +25,9 @@ export class CollectionsHeader {
   isShowAddCollectionModalActive = false;
 
   public currentOpenedCollectionId$ = this.actionsMenuService.openedId$;
+
+  portal = viewChild.required<CdkPortal>(CdkPortal);
+  overlayRef: OverlayRef;
 
   toggleMenu(event: MouseEvent) {
     event.stopPropagation();
@@ -35,8 +40,23 @@ export class CollectionsHeader {
 
   showAddCollectionModal() {
     console.log(`Show add collection modal`);
-    this.isShowAddCollectionModalActive = true;
     this.actionsMenuService.close();
+
+    this.overlayRef = this.overlay.create({
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      positionStrategy: this.overlay.position()
+        .global()
+        .centerHorizontally()
+        .centerVertically()
+    });
+
+    this.overlayRef.backdropClick().subscribe(() => {
+      this.overlayRef?.dispose();
+    });
+
+    this.overlayRef.attach(this.portal());
+
   }
 
   openCollection(){
@@ -48,7 +68,4 @@ export class CollectionsHeader {
     this.store.dispatch(addCollection(collectionInfo));
   }
 
-  closeModal() {
-    this.isShowAddCollectionModalActive = false;
-  }
 }

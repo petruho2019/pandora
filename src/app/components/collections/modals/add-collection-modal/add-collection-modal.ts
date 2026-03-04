@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output, output } from '@angular/core';
+import { Component, EventEmitter, HostListener, inject, OnInit, Output, output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { addCollection } from '../../../../store/actions/collections.actions';
 import { FormsModule } from '@angular/forms'
@@ -11,37 +11,42 @@ import { ElectronService } from '../../../../services/electron-service';
   styleUrl: './add-collection-modal.css',
 })
 export class AddCollectionModal {
-    private store = inject(Store);
-    private electronService = inject(ElectronService);
-      
-    collectionName = '';
-    collectionPath = '';
+  private electronService = inject(ElectronService);
+    
+  collectionName = '';
+  collectionPath = '';
 
-    @Output() closeModal = new EventEmitter();
+  @Output() closeModal = new EventEmitter();
 
-    @Output() addCollecton = new EventEmitter();
+  @Output() addCollecton = new EventEmitter();
 
-    addCollection() {
-      this.addCollecton.emit({ 
-          name: this.collectionName, 
-          path: this.collectionPath
-        });
-
-      this.close();
-      }
-
-    selectFolder(){
-      console.log("Select folder");
-      this.electronService.selectFolder().then((path: string | null) => {
-        if (path) {
-          this.collectionPath = path;
-        }
+  addCollection() {
+    this.addCollecton.emit({ 
+        name: this.collectionName, 
+        path: this.collectionPath
       });
+
+    this.close();
     }
 
-    close() {
-      this.collectionName = '';
-      this.collectionPath = '';
+  selectFolder(){
+    console.log("Select folder");
+    this.electronService.selectFolder().then((path: string | null) => {
+      if (path) {
+        this.collectionPath = path;
+      }
+    });
+  }
+
+  close() {
+    this.collectionName = '';
+    this.collectionPath = '';
+    this.closeModal.emit();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    if(event.key === 'Escape')
       this.closeModal.emit();
-    }
+  }
 }

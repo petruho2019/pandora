@@ -1,11 +1,11 @@
 <div class="add-request-modal">
-  <div class="add-request-header">
+  <div class="modal-header">
     <span>Добавить запрос</span>
   </div>
 
   <div class="add-request-content">
     <div class="reguest-type field">
-      <label>Тип</label>
+      <label class="request-type-label modal-label">Тип запроса</label>
       <div class="radio-group">
         <label>
           <input type="radio" name="type" value="HTTP" [(ngModel)]="type" />
@@ -23,17 +23,12 @@
     </div>
 
     <div class="request-name field">
-      <label>Название запроса</label>
-      <input
-        placeholder="Название запроса"
-        class="request-name-input"
-        type="text"
-        [(ngModel)]="name"
-      />
+      <label class="modal-label">Название запроса</label>
+      <input placeholder="Название запроса" class="pandora-input" type="text" [(ngModel)]="name" />
     </div>
 
     <div class="url-con field">
-      <label>Путь запроса</label>
+      <label class="modal-label">Путь запроса</label>
 
       <div class="url-row">
         <div class="method-select-con" (click)="$event.stopPropagation()">
@@ -70,8 +65,8 @@
     </div>
 
     <div class="actions">
-      <button class="close action-button" (click)="onClose()">Закрыть</button>
-      <button class="create action-button" (click)="onCreate()">Создать</button>
+      <button class="modal-close-button action-button" (click)="onClose()">Закрыть</button>
+      <button class="modal-create-button action-button" (click)="onCreate()">Создать</button>
     </div>
   </div>
 </div>
