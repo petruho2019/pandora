@@ -26,6 +26,14 @@
   margin-bottom: 14px;
 }
 
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  fill: rgba(212, 212, 212, 0.4);
+  padding: 8px 16px 8px 16px;
+}
+
 .url-input {
   width: 100%;
   padding: 6px 8px;
@@ -34,6 +42,7 @@
   border-left: 0px solid;
   color: #fff;
   border-radius: 0px 4px 4px 0px;
+  outline: none;
 }
 
 .reguest-type {

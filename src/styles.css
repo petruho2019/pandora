@@ -15,7 +15,7 @@ html, body {
 
 :root {
   --modal-border-style: 1px solid rgba(155, 155, 155, 0.315);
-  --contrasting-color: #421932;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь*/
+  --contrasting-color: #486cbb;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
 }
 
 .pointer {
@@ -54,10 +54,10 @@ html, body {
 }
 
 .modal-header {
-  padding: 14px;
   background-color: #191919;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+  min-height: 25px;
 }
 
 .pandora-input {
@@ -67,11 +67,11 @@ html, body {
   color: #fff;
   border-radius: 4px;
   outline: none;
-  transition: outline 0.5s;
+  transition: border 0.1s;
 }
 
 .pandora-input:focus{
-  border: 1px solid #CCCCFF;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь*/
+  border: 1.5px solid var(--contrasting-color);   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь*/
 }
 
 .modal-close-button {
