@@ -4,10 +4,11 @@ import { CommonModule } from '@angular/common';
 import { HttpMethod } from '../../../../../../shared/models/requests/http-request-model';
 import { RequestType, RequestTypes } from '../../../../../../shared/models/requests/request';
 import { CreateRequestInfo } from '../../../../../../shared/models/event-models/add-request-info';
+import { CloseModalIcon } from "../../../utils/close-modal-icon/close-modal-icon";
 
 @Component({
   selector: 'add-request-modal',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CloseModalIcon],
   templateUrl: './add-request-modal.html',
   styleUrl: './add-request-modal.css',
 })

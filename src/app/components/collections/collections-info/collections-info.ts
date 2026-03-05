@@ -10,7 +10,7 @@ import { createHttpRequest, createRequestFailure } from '../../../store/actions/
 import { CollectionEntity } from '../../../../../shared/models/entitys/collection-entity'
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info'
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
-import { loadCollections } from '../../../store/actions/collections.actions';
+import { closeCollection, loadCollections } from '../../../store/actions/collections.actions';
 import { ofType } from '@ngrx/effects';
 import { RequestCollectionItem } from '../../requests/request-collection-item/request-collection-item';
 import { Collection } from '../../../../../shared/models/collections/collection';
@@ -28,9 +28,9 @@ export class CollectionsInfo implements OnInit {
   private store = inject(Store);
   private overlay = inject(Overlay)
 
-  //public readonly collections$ = this.store.select(selectAll);
+  public readonly collections$ = this.store.select(selectAll);
 
-  public collections$: Observable<Collection[]> | null = null; // Test
+  //public collections$: Observable<Collection[]> | null = null; // Test
 
   public openCollections: Record<string, boolean> = {};
   public showAddRequestModal: boolean =  false;
@@ -53,10 +53,10 @@ export class CollectionsInfo implements OnInit {
       alert(errorBody.error.message);
     })
 
-    this.collections$ = of([
-      { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
-      { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
-    ]);
+    // this.collections$ = of([
+    //   { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
+    //   { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
+    // ]);
 
     this.collections$.pipe(take(1)).subscribe(collections => {
       this.openCollections = collections.reduce((acc, c) => {
@@ -96,9 +96,11 @@ export class CollectionsInfo implements OnInit {
     this.overlayRef.attach(this.portal());
   }
 
-  closeCollection() {
+  closeCollection(collection: Collection) {
     this.actionsMenuService.close();
-    console.log('close collection');
+    console.log(`close collection, ${collection.id}`);
+
+    this.store.dispatch(closeCollection({collectionId: collection.id}));
   }
 
   deleteCollection() {

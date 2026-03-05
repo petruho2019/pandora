@@ -53,7 +53,9 @@ Z"
               @if ((currentOpenedCollectionId$ | async) === collection.id) {
                 <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
                   <div class="action-item" (click)="addRequest(collection)">Добавить запрос</div>
-                  <div class="action-item" (click)="closeCollection()">Закрыть коллекцию</div>
+                  <div class="action-item" (click)="closeCollection(collection)">
+                    Закрыть коллекцию
+                  </div>
                   <div class="action-item" (click)="deleteCollection()">Удалить коллекцию</div>
                 </div>
               }

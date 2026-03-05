@@ -16,6 +16,7 @@ html, body {
 :root {
   --modal-border-style: 1px solid rgba(155, 155, 155, 0.315);
   --contrasting-color: #486cbb;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
+  --modal-background-color: #202020;
 }
 
 .pointer {
@@ -71,11 +72,26 @@ html, body {
 }
 
 .pandora-input:focus{
-  border: 1.5px solid var(--contrasting-color);   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь*/
+  border: 1.5px solid var(--contrasting-color);   
 }
 
 .modal-close-button {
   transition: background-color 0.2s;
+}
+
+.modal-close-icon {
+  border-radius: 4px;
+  position: relative;
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  fill: rgba(212, 212, 212, 0.5);
+  transition: fill 0.2s
+}
+
+.modal-close-icon:hover {
+  background-color: rgba(155, 155, 155, 0.150);
+  fill: rgba(212, 212, 212, 0.75);
 }
 
 .modal-create-button {

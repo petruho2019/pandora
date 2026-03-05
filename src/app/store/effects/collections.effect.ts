@@ -3,7 +3,7 @@ import { catchError, EMPTY, exhaustMap, from, map, mergeMap, of, switchMap, tap 
 
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects'; // ← Actions из effects!
-import { addCollection, addCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionSuccess } from '../actions/collections.actions';
+import { addCollection, addCollectionSuccess, closeCollection, closeCollectionFailure, closeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionSuccess } from '../actions/collections.actions';
 import { CollectionEntity } from "../../../../shared/models/entitys/collection-entity";
 import { Collection } from "../../../../shared/models/collections/collection";
 
@@ -80,4 +80,15 @@ export class CollectionEffects {
       })
     )
   )
+
+  closeCollection = createEffect(() => this.actions$.pipe(
+      ofType(closeCollection),
+      switchMap(({collectionId}) => 
+        from(this.electronService.closeCollection(collectionId)).pipe(
+          map(collections => closeCollectionSuccess({collections})),
+          catchError(() => of(closeCollectionFailure({errorMessage: `Ошибка при закрытии коллекции`}))) // Скорее всего невозможна
+        )
+      )
+    )
+  );
 }

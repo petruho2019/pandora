@@ -1,5 +1,4 @@
 import { createAction, props } from "@ngrx/store";
-import { CollectionEntity } from "../../../../shared/models/entitys/collection-entity";
 import { Collection } from "../../../../shared/models/collections/collection";
 
 export const addCollection = createAction(
@@ -20,3 +19,7 @@ export const openCollection = createAction('[Collections] Open');
 export const openCollectionSuccess = createAction('[Collections] Open Success', props<{collection: Collection}>());
 export const openCollectionFailure = createAction('[Collections] Open Failure', props<{error: any}>());
 export const openCollectionCancel = createAction('[Collections] Open Cancel');
+
+export const closeCollection = createAction('[Collection] Close', props<{collectionId: string}>());
+export const closeCollectionSuccess = createAction('[Collection] Close Success', props<{collections: Collection[]}>());
+export const closeCollectionFailure = createAction('[Collection] Close Failure', props<{errorMessage: string}>());

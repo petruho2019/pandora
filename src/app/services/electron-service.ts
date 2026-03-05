@@ -7,6 +7,7 @@ import { CreateRequestError } from "../../../shared/models/error/error";
 
 @Injectable({ providedIn: 'root'})
 export class ElectronService {
+
     addCollection( {name, path} : { name: string; path: string; } ) : Promise<Collection>{
         return (window as any).electronAPI?.addCollection({ collectionName: name, collectionPath: path });
     };
@@ -16,10 +17,10 @@ export class ElectronService {
     openCollection({collectionPath}: {collectionPath: string}) : Promise<Collection> {
         return (window as any).electronAPI?.openCollection(collectionPath);
     };
-    removeCollection(id: string) {
-        (window as any).electronAPI?.removeCollection(id);
+    closeCollection(collectionId: string) : Promise<Collection[]>{
+        return (window as any).electronAPI?.closeCollection(collectionId);
     };
-    
+
     createRequest({collectionPath, requestInfo}: {collectionPath: string, requestInfo: CreateRequestInfo}) : Promise<ResultT<RequestModel, CreateRequestError>> {
         return (window as any).electronAPI?.addRequest({collectionPath: collectionPath,  requestInfo: requestInfo});
     }

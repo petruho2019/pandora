@@ -3,10 +3,11 @@ import { Store } from '@ngrx/store';
 import { addCollection } from '../../../../store/actions/collections.actions';
 import { FormsModule } from '@angular/forms'
 import { ElectronService } from '../../../../services/electron-service';
+import { CloseModalIcon } from "../../../utils/close-modal-icon/close-modal-icon";
 
 @Component({
   selector: 'add-collection-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, CloseModalIcon],
   templateUrl: './add-collection-modal.html',
   styleUrl: './add-collection-modal.css',
 })
@@ -26,7 +27,7 @@ export class AddCollectionModal {
         path: this.collectionPath
       });
 
-    this.close();
+    this.onClose();
     }
 
   selectFolder(){
@@ -38,7 +39,7 @@ export class AddCollectionModal {
     });
   }
 
-  close() {
+  onClose() {
     this.collectionName = '';
     this.collectionPath = '';
     this.closeModal.emit();

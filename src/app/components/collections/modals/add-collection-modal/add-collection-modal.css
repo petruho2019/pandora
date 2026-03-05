@@ -9,7 +9,7 @@
   transform: translate(-50%, -50%);
   top: 30%;
   width: 420px;
-  background: #202020;
+  background: var(--modal-background-color);
   border: var(--modal-border-style)
 }
 
@@ -17,13 +17,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  fill: rgba(212, 212, 212, 0.4);
   padding: 8px 16px 8px 16px;
-}
-
-.close-icon {
-  position: relative;
-  padding: 5px;
 }
 
 .add-collection-content {
@@ -49,8 +43,6 @@
   justify-content: flex-end;
   gap: 10px;
 }
-
-
 
 .modal-close-button {
   background-color: #202020;

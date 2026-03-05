@@ -18,8 +18,6 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
     //#region load-collections
     ipcMain.handle('load-collections', () => {
 
-        store.clear();
-
         const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
 
         console.log(`Collections from store ${JSON.stringify(collectionsFromStore)}`);
@@ -96,11 +94,13 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
         throw new Error(createCollectionConfigFileResult.error);
     });
 
-    //#region remove-collection
+    //#region close-collection
 
-    ipcMain.handle('remove-collection', (event, path) => {
+    ipcMain.handle('close-collection', (event, collectionId: string) : Collection[] => {
+        console.log(`Close collection, collectionId: ${collectionId}`);
+
         const collections = store.get(COLLECTIONS_KEY, []);
-        const filtered = collections.filter(item => item.path !== path);
+        const filtered = collections.filter(item => item.id !== collectionId);
         store.set(COLLECTIONS_KEY, filtered);
 
         return filtered;

@@ -22,15 +22,14 @@
       </svg>
     </div>
 
-    <div
-      class="collection-actions"
-      [class.collection-actions-show]="(currentOpenedCollectionId$ | async) === HEADER_MENU_ID"
-    >
-      <div class="collection-action pointer" (click)="showAddCollectionModal()">
-        Добавить коллекцию
+    @if ((currentOpenedCollectionId$ | async) === HEADER_MENU_ID) {
+      <div class="collection-actions">
+        <div class="collection-action pointer" (click)="showAddCollectionModal()">
+          Добавить коллекцию
+        </div>
+        <div class="collection-action pointer" (click)="openCollection()">Открыть коллекцию</div>
       </div>
-      <div class="collection-action pointer" (click)="openCollection()">Открыть коллекцию</div>
-    </div>
+    }
   </div>
 
   <ng-template cdkPortal>
