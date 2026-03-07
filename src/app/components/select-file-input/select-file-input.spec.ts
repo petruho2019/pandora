@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CloneCollection } from './clone-collection';
+import { SelectFileInput } from './select-file-input';
 
-describe('CloneCollection', () => {
-  let component: CloneCollection;
-  let fixture: ComponentFixture<CloneCollection>;
+describe('SelectFileInput', () => {
+  let component: SelectFileInput;
+  let fixture: ComponentFixture<SelectFileInput>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CloneCollection]
+      imports: [SelectFileInput]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CloneCollection);
+    fixture = TestBed.createComponent(SelectFileInput);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,27 +1,22 @@
 <div class="add-collection-modal" (click)="$event.stopPropagation()">
-  <div class="modal-header">
-    <p>Создать коллекцию</p>
-
-    <close-modal-icon (close)="onClose()"></close-modal-icon>
-  </div>
+  <modal-header [title]="headerTitle" (onClose)="onClose()"></modal-header>
 
   <div class="add-collection-content">
     <div class="collection-name">
       <label class="modal-label">Название коллекции</label>
-      <input placeholder="Название коллекции" class="pandora-input" type="text" />
-    </div>
-
-    <div class="collection-path" (click)="$event.stopPropagation()">
-      <label class="modal-label" for="collectionPath" style="pointer-events: none">Путь</label>
       <input
-        [(ngModel)]="collectionPath"
-        (click)="selectFolder()"
-        placeholder="Путь к папке"
-        id="collectionPath"
+        [(ngModel)]="collectionName"
+        placeholder="Название коллекции"
         class="pandora-input"
-        readonly
+        type="text"
       />
     </div>
+
+    <select-file-input
+      (onPathSelected)="onPathSelected($event)"
+      [placeholder]="fileInputPlaceholder"
+      [label]="fileInputLabel"
+    ></select-file-input>
 
     <div class="modal-actions">
       <button (click)="onClose()" class="modal-close-button action-button">Закрыть</button>

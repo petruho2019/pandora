@@ -1,27 +1,29 @@
-import { Component, EventEmitter, HostListener, inject, OnInit, Output, output } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { addCollection } from '../../../../store/actions/collections.actions';
+import { Component, EventEmitter, HostListener, inject, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms'
-import { ElectronService } from '../../../../services/electron-service';
-import { CloseModalIcon } from "../../../utils/close-modal-icon/close-modal-icon";
+import { ModalHeader } from "../../../reuseable/modal-header/modal-header";
+import { SelectFileInput } from "../../../select-file-input/select-file-input";
 
 @Component({
   selector: 'add-collection-modal',
-  imports: [FormsModule, CloseModalIcon],
+  imports: [FormsModule, ModalHeader, SelectFileInput],
   templateUrl: './add-collection-modal.html',
   styleUrl: './add-collection-modal.css',
 })
 export class AddCollectionModal {
-  private electronService = inject(ElectronService);
     
   collectionName = '';
   collectionPath = '';
+
+  headerTitle = "Создать коллекцию";
+  fileInputPlaceholder = "Путь до коллекции";
+  fileInputLabel = "Путь";
 
   @Output() closeModal = new EventEmitter();
 
   @Output() addCollecton = new EventEmitter();
 
   addCollection() {
+    console.log(`Add collection ${this.collectionName} , ${this.collectionPath}`);
     this.addCollecton.emit({ 
         name: this.collectionName, 
         path: this.collectionPath
@@ -30,13 +32,8 @@ export class AddCollectionModal {
     this.onClose();
     }
 
-  selectFolder(){
-    console.log("Select folder");
-    this.electronService.selectFolder().then((path: string | null) => {
-      if (path) {
-        this.collectionPath = path;
-      }
-    });
+  onPathSelected(selectedPath: string){
+    this.collectionPath = selectedPath;
   }
 
   onClose() {

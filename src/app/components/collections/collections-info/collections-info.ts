@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit, TemplateRef, ViewChild, viewChild, ViewContainerRef } from '@angular/core';
 import { CollectionsHeader } from "../collections-header/collections-header";
 import { Store } from '@ngrx/store';
 import { selectAll } from '../../../store/selectors/collections.selector';
@@ -10,37 +10,44 @@ import { createHttpRequest, createRequestFailure } from '../../../store/actions/
 import { CollectionEntity } from '../../../../../shared/models/entitys/collection-entity'
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info'
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
-import { closeCollection, loadCollections } from '../../../store/actions/collections.actions';
+import { cloneCollection, closeCollection, loadCollections } from '../../../store/actions/collections.actions';
 import { ofType } from '@ngrx/effects';
 import { RequestCollectionItem } from '../../requests/request-collection-item/request-collection-item';
 import { Collection } from '../../../../../shared/models/collections/collection';
 import { getRequestsByCollectionId } from '../../../store/selectors/requests.selector';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { CdkPortal, PortalModule } from '@angular/cdk/portal';
+import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
+import { CloneCollectionModal } from "../modals/clone-collection-modal/clone-collection-modal";
+import { CloneCollectionDto } from '../../../../../shared/models/collections/dto/clone-collection-dto';
 
 @Component({
   selector: 'collections-info',
-  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal],
+  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal, CloneCollectionModal],
   templateUrl: './collections-info.html',
   styleUrl: './collections-info.css',
 })
 export class CollectionsInfo implements OnInit {
   private store = inject(Store);
   private overlay = inject(Overlay)
+  private viewContainerRef = inject(ViewContainerRef);
 
   public readonly collections$ = this.store.select(selectAll);
 
   //public collections$: Observable<Collection[]> | null = null; // Test
 
   public openCollections: Record<string, boolean> = {};
-  public showAddRequestModal: boolean =  false;
+  
   public selectedCollectionPath: string = "";
+  public cloningCollectionId: string = "";
 
   private actionsMenuService = inject(ActionsMenuService);
   public currentOpenedCollectionId$ = this.actionsMenuService.openedId$;
 
-  portal = viewChild.required<CdkPortal>(CdkPortal);
-  overlayRef: OverlayRef;
+  addRequestPortal = viewChild.required<TemplateRef<any>>('addRequest');
+  addRequestOverlayRef: OverlayRef;
+  
+  cloneCollectionPortal = viewChild.required<TemplateRef<any>>('cloneCollection');
+  cloneCollectionOverlayRef: OverlayRef;
 
   ngOnInit(): void {
     console.log("ngOnInit");
@@ -80,20 +87,43 @@ export class CollectionsInfo implements OnInit {
     this.selectedCollectionPath = collection.path;
     this.actionsMenuService.close();
 
-    this.overlayRef = this.overlay.create({
+    this.addRequestOverlayRef = this.overlay.create({
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-dark-backdrop',
       positionStrategy: this.overlay.position()
         .global()
         .centerHorizontally()
-        .centerVertically()
     });
 
-    this.overlayRef.backdropClick().subscribe(() => {
-      this.overlayRef?.dispose();
+    this.addRequestOverlayRef.backdropClick().subscribe(() => {
+      this.addRequestOverlayRef?.dispose();
     });
 
-    this.overlayRef.attach(this.portal());
+    const portal = new TemplatePortal(this.addRequestPortal(), this.viewContainerRef);
+
+    this.addRequestOverlayRef.attach(portal);
+  }
+
+  showCloneCollectionModal(collectionId: string){
+    this.cloningCollectionId = collectionId;
+
+    this.actionsMenuService.close();
+
+    this.cloneCollectionOverlayRef = this.overlay.create({
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      positionStrategy: this.overlay.position()
+        .global()
+        .centerHorizontally()
+    });
+
+    this.cloneCollectionOverlayRef.backdropClick().subscribe(() => {
+      this.cloneCollectionOverlayRef?.dispose();
+    });
+
+    const portal = new TemplatePortal(this.cloneCollectionPortal(), this.viewContainerRef);
+
+    this.cloneCollectionOverlayRef.attach(portal);
   }
 
   closeCollection(collection: Collection) {
@@ -128,9 +158,16 @@ export class CollectionsInfo implements OnInit {
     }
   }
 
+  handleCloneCollection(collectionInfo: CloneCollectionDto) {
+    this.store.dispatch(cloneCollection({ collectionInfo }));
+    this.cloneCollectionOverlayRef.dispose();
+  }
+
   isCollectionActionsOpen(collectionId: string){
     return this.openCollections[collectionId];
   }
+
+
 
   getRequestsByCollectionId(collectionId: string): Observable<RequestModel[]>{
     if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b'){
@@ -140,6 +177,8 @@ export class CollectionsInfo implements OnInit {
     if (collectionId === '33abfac2-d678-481c-aa9a-39ac8361bd3e'){
       return of([ { id: "9058196d-801b-44df-9ef8-17f331c958c5", name:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", type: "HTTP", method: "GET", url: "asdasd" , headers: null , body: null, collectionId: collectionId }] );
     }
+
+    // TODO Добавить Record для запросов коллекции которых открывались
 
     return this.store.select(getRequestsByCollectionId(collectionId));
   }

@@ -8,19 +8,11 @@
   justify-content: space-between;
 }
 
-.actions-icon {
-  cursor: pointer;
-}
-
 .collection-header-actions {
   position: relative;
   margin-left: auto;
   display: flex;
   align-items: center;
-}
-
-.collection-actions-show {
-  color: black;
 }
 
 .collection-actions {
@@ -37,7 +29,7 @@
 }
 
 .collection-action {
-  padding: 8px 12px;
+  padding: 8px;
   font-size: 12px;
   white-space: nowrap;
   border-radius: 6px;

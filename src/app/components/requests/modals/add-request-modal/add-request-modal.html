@@ -1,9 +1,5 @@
 <div class="add-request-modal">
-  <div class="modal-header">
-    <span>Добавить запрос</span>
-
-    <close-modal-icon (close)="onClose()"></close-modal-icon>
-  </div>
+  <modal-header [title]="headerTitle" (onClose)="onClose()"></modal-header>
 
   <div class="add-request-content">
     <div class="reguest-type field">

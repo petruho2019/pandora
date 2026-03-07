@@ -1,0 +1,11 @@
+<div class="path" (click)="$event.stopPropagation()">
+  <label class="modal-label" for="path" style="pointer-events: none">{{ label }}</label>
+  <input
+    [(ngModel)]="selectedPath"
+    (click)="selectFolder()"
+    [placeholder]="placeholder"
+    id="path"
+    class="pandora-input pointer"
+    readonly
+  />
+</div>

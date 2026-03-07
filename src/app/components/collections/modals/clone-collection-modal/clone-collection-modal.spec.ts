@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SideBarHeader } from './side-bar-header';
+import { CloneCollectionModal } from './clone-collection-modal';
 
-describe('SideBarHeader', () => {
-  let component: SideBarHeader;
-  let fixture: ComponentFixture<SideBarHeader>;
+describe('CloneCollectionModal', () => {
+  let component: CloneCollectionModal;
+  let fixture: ComponentFixture<CloneCollectionModal>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SideBarHeader]
+      imports: [CloneCollectionModal]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SideBarHeader);
+    fixture = TestBed.createComponent(CloneCollectionModal);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

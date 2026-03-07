@@ -52,11 +52,16 @@ Z"
 
               @if ((currentOpenedCollectionId$ | async) === collection.id) {
                 <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
-                  <div class="action-item" (click)="addRequest(collection)">Добавить запрос</div>
+                  <div class="action-item" (click)="this.addRequest(collection)">
+                    Добавить запрос
+                  </div>
                   <div class="action-item" (click)="closeCollection(collection)">
                     Закрыть коллекцию
                   </div>
-                  <div class="action-item" (click)="deleteCollection()">Удалить коллекцию</div>
+                  <div class="action-item" (click)="showCloneCollectionModal(collection.id)">
+                    Клонировать коллекцию
+                  </div>
+                  <!-- <div class="action-item" (click)="deleteCollection()">Удалить коллекцию</div> -->
                 </div>
               }
             </div>
@@ -73,10 +78,19 @@ Z"
             </div>
           }
 
-          <ng-template cdkPortal>
+          <ng-template cdkPortal #addRequest>
             <add-request-modal
-              (close)="overlayRef?.dispose()"
+              (close)="addRequestOverlayRef.dispose()"
               (create)="onCreateRequest($event)"
+              [collectionId]="collection.id"
+            />
+          </ng-template>
+
+          <ng-template cdkPortal #cloneCollection>
+            <clone-collection-modal
+              (onClose)="cloneCollectionOverlayRef.dispose()"
+              (onClone)="handleCloneCollection($event)"
+              [collectionName]="collection.name"
               [collectionId]="collection.id"
             />
           </ng-template>

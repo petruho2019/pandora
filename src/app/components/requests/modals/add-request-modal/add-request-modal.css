@@ -1,11 +1,11 @@
 .add-request-modal {
   display: flex;
   flex-direction: column;
-  position: fixed;
-  top: 30%;
+  position: absolute;
+  top: 34.6%;
   transform: translate(-50%, -50%);
   color: #fff;
-  width: 475px;
+  min-width: 420px;
   border-radius: 8px;
   z-index: 1001;
   border: var(--modal-border-style);
@@ -26,18 +26,10 @@
   margin-bottom: 14px;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  fill: rgba(212, 212, 212, 0.4);
-  padding: 8px 16px 8px 16px;
-}
-
 .url-input {
   width: 100%;
   padding: 6px 8px;
-  background: #2a2a2a;
+  background: none;
   border: 1px solid #444;
   border-left: 0px solid;
   color: #fff;
@@ -99,7 +91,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px;
-  background-color: #2a2a2a;
+  background: none;
   border: 0px;
   min-width: 60px;
   border-radius: 4px;
@@ -118,7 +110,7 @@
 .method-select {
   padding: 2px;
   display: flex;
-  background: #2a2a2a;
+  background: none;
   border: 1px solid #444;
   border-right: 0;
   border-radius: 4px 0 0 4px;

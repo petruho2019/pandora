@@ -48,7 +48,6 @@ export class CollectionsHeader {
       positionStrategy: this.overlay.position()
         .global()
         .centerHorizontally()
-        .centerVertically()
     });
 
     this.overlayRef.backdropClick().subscribe(() => {
