@@ -10,6 +10,7 @@ import { buildFailureResult, buildFailureResultT, buildSuccessResult, buildSucce
 import { CollectionYmlConfig } from '../shared/models/collections/collection-config'
 import ElectronStore = require('electron-store');
 import yaml from 'js-yaml';
+import { CloneCollectionDto, RenameCollectionDto } from '../shared/models/collections/dto/collection-action-dtos';
 
 const COLLECTIONS_KEY = 'loadedCollections';
 
@@ -17,6 +18,8 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
     //#region load-collections
     ipcMain.handle('load-collections', () => {
+
+        store.clear();
 
         const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
 
@@ -28,12 +31,12 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             console.log(`Store updated: ${validCollections.length} collections`);
             store.set(COLLECTIONS_KEY, validCollections);
 
-            console.log(`Valid collections: ${JSON.stringify(validCollections)}`);
+            //console.log(`Valid collections: ${JSON.stringify(validCollections)}`);
 
             return validCollections;
         }
         else{
-            console.log(`Collections from store are valid: ${JSON.stringify(collectionsFromStore)}`);
+            //console.log(`Collections from store are valid: ${JSON.stringify(collectionsFromStore)}`);
 
             return collectionsFromStore;
         }
@@ -160,22 +163,119 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
         return openedCollectionResult.body;
     });
+
+    //region clone-collection
+
+    ipcMain.handle('clone-collection',  (event, collectionInfo: CloneCollectionDto): Collection => {
+
+        validateCloneCollectionDto(collectionInfo);
+
+        const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
+        const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.sourceCollectionId);
+
+        if(!collectionFromStore)
+            throw new Error(`Коллекция из стора не найдена`);
+
+        const newCollectionPath = path.join(collectionInfo.collectionPath, collectionInfo.folderName);
+
+        console.log(`New collection path: ${newCollectionPath}`);
+
+        try {
+            fs.cpSync(collectionFromStore.path, newCollectionPath, {recursive: true});
+        }
+        catch(err){
+            throw new Error(err);
+        }
+
+        const configFilePath = path.join(newCollectionPath, COLLECTION_CONFIG_FILE_NAME);
+
+        try {
+            fs.unlinkSync(configFilePath);
+        } catch (err) {
+            throw new Error(err);
+        }
+
+
+        console.log(`File ${configFilePath}`);
+
+        const collectionEntity = {path: newCollectionPath};
+
+        console.log(`NewCollpath: ${newCollectionPath}, ${collectionInfo.collectionName}`);
+
+        var createCollectionConfigFileResult = createCollectionConfigFile(collectionEntity, collectionInfo.collectionName);
+
+        if(createCollectionConfigFileResult.isSuccess){
+            const newCollection = mapCollection(collectionEntity, createCollectionConfigFileResult.body);
+
+            collectionsFromStore.push(newCollection);
+            store.set(COLLECTIONS_KEY, collectionsFromStore);
+
+            return newCollection;
+        }
+
+        throw new Error(`Builder collection ${createCollectionConfigFileResult.error}`);
+    });
+
+
+    //region rename-collection
+
+    ipcMain.handle('rename-collection',  (event, collectionInfo: RenameCollectionDto): Collection => {
+
+        if(!collectionInfo.collectionName){
+            throw new Error(`Название коллeкции обязательно`);
+        }
+
+        const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
+        const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.collectioId);
+
+        if(!collectionFromStore)
+            throw new Error(`Коллекция из стора не найдена`);
+
+        collectionFromStore.name = collectionInfo.collectionName;
+
+        collectionsFromStore.splice(collectionsFromStore.findIndex(c => c.id === collectionInfo.collectioId), 1, collectionFromStore);
+
+        console.log(`\n Collections from store with renamed item: ${collectionsFromStore}`);
+
+        // collectionsFromStore.push(newCollection);
+        // store.set(COLLECTIONS_KEY, collectionsFromStore);
+
+        return collectionFromStore;
+    });
+
 }
 
 //region functions
+
+function validateCloneCollectionDto(collectionInfo: CloneCollectionDto){
+    if(!collectionInfo.collectionName){
+        throw new Error(`Название коллeкции обязательно`);
+    }
+
+    if(!collectionInfo.folderName){
+        throw new Error(`Название папки обязательно`);
+    }
+
+    if(!collectionInfo.collectionPath){
+        throw new Error(`Путь коллекции обязательно`);
+    }
+
+    if(!path.isAbsolute(collectionInfo.collectionPath)){
+        throw new Error(`Путь должен быть абсолютным`);
+    }
+}
 
 function buildCollection(collectionEntity: CollectionEntity): ResultT<Collection, string>{
         const configPath = path.join(collectionEntity.path, COLLECTION_CONFIG_FILE_NAME);
 
         const collectionConfigResult = getCollectionConfig<CollectionYmlConfig>(configPath);
 
-        if (collectionConfigResult.isFailure) return null;
+        if (collectionConfigResult.isFailure) return {body: null, isSuccess: false, isFailure: true, error: collectionConfigResult.error};
 
         const isValidCollectionConfigResult = validationCollectionYmlConfig(collectionConfigResult.body);
 
-        if(isValidCollectionConfigResult.isFailure) {
-            return null;
-        }
+        if(isValidCollectionConfigResult.isFailure) 
+            return {body: null, isSuccess: false, isFailure: true, error: isValidCollectionConfigResult.errorMessage};
 
         return buildSuccessResultT(mapCollection(collectionEntity, collectionConfigResult.body));
 }

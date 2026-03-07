@@ -10,7 +10,7 @@ import { createHttpRequest, createRequestFailure } from '../../../store/actions/
 import { CollectionEntity } from '../../../../../shared/models/entitys/collection-entity'
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info'
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
-import { cloneCollection, closeCollection, loadCollections } from '../../../store/actions/collections.actions';
+import { cloneCollection, closeCollection, loadCollections, renameCollection } from '../../../store/actions/collections.actions';
 import { ofType } from '@ngrx/effects';
 import { RequestCollectionItem } from '../../requests/request-collection-item/request-collection-item';
 import { Collection } from '../../../../../shared/models/collections/collection';
@@ -18,11 +18,12 @@ import { getRequestsByCollectionId } from '../../../store/selectors/requests.sel
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { CloneCollectionModal } from "../modals/clone-collection-modal/clone-collection-modal";
-import { CloneCollectionDto } from '../../../../../shared/models/collections/dto/clone-collection-dto';
+import { CloneCollectionDto, RenameCollectionDto } from '../../../../../shared/models/collections/dto/collection-action-dtos';
+import { RenameCollectionModal } from "../modals/rename-collection-modal/rename-collection-modal";
 
 @Component({
   selector: 'collections-info',
-  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal, CloneCollectionModal],
+  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal, CloneCollectionModal, RenameCollectionModal],
   templateUrl: './collections-info.html',
   styleUrl: './collections-info.css',
 })
@@ -37,9 +38,6 @@ export class CollectionsInfo implements OnInit {
 
   public openCollections: Record<string, boolean> = {};
   
-  public selectedCollectionPath: string = "";
-  public cloningCollectionId: string = "";
-
   private actionsMenuService = inject(ActionsMenuService);
   public currentOpenedCollectionId$ = this.actionsMenuService.openedId$;
 
@@ -48,6 +46,9 @@ export class CollectionsInfo implements OnInit {
   
   cloneCollectionPortal = viewChild.required<TemplateRef<any>>('cloneCollection');
   cloneCollectionOverlayRef: OverlayRef;
+
+  renameCollectionPortal = viewChild.required<TemplateRef<any>>('renameCollection');
+  renameCollectionOverlayRef: OverlayRef;
 
   ngOnInit(): void {
     console.log("ngOnInit");
@@ -83,17 +84,10 @@ export class CollectionsInfo implements OnInit {
     });
   }
 
-  addRequest(collection: CollectionEntity) {
-    this.selectedCollectionPath = collection.path;
+  showAddRequestModal() {
     this.actionsMenuService.close();
 
-    this.addRequestOverlayRef = this.overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally()
-    });
+    this.addRequestOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.addRequestOverlayRef.backdropClick().subscribe(() => {
       this.addRequestOverlayRef?.dispose();
@@ -104,18 +98,10 @@ export class CollectionsInfo implements OnInit {
     this.addRequestOverlayRef.attach(portal);
   }
 
-  showCloneCollectionModal(collectionId: string){
-    this.cloningCollectionId = collectionId;
-
+  showCloneCollectionModal(){
     this.actionsMenuService.close();
 
-    this.cloneCollectionOverlayRef = this.overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally()
-    });
+    this.cloneCollectionOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.cloneCollectionOverlayRef.backdropClick().subscribe(() => {
       this.cloneCollectionOverlayRef?.dispose();
@@ -126,30 +112,44 @@ export class CollectionsInfo implements OnInit {
     this.cloneCollectionOverlayRef.attach(portal);
   }
 
-  closeCollection(collection: Collection) {
+  showRenameCollectionModal(){
     this.actionsMenuService.close();
-    console.log(`close collection, ${collection.id}`);
 
-    this.store.dispatch(closeCollection({collectionId: collection.id}));
+    this.renameCollectionOverlayRef = this.buildOverlayRef(this.overlay);
+
+    this.renameCollectionOverlayRef.backdropClick().subscribe(() => {
+      this.renameCollectionOverlayRef?.dispose();
+    });
+
+    const portal = new TemplatePortal(this.renameCollectionPortal(), this.viewContainerRef);
+
+    this.renameCollectionOverlayRef.attach(portal);
   }
 
-  deleteCollection() {
-    this.actionsMenuService.close();
-    console.log('delete collection');
-  }
+  // closeCollection(collection: Collection) {
+  //   this.actionsMenuService.close();
+  //   console.log(`close collection, ${collection.id}`);
+
+  //   this.store.dispatch(closeCollection({collectionId: collection.id}));
+  // }
+
+  // deleteCollection() {
+  //   this.actionsMenuService.close();
+  //   console.log('delete collection');
+  // }
 
   toggleCollection(collectionId: string){
     this.openCollections[collectionId] = !this.openCollections[collectionId];
   }
 
-  onCreateRequest(request: CreateRequestInfo) {
+  handleCreateRequest(request: CreateRequestInfo) {
 
     console.log(`onCreateRequest логирование аргументов: ${JSON.stringify(request)}`);
     switch (request.type) {
 
       case RequestTypes.HTTP:
         console.log(`onCreateRequest addHttpRequest: ${JSON.stringify(request)} , collectionId ${this.actionsMenuService.currentId}`);
-        this.store.dispatch(createHttpRequest({ collectionPath: this.selectedCollectionPath, collectionId: this.actionsMenuService.currentId!, requestInfo: request }));
+        this.store.dispatch(createHttpRequest({ collectionPath: request.collectionName, collectionId: this.actionsMenuService.currentId!, requestInfo: request }));
       break;
 
       // case 'gRPC':
@@ -163,11 +163,14 @@ export class CollectionsInfo implements OnInit {
     this.cloneCollectionOverlayRef.dispose();
   }
 
+  handleRenameCollection(collectionInfo: RenameCollectionDto) {
+    this.store.dispatch(renameCollection({ collectionInfo }));
+    this.cloneCollectionOverlayRef.dispose();
+  }
+
   isCollectionActionsOpen(collectionId: string){
     return this.openCollections[collectionId];
   }
-
-
 
   getRequestsByCollectionId(collectionId: string): Observable<RequestModel[]>{
     if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b'){
@@ -187,5 +190,15 @@ export class CollectionsInfo implements OnInit {
   closeActions() {
     console.log(`Close action menu`);
     this.actionsMenuService.close();
+  }
+
+  buildOverlayRef(overlay: Overlay){
+    return overlay.create({
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      positionStrategy: this.overlay.position()
+        .global()
+        .centerHorizontally()
+    });
   }
 }

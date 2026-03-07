@@ -1,6 +1,6 @@
 import { createReducer, on, State } from "@ngrx/store";
 import { CollectionState } from "../states/collection-state";
-import { addCollectionSuccess, closeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollectionSuccess } from "../actions/collections.actions";
+import { addCollectionSuccess, cloneCollectionSuccess, closeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollectionSuccess, renameCollectionSuccess } from "../actions/collections.actions";
 import { collectionsAdapter } from "../adapters/collection-adapter";
 
 export const collectionFeatureKey = 'collections';
@@ -29,6 +29,17 @@ export const collectionsReducer = createReducer(
         collectionsAdapter.addOne(collection, state)),
 
     on(closeCollectionSuccess, (state, {collections}) => 
-        collectionsAdapter.setAll(collections, state))
+        collectionsAdapter.setAll(collections, state)),
+
+    on(cloneCollectionSuccess, (state, {clonedCollection: collection}) => 
+        collectionsAdapter.addOne(collection, state)),
+    on(renameCollectionSuccess, (state, {renamedCollection: collection}) => 
+        collectionsAdapter.updateOne(
+            {
+                id: collection.id,
+                changes: collection
+            },
+            state
+        ))
     
 )

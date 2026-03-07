@@ -1,11 +1,11 @@
-import { ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input, OnInit, Output } from '@angular/core';
 import { ModalHeader } from "../../../reuseable/modal-header/modal-header";
 import { SelectFileInput } from "../../../select-file-input/select-file-input";
 import { ElectronService } from '../../../../services/electron-service';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { cloneCollection } from '../../../../store/actions/collections.actions';
-import { CloneCollectionDto } from '../../../../../../shared/models/collections/dto/clone-collection-dto';
+import { CloneCollectionDto } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
 
 @Component({
   selector: 'clone-collection-modal',
@@ -16,7 +16,6 @@ import { CloneCollectionDto } from '../../../../../../shared/models/collections/
 export class CloneCollectionModal implements OnInit {
   private electronService = inject(ElectronService)
   private changeDetectorRef = inject(ChangeDetectorRef)
-  private store = inject(Store)
 
   headerTitle: string = "Клонировать коллекцию";
   fileInputLabel: string = "Путь"
@@ -70,5 +69,11 @@ export class CloneCollectionModal implements OnInit {
 
   close(){
     this.onClose.emit();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    if(event.key === 'Escape')
+      this.close();
   }
 }

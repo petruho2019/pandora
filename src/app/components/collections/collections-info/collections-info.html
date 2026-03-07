@@ -52,14 +52,17 @@ Z"
 
               @if ((currentOpenedCollectionId$ | async) === collection.id) {
                 <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
-                  <div class="action-item" (click)="this.addRequest(collection)">
+                  <div class="action-item" (click)="this.showAddRequestModal()">
                     Добавить запрос
                   </div>
-                  <div class="action-item" (click)="closeCollection(collection)">
+                  <!-- <div class="action-item" (click)="closeCollection(collection)">
                     Закрыть коллекцию
+                  </div> -->
+                  <div class="action-item" (click)="showCloneCollectionModal()">
+                    Клонировать
                   </div>
-                  <div class="action-item" (click)="showCloneCollectionModal(collection.id)">
-                    Клонировать коллекцию
+                  <div class="action-item" (click)="showRenameCollectionModal()">
+                    Переименовать
                   </div>
                   <!-- <div class="action-item" (click)="deleteCollection()">Удалить коллекцию</div> -->
                 </div>
@@ -81,7 +84,7 @@ Z"
           <ng-template cdkPortal #addRequest>
             <add-request-modal
               (close)="addRequestOverlayRef.dispose()"
-              (create)="onCreateRequest($event)"
+              (create)="handleCreateRequest($event)"
               [collectionId]="collection.id"
             />
           </ng-template>
@@ -92,6 +95,15 @@ Z"
               (onClone)="handleCloneCollection($event)"
               [collectionName]="collection.name"
               [collectionId]="collection.id"
+            />
+          </ng-template>
+
+          <ng-template cdkPortal #renameCollection>
+            <rename-collection-modal
+              (onClose)="renameCollectionOverlayRef.dispose()"
+              (onRename)="handleRenameCollection($event)"
+              [collectionId]="collection.id"
+              [collectionName]="collection.name"
             />
           </ng-template>
         }

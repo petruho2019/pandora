@@ -14,8 +14,8 @@ html, body {
 }
 
 :root {
-  --modal-border-style: 1px solid rgba(155, 155, 155, 0.315);
-  --contrasting-color: #486cbb;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
+  --modal-border-style: 1px solid rgba(105, 105, 105, 0.315);
+  --contrasting-color: #98c5ff;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
   --modal-background-color: #202020;
 }
 
@@ -54,25 +54,19 @@ html, body {
   text-overflow: ellipsis;    
 }
 
-.modal-header {
-  background-color: #191919;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  min-height: 25px;
-}
-
 .pandora-input {
-  padding: 6px 8px;
-  background: #2a2a2a;
+  font-family: 'Open Sans', 'Raleway';
+  padding: 8px 8px;
+  background: none;
   border: 1px solid #444;
-  color: #fff;
+  color: rgb(212, 212, 212);
   border-radius: 4px;
   outline: none;
   transition: border 0.1s;
 }
 
 .pandora-input:focus{
-  border: 1.5px solid var(--contrasting-color);   
+  border: 1px solid var(--contrasting-color);   
 }
 
 .modal-close-button {
@@ -96,6 +90,7 @@ html, body {
 
 .modal-create-button {
   background-color: var(--contrasting-color);
+  color: #202020;
 }
 
 .action-button {
@@ -106,8 +101,28 @@ html, body {
 }
 
 .modal-label {
+  pointer-events: none;
   display: block;
   margin-bottom: 6px;
   font-size: 13px;
   color: #bbb;
+  font-weight: 650;
+}
+
+
+.cdk-overlay-dark-backdrop {
+  background-color: rgba(0, 0, 0, 0.450);
+}
+
+
+.flex {
+  display: flex;
+}
+
+.justify-space-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
 }

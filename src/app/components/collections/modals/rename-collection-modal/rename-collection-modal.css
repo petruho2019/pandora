@@ -1,0 +1,36 @@
+.rename-collection-modal {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 30%;
+  min-width: 500px;
+  max-width: 700px;
+  background: var(--modal-background-color);
+  border: var(--modal-border-style)
+}
+
+.rename-collection-content {
+  padding: 14px;
+}
+
+.collection-name {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.modal-close-button {
+  background-color: #202020;
+}
+
+.modal-close-button:hover {
+  background-color: rgba(155, 155, 155, 0.150);
+}

@@ -18,6 +18,7 @@ export class AddRequestModal {
   @Output() close = new EventEmitter<void>();
   @Output() create = new EventEmitter<CreateRequestInfo>();
   @Input() collectionId: string; 
+  @Input() collectionName: string; 
 
   headerTitle: string = "Добавить запрос"
 
@@ -58,7 +59,8 @@ export class AddRequestModal {
         name: this.name.trim(),
         method: this.selectedMethod,
         url: this.url.trim(),
-        collectionId: this.collectionId
+        collectionId: this.collectionId,
+        collectionName: this.collectionName
       });
     }
 

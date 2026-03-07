@@ -4,4 +4,5 @@ export interface BaseCreateRequestInfo {
   name: string;
   type: RequestType;
   collectionId: string
+  collectionName: string
 }

@@ -1,5 +1,6 @@
 import { createAction, props } from "@ngrx/store";
 import { Collection } from "../../../../shared/models/collections/collection";
+import { CloneCollectionDto, RenameCollectionDto } from "../../../../shared/models/collections/dto/collection-action-dtos";
 
 export const addCollection = createAction(
   '[Collections] Add Requested',
@@ -23,3 +24,11 @@ export const openCollectionCancel = createAction('[Collections] Open Cancel');
 export const closeCollection = createAction('[Collection] Close', props<{collectionId: string}>());
 export const closeCollectionSuccess = createAction('[Collection] Close Success', props<{collections: Collection[]}>());
 export const closeCollectionFailure = createAction('[Collection] Close Failure', props<{errorMessage: string}>());
+
+export const cloneCollection = createAction('[Collection] Clone', props<{collectionInfo: CloneCollectionDto}>());
+export const cloneCollectionSuccess = createAction('[Collection] Clone Success', props<{clonedCollection: Collection}>());
+export const cloneCollectionFailure = createAction('[Collection] Clone Failure', props<{errorMessage: string}>());
+
+export const renameCollection = createAction('[Collection] Rename', props<{collectionInfo: RenameCollectionDto}>());
+export const renameCollectionSuccess = createAction('[Collection] Rename Success', props<{renamedCollection: Collection}>());
+export const renameCollectionFailure = createAction('[Collection] Rename Failure', props<{errorMessage: string}>());

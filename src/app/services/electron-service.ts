@@ -4,6 +4,7 @@ import { buildFailureResultT, buildSuccessResultT, ResultT } from '../../../shar
 import { Collection } from "../../../shared/models/collections/collection";
 import { RequestModel } from "../../../shared/models/requests/request";
 import { CreateRequestError } from "../../../shared/models/error/error";
+import { CloneCollectionDto, RenameCollectionDto } from "../../../shared/models/collections/dto/collection-action-dtos";
 
 @Injectable({ providedIn: 'root'})
 export class ElectronService {
@@ -19,6 +20,12 @@ export class ElectronService {
     };
     closeCollection(collectionId: string) : Promise<Collection[]>{
         return (window as any).electronAPI?.closeCollection(collectionId);
+    };
+    cloneCollection(collectionInfo: CloneCollectionDto) : Promise<Collection>{
+        return (window as any).electronAPI?.cloneCollection(collectionInfo);
+    };
+    renameCollection(collectionInfo: RenameCollectionDto) : Promise<Collection>{
+        return (window as any).electronAPI?.renameCollection(collectionInfo);
     };
 
     createRequest({collectionPath, requestInfo}: {collectionPath: string, requestInfo: CreateRequestInfo}) : Promise<ResultT<RequestModel, CreateRequestError>> {
