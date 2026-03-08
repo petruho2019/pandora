@@ -19,8 +19,6 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
     //#region load-collections
     ipcMain.handle('load-collections', () => {
 
-        store.clear();
-
         const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
 
         console.log(`Collections from store ${JSON.stringify(collectionsFromStore)}`);
@@ -221,19 +219,21 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
     ipcMain.handle('rename-collection',  (event, collectionInfo: RenameCollectionDto): Collection => {
 
+        console.log(`rename-collection: ${JSON.stringify(collectionInfo)}`);
+
         if(!collectionInfo.collectionName){
             throw new Error(`Название коллeкции обязательно`);
         }
 
         const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
-        const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.collectioId);
+        const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.collectionId);
 
         if(!collectionFromStore)
             throw new Error(`Коллекция из стора не найдена`);
 
         collectionFromStore.name = collectionInfo.collectionName;
 
-        collectionsFromStore.splice(collectionsFromStore.findIndex(c => c.id === collectionInfo.collectioId), 1, collectionFromStore);
+        collectionsFromStore.splice(collectionsFromStore.findIndex(c => c.id === collectionInfo.collectionId), 1, collectionFromStore);
 
         console.log(`\n Collections from store with renamed item: ${collectionsFromStore}`);
 

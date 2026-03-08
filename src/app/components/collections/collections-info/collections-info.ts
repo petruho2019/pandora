@@ -34,21 +34,27 @@ export class CollectionsInfo implements OnInit {
 
   public readonly collections$ = this.store.select(selectAll);
 
-  //public collections$: Observable<Collection[]> | null = null; // Test
+  public collections$: Observable<Collection[]> | null = null; // Test
 
-  public openCollections: Record<string, boolean> = {};
+  //public openCollections: Record<string, boolean> = {};
   
   private actionsMenuService = inject(ActionsMenuService);
   public currentOpenedCollectionId$ = this.actionsMenuService.openedId$;
 
   addRequestPortal = viewChild.required<TemplateRef<any>>('addRequest');
   addRequestOverlayRef: OverlayRef;
+  addRequestCollectionId: string;
   
   cloneCollectionPortal = viewChild.required<TemplateRef<any>>('cloneCollection');
   cloneCollectionOverlayRef: OverlayRef;
+  cloneCollectionId: string;
+  cloneCollectionName: string;
+
 
   renameCollectionPortal = viewChild.required<TemplateRef<any>>('renameCollection');
   renameCollectionOverlayRef: OverlayRef;
+  renameCollectionId: string;
+  renameCollectionName: string;
 
   ngOnInit(): void {
     console.log("ngOnInit");
@@ -61,10 +67,10 @@ export class CollectionsInfo implements OnInit {
       alert(errorBody.error.message);
     })
 
-    // this.collections$ = of([
-    //   { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
-    //   { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
-    // ]);
+    this.collections$ = of([
+      { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
+      { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
+    ]);
 
     this.collections$.pipe(take(1)).subscribe(collections => {
       this.openCollections = collections.reduce((acc, c) => {
@@ -84,7 +90,8 @@ export class CollectionsInfo implements OnInit {
     });
   }
 
-  showAddRequestModal() {
+  showAddRequestModal(collectionId: string) {
+    this.addRequestCollectionId = collectionId
     this.actionsMenuService.close();
 
     this.addRequestOverlayRef = this.buildOverlayRef(this.overlay);
@@ -98,7 +105,10 @@ export class CollectionsInfo implements OnInit {
     this.addRequestOverlayRef.attach(portal);
   }
 
-  showCloneCollectionModal(){
+  showCloneCollectionModal(collectionId: string, collectionName: string){
+    this.cloneCollectionId = collectionId;
+    this.cloneCollectionName = collectionName;
+
     this.actionsMenuService.close();
 
     this.cloneCollectionOverlayRef = this.buildOverlayRef(this.overlay);
@@ -112,7 +122,10 @@ export class CollectionsInfo implements OnInit {
     this.cloneCollectionOverlayRef.attach(portal);
   }
 
-  showRenameCollectionModal(){
+  showRenameCollectionModal(collectionId: string, collectionName: string){
+    this.renameCollectionId = collectionId;
+    this.renameCollectionName = collectionName;
+
     this.actionsMenuService.close();
 
     this.renameCollectionOverlayRef = this.buildOverlayRef(this.overlay);
@@ -164,6 +177,7 @@ export class CollectionsInfo implements OnInit {
   }
 
   handleRenameCollection(collectionInfo: RenameCollectionDto) {
+    console.log(`handleRenameCollection ${JSON.stringify(collectionInfo)}`);
     this.store.dispatch(renameCollection({ collectionInfo }));
     this.cloneCollectionOverlayRef.dispose();
   }

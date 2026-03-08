@@ -1,6 +1,7 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import { ModalHeader } from "../../../reuseable/modal-header/modal-header";
 import { FormsModule } from '@angular/forms';
+import { RenameCollectionDto } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
 
 @Component({
   selector: 'rename-collection-modal',
@@ -15,13 +16,13 @@ export class RenameCollectionModal {
   @Input() collectionId: string;
   @Input() collectionName: string;
   @Output() onClose = new EventEmitter();
-  @Output() onRename = new EventEmitter();
+  @Output() onRename = new EventEmitter<RenameCollectionDto>();
 
   renameCollection(){
 
     console.log(`Rename collection , name: ${this.collectionName}`);
 
-    this.onRename.emit({newCollectionName: this.collectionName, collectionId: this.collectionId});
+    this.onRename.emit({collectionName: this.collectionName, collectionId: this.collectionId});
     this.close();
   }
 

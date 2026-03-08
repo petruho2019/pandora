@@ -52,16 +52,22 @@ Z"
 
               @if ((currentOpenedCollectionId$ | async) === collection.id) {
                 <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
-                  <div class="action-item" (click)="this.showAddRequestModal()">
+                  <div class="action-item" (click)="this.showAddRequestModal(collection.id)">
                     Добавить запрос
                   </div>
                   <!-- <div class="action-item" (click)="closeCollection(collection)">
                     Закрыть коллекцию
                   </div> -->
-                  <div class="action-item" (click)="showCloneCollectionModal()">
+                  <div
+                    class="action-item"
+                    (click)="showCloneCollectionModal(collection.id, collection.name)"
+                  >
                     Клонировать
                   </div>
-                  <div class="action-item" (click)="showRenameCollectionModal()">
+                  <div
+                    class="action-item"
+                    (click)="showRenameCollectionModal(collection.id, collection.name)"
+                  >
                     Переименовать
                   </div>
                   <!-- <div class="action-item" (click)="deleteCollection()">Удалить коллекцию</div> -->
@@ -80,32 +86,6 @@ Z"
               }
             </div>
           }
-
-          <ng-template cdkPortal #addRequest>
-            <add-request-modal
-              (close)="addRequestOverlayRef.dispose()"
-              (create)="handleCreateRequest($event)"
-              [collectionId]="collection.id"
-            />
-          </ng-template>
-
-          <ng-template cdkPortal #cloneCollection>
-            <clone-collection-modal
-              (onClose)="cloneCollectionOverlayRef.dispose()"
-              (onClone)="handleCloneCollection($event)"
-              [collectionName]="collection.name"
-              [collectionId]="collection.id"
-            />
-          </ng-template>
-
-          <ng-template cdkPortal #renameCollection>
-            <rename-collection-modal
-              (onClose)="renameCollectionOverlayRef.dispose()"
-              (onRename)="handleRenameCollection($event)"
-              [collectionId]="collection.id"
-              [collectionName]="collection.name"
-            />
-          </ng-template>
         }
       }
     } @else {
@@ -113,3 +93,29 @@ Z"
     }
   </div>
 </div>
+
+<ng-template cdkPortal #addRequest>
+  <add-request-modal
+    (close)="addRequestOverlayRef.dispose()"
+    (create)="handleCreateRequest($event)"
+    [collectionId]="addRequestCollectionId"
+  />
+</ng-template>
+
+<ng-template cdkPortal #cloneCollection>
+  <clone-collection-modal
+    (onClose)="cloneCollectionOverlayRef.dispose()"
+    (onClone)="handleCloneCollection($event)"
+    [collectionName]="cloneCollectionName"
+    [collectionId]="cloneCollectionId"
+  />
+</ng-template>
+
+<ng-template cdkPortal #renameCollection>
+  <rename-collection-modal
+    (onClose)="renameCollectionOverlayRef.dispose()"
+    (onRename)="handleRenameCollection($event)"
+    [collectionId]="renameCollectionId"
+    [collectionName]="renameCollectionName"
+  />
+</ng-template>

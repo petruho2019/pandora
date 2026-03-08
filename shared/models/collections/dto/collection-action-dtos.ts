@@ -7,5 +7,5 @@ export interface CloneCollectionDto {
 
 export interface RenameCollectionDto {
     collectionName: string,
-    collectioId: string
+    collectionId: string
 }
