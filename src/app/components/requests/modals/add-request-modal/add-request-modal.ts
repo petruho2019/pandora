@@ -13,12 +13,10 @@ import { ModalHeader } from "../../../reuseable/modal-header/modal-header";
   styleUrl: './add-request-modal.css',
 })
 export class AddRequestModal {
-
-
   @Output() close = new EventEmitter<void>();
   @Output() create = new EventEmitter<CreateRequestInfo>();
   @Input() collectionId: string; 
-  @Input() collectionName: string; 
+  @Input() collectionPath: string; 
 
   headerTitle: string = "Добавить запрос"
 
@@ -60,7 +58,7 @@ export class AddRequestModal {
         method: this.selectedMethod,
         url: this.url.trim(),
         collectionId: this.collectionId,
-        collectionName: this.collectionName
+        collectionPath: this.collectionPath
       });
     }
 

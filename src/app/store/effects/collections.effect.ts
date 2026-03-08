@@ -1,9 +1,9 @@
 import { ElectronService } from "../../services/electron-service";
-import { catchError, EMPTY, exhaustMap, from, map, mergeMap, of, switchMap, tap } from "rxjs";
+import { catchError, EMPTY, exhaustMap, from, map, of, switchMap } from "rxjs";
 
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { addCollection, addCollectionSuccess, cloneCollection, cloneCollectionFailure, cloneCollectionSuccess, closeCollection, closeCollectionFailure, closeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionSuccess, renameCollection, renameCollectionFailure, renameCollectionSuccess } from '../actions/collections.actions';
+import { addCollection, addCollectionSuccess, cloneCollection, cloneCollectionFailure, cloneCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionSuccess, removeCollection, removeCollectionFailure, removeCollectionSuccess, renameCollection, renameCollectionFailure, renameCollectionSuccess } from '../actions/collections.actions';
 import { Collection } from "../../../../shared/models/collections/collection";
 import { CloneCollectionDto } from "../../../../shared/models/collections/dto/collection-action-dtos";
 
@@ -84,12 +84,12 @@ export class CollectionEffects {
     )
   )
 
-  closeCollection = createEffect(() => this.actions$.pipe(
-      ofType(closeCollection),
+  removeCollection = createEffect(() => this.actions$.pipe(
+      ofType(removeCollection),
       switchMap(({collectionId}) => 
-        from(this.electronService.closeCollection(collectionId)).pipe(
-          map(collections => closeCollectionSuccess({collections})),
-          catchError(() => of(closeCollectionFailure({errorMessage: `Ошибка при закрытии коллекции`}))) // Скорее всего невозможна
+        from(this.electronService.removeCollection(collectionId)).pipe(
+          map(collections => removeCollectionSuccess({collections})),
+          catchError(() => of(removeCollectionFailure({errorMessage: `Ошибка при удалении коллекции`}))) // Скорее всего невозможна
         )
       )
     )

@@ -9,7 +9,7 @@ html, body {
   height: 100%;  
   width: 100%;
   overflow: hidden; 
-  background-color: #222222;
+  background-color: var(--background-color);
   font-family: 'Open Sans', 'Raleway';
 }
 
@@ -17,6 +17,7 @@ html, body {
   --modal-border-style: 1px solid rgba(105, 105, 105, 0.315);
   --contrasting-color: #98c5ff;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
   --modal-background-color: #202020;
+  --background-color: #222222;
 }
 
 .pointer {
@@ -112,6 +113,10 @@ html, body {
 
 .cdk-overlay-dark-backdrop {
   background-color: rgba(0, 0, 0, 0.450);
+}
+
+.blur-item{
+  background-color: rgba(115, 115, 115, 0.1);
 }
 
 

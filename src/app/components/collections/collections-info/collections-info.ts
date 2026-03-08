@@ -10,7 +10,7 @@ import { createHttpRequest, createRequestFailure } from '../../../store/actions/
 import { CollectionEntity } from '../../../../../shared/models/entitys/collection-entity'
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info'
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
-import { cloneCollection, closeCollection, loadCollections, renameCollection } from '../../../store/actions/collections.actions';
+import { cloneCollection, loadCollections, removeCollection, renameCollection } from '../../../store/actions/collections.actions';
 import { ofType } from '@ngrx/effects';
 import { RequestCollectionItem } from '../../requests/request-collection-item/request-collection-item';
 import { Collection } from '../../../../../shared/models/collections/collection';
@@ -18,12 +18,14 @@ import { getRequestsByCollectionId } from '../../../store/selectors/requests.sel
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
 import { CloneCollectionModal } from "../modals/clone-collection-modal/clone-collection-modal";
-import { CloneCollectionDto, RenameCollectionDto } from '../../../../../shared/models/collections/dto/collection-action-dtos';
+import { CloneCollectionDto, RemoveCollectionInfo, RenameCollectionDto } from '../../../../../shared/models/collections/dto/collection-action-dtos';
 import { RenameCollectionModal } from "../modals/rename-collection-modal/rename-collection-modal";
+import { RemoveCollectionModal } from '../modals/remove-collection-modal/remove-collection-modal';
+import { BlurService } from '../../../services/blur-service';
 
 @Component({
   selector: 'collections-info',
-  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal, CloneCollectionModal, RenameCollectionModal],
+  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal, CloneCollectionModal, RenameCollectionModal, RemoveCollectionModal],
   templateUrl: './collections-info.html',
   styleUrl: './collections-info.css',
 })
@@ -31,30 +33,37 @@ export class CollectionsInfo implements OnInit {
   private store = inject(Store);
   private overlay = inject(Overlay)
   private viewContainerRef = inject(ViewContainerRef);
+  public blurService = inject(BlurService);
 
-  public readonly collections$ = this.store.select(selectAll);
+  //public readonly collections$ = this.store.select(selectAll);
 
   public collections$: Observable<Collection[]> | null = null; // Test
 
-  //public openCollections: Record<string, boolean> = {};
+  public openCollections: Record<string, boolean> = {};
   
   private actionsMenuService = inject(ActionsMenuService);
   public currentOpenedCollectionId$ = this.actionsMenuService.openedId$;
 
+  public currentBlurCollectionId: string;
+
   addRequestPortal = viewChild.required<TemplateRef<any>>('addRequest');
   addRequestOverlayRef: OverlayRef;
   addRequestCollectionId: string;
+  addRequestCollectionPath: string;
   
   cloneCollectionPortal = viewChild.required<TemplateRef<any>>('cloneCollection');
   cloneCollectionOverlayRef: OverlayRef;
   cloneCollectionId: string;
   cloneCollectionName: string;
 
-
   renameCollectionPortal = viewChild.required<TemplateRef<any>>('renameCollection');
   renameCollectionOverlayRef: OverlayRef;
   renameCollectionId: string;
   renameCollectionName: string;
+
+  removeCollectionPortal = viewChild.required<TemplateRef<any>>('closeCollection');
+  removeCollectionOverlayRef: OverlayRef;
+  removeCollectionInfo: RemoveCollectionInfo;
 
   ngOnInit(): void {
     console.log("ngOnInit");
@@ -90,8 +99,9 @@ export class CollectionsInfo implements OnInit {
     });
   }
 
-  showAddRequestModal(collectionId: string) {
-    this.addRequestCollectionId = collectionId
+  showAddRequestModal(collectionId: string, collectionPath: string) {
+    this.addRequestCollectionId = collectionId;
+    this.addRequestCollectionPath = collectionPath;
     this.actionsMenuService.close();
 
     this.addRequestOverlayRef = this.buildOverlayRef(this.overlay);
@@ -139,17 +149,26 @@ export class CollectionsInfo implements OnInit {
     this.renameCollectionOverlayRef.attach(portal);
   }
 
-  // closeCollection(collection: Collection) {
-  //   this.actionsMenuService.close();
-  //   console.log(`close collection, ${collection.id}`);
+  showCloseCollectionModal(collectionId: string, collectionName: string, collectionPath: string) {
 
-  //   this.store.dispatch(closeCollection({collectionId: collection.id}));
-  // }
+    this.removeCollectionInfo = {
+      collectionId: collectionId,
+      collectionName: collectionName,
+      collectionPath: collectionPath
+    }
 
-  // deleteCollection() {
-  //   this.actionsMenuService.close();
-  //   console.log('delete collection');
-  // }
+    this.actionsMenuService.close();
+
+    this.removeCollectionOverlayRef = this.buildOverlayRef(this.overlay);
+
+    this.removeCollectionOverlayRef.backdropClick().subscribe(() => {
+      this.removeCollectionOverlayRef?.dispose();
+    });
+
+    const portal = new TemplatePortal(this.removeCollectionPortal(), this.viewContainerRef);
+
+    this.removeCollectionOverlayRef.attach(portal);
+  }
 
   toggleCollection(collectionId: string){
     this.openCollections[collectionId] = !this.openCollections[collectionId];
@@ -162,7 +181,7 @@ export class CollectionsInfo implements OnInit {
 
       case RequestTypes.HTTP:
         console.log(`onCreateRequest addHttpRequest: ${JSON.stringify(request)} , collectionId ${this.actionsMenuService.currentId}`);
-        this.store.dispatch(createHttpRequest({ collectionPath: request.collectionName, collectionId: this.actionsMenuService.currentId!, requestInfo: request }));
+        this.store.dispatch(createHttpRequest({ collectionPath: request.collectionPath, collectionId: this.actionsMenuService.currentId!, requestInfo: request }));
       break;
 
       // case 'gRPC':
@@ -180,6 +199,11 @@ export class CollectionsInfo implements OnInit {
     console.log(`handleRenameCollection ${JSON.stringify(collectionInfo)}`);
     this.store.dispatch(renameCollection({ collectionInfo }));
     this.cloneCollectionOverlayRef.dispose();
+  }
+
+  handleRemoveCollection(collectionId: string) {
+    this.store.dispatch(removeCollection({ collectionId: collectionId }));
+    this.removeCollectionOverlayRef.dispose();
   }
 
   isCollectionActionsOpen(collectionId: string){
@@ -200,6 +224,10 @@ export class CollectionsInfo implements OnInit {
     return this.store.select(getRequestsByCollectionId(collectionId));
   }
 
+  onRightClick($event: MouseEvent, collectionId: string) {
+    this.toggleCollectionActions($event, collectionId);
+  }
+
   @HostListener('document:click')
   closeActions() {
     console.log(`Close action menu`);
@@ -214,5 +242,14 @@ export class CollectionsInfo implements OnInit {
         .global()
         .centerHorizontally()
     });
+  }
+
+  onBlurItem(id: string){
+    console.log(`Blur collection`);
+    this.blurService.setCurrentBlurId(id);
+  }
+
+  test(){
+    console.log(`s.dkfjghsljhkdf`);
   }
 }

@@ -18,8 +18,8 @@ export class ElectronService {
     openCollection({collectionPath}: {collectionPath: string}) : Promise<Collection> {
         return (window as any).electronAPI?.openCollection(collectionPath);
     };
-    closeCollection(collectionId: string) : Promise<Collection[]>{
-        return (window as any).electronAPI?.closeCollection(collectionId);
+    removeCollection(collectionId: string) : Promise<Collection[]>{
+        return (window as any).electronAPI?.removeCollection(collectionId);
     };
     cloneCollection(collectionInfo: CloneCollectionDto) : Promise<Collection>{
         return (window as any).electronAPI?.cloneCollection(collectionInfo);

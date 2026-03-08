@@ -95,10 +95,10 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
         throw new Error(createCollectionConfigFileResult.error);
     });
 
-    //#region close-collection
+    //#region remove-collection
 
-    ipcMain.handle('close-collection', (event, collectionId: string) : Collection[] => {
-        console.log(`Close collection, collectionId: ${collectionId}`);
+    ipcMain.handle('remove-collection', (event, collectionId: string) : Collection[] => {
+        console.log(`Remove collection, collectionId: ${collectionId}`);
 
         const collections = store.get(COLLECTIONS_KEY, []);
         const filtered = collections.filter(item => item.id !== collectionId);

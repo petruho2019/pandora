@@ -8,7 +8,15 @@
         <div><a>Create</a> or <a>import</a> collection</div>
       } @else {
         @for (collection of collections; track collection.path) {
-          <div class="collection-item" (click)="toggleCollection(collection.id)">
+          <div
+            class="collection-item"
+            tabindex="0"
+            [ngClass]="{ 'blur-item': blurService.currentBlurId === collection.id }"
+            (click)="toggleCollection(collection.id)"
+            (click)="test()"
+            (contextmenu)="onRightClick($event, collection.id)"
+            (blur)="onBlurItem(collection.id)"
+          >
             <i class="dropdown-icon">
               <svg
                 class="open-collection-icon"
@@ -52,12 +60,12 @@ Z"
 
               @if ((currentOpenedCollectionId$ | async) === collection.id) {
                 <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
-                  <div class="action-item" (click)="this.showAddRequestModal(collection.id)">
+                  <div
+                    class="action-item"
+                    (click)="this.showAddRequestModal(collection.id, collection.path)"
+                  >
                     Добавить запрос
                   </div>
-                  <!-- <div class="action-item" (click)="closeCollection(collection)">
-                    Закрыть коллекцию
-                  </div> -->
                   <div
                     class="action-item"
                     (click)="showCloneCollectionModal(collection.id, collection.name)"
@@ -70,7 +78,15 @@ Z"
                   >
                     Переименовать
                   </div>
-                  <!-- <div class="action-item" (click)="deleteCollection()">Удалить коллекцию</div> -->
+
+                  <div
+                    class="action-item"
+                    (click)="
+                      showCloseCollectionModal(collection.id, collection.name, collection.path)
+                    "
+                  >
+                    Удалить коллекцию
+                  </div>
                 </div>
               }
             </div>
@@ -99,6 +115,7 @@ Z"
     (close)="addRequestOverlayRef.dispose()"
     (create)="handleCreateRequest($event)"
     [collectionId]="addRequestCollectionId"
+    [collectionPath]="addRequestCollectionPath"
   />
 </ng-template>
 
@@ -117,5 +134,13 @@ Z"
     (onRename)="handleRenameCollection($event)"
     [collectionId]="renameCollectionId"
     [collectionName]="renameCollectionName"
+  />
+</ng-template>
+
+<ng-template cdkPortal #closeCollection>
+  <remove-collection-modal
+    (onClose)="removeCollectionOverlayRef.dispose()"
+    (onRemove)="handleRemoveCollection($event)"
+    [collectionInfo]="removeCollectionInfo"
   />
 </ng-template>

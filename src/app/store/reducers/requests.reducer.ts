@@ -11,9 +11,6 @@ export const initialState: RequestState =
 
 export const requestsReducer = createReducer(
     initialState,
-    on(createRequestSuccess, (state, { request }) => {
-        console.log(`createRequestSuccess reducer ${request}`);
-        return requestAdapter.addOne(request, state)
-    } )
+    on(createRequestSuccess, (state, { request }) => requestAdapter.addOne(request, state))
 );
  

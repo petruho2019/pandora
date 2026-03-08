@@ -21,9 +21,9 @@ export const openCollectionSuccess = createAction('[Collections] Open Success', 
 export const openCollectionFailure = createAction('[Collections] Open Failure', props<{error: any}>());
 export const openCollectionCancel = createAction('[Collections] Open Cancel');
 
-export const closeCollection = createAction('[Collection] Close', props<{collectionId: string}>());
-export const closeCollectionSuccess = createAction('[Collection] Close Success', props<{collections: Collection[]}>());
-export const closeCollectionFailure = createAction('[Collection] Close Failure', props<{errorMessage: string}>());
+export const removeCollection = createAction('[Collection] Remove', props<{collectionId: string}>());
+export const removeCollectionSuccess = createAction('[Collection] Remove Success', props<{collections: Collection[]}>());
+export const removeCollectionFailure = createAction('[Collection] Remove Failure', props<{errorMessage: string}>());
 
 export const cloneCollection = createAction('[Collection] Clone', props<{collectionInfo: CloneCollectionDto}>());
 export const cloneCollectionSuccess = createAction('[Collection] Clone Success', props<{clonedCollection: Collection}>());

@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addCollection: (data: { name: string; path: string; }) => ipcRenderer.invoke('add-collection', data),
   loadCollections: () => ipcRenderer.invoke('load-collections'),
   selectFolder: () => ipcRenderer.invoke('select-folder'),
-  closeCollection: (collectionId: string) => ipcRenderer.invoke('close-collection', collectionId),
+  removeCollection: (collectionId: string) => ipcRenderer.invoke('remove-collection', collectionId),
   cloneCollection: (collectionInfo: CloneCollectionDto) => ipcRenderer.invoke('clone-collection', collectionInfo),
   renameCollection: (collectionInfo: RenameCollectionDto) => ipcRenderer.invoke('rename-collection', collectionInfo),
   addRequest: (collectionPath: string, requestInfo: CreateRequestInfo) => ipcRenderer.invoke('add-request', collectionPath, requestInfo),

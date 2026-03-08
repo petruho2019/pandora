@@ -1,4 +1,9 @@
-<div class="request-item pointer">
+<div
+  class="request-item pointer"
+  tabindex="0"
+  [ngClass]="{ 'blur-item': blurService.currentBlurId === request.id }"
+  (blur)="onBlurRequest()"
+>
   <div class="request-item-info">
     @if (isHttp()) {
       <div class="http-request-info">
