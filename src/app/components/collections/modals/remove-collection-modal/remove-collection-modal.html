@@ -1,0 +1,28 @@
+<div class="close-collection-modal">
+  <modal-header
+    [canShowWarningIcon]="true"
+    [title]="headerTitle"
+    (onClose)="close()"
+  ></modal-header>
+
+  <div class="close-collection-content">
+    <p style="margin-bottom: 18px">Вы уверены что хотите удалить коллекцию?</p>
+
+    <div class="collection-info">
+      <p class="collection-name">{{ collectionInfo.collectionName }}</p>
+
+      <p class="collection-path">{{ collectionInfo.collectionPath }}</p>
+    </div>
+
+    <p style="margin-top: 18px; margin-bottom: 32px">
+      Она будет доступна в файловой системе по пути и может быть открыта снова
+    </p>
+
+    <div class="modal-actions">
+      <button (click)="close()" class="modal-close-button action-button">Закрыть</button>
+      <button (click)="removeCollection()" class="modal-create-button action-button">
+        Удалить
+      </button>
+    </div>
+  </div>
+</div>
