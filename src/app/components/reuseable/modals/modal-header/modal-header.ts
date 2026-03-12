@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CloseModalIcon } from "../close-modal-icon/close-modal-icon";
+import { CloseModalIcon } from '../../close-modal-icon/close-modal-icon';
 
 @Component({
   selector: 'modal-header',

@@ -1,28 +1,35 @@
+import { RequestsStoreSchema } from './../shared/store/schemes/request-store-schema';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import * as fs from 'fs';
-import { CollectionsStoreSchema } from '../shared/store/schemes/collection-store-schema'
 import { IpcMain } from 'electron';
 import { RequestModel, RequestType, RequestTypes } from '../shared/models/requests/request'
-import { buildFailureResultT, buildSuccessResultT, ResultT } from '../shared/models/result'
-import { HttpMethod, HttpRequestModel } from '../shared/models/requests/http-request-model';
+import { buildFailureResult, buildFailureResultT, buildSuccessResult, buildSuccessResultT, ResultT } from '../shared/models/result'
+import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http-request-model';
 import { CreateRequestError } from '../shared/models/error/error';
 import ElectronStore = require('electron-store');
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
-import { error } from 'console';
+import { LoadRequestDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
+import { COLLECTION_CONFIG_FILE_NAME } from '../shared/models/constants';
+import { ZodError } from 'zod';
 
-export function initializeRequest(store: ElectronStore<CollectionsStoreSchema>, ipcMain: IpcMain) {
-  ipcMain.handle('add-request', async (event, { collectionPath, requestInfo }: {collectionPath: string, requestInfo: CreateRequestInfo}) : Promise<ResultT<HttpRequestModel, CreateRequestError>> => {
+const REQUESTS_KEY = 'loadedRequests';
 
+
+export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipcMain: IpcMain) {
+
+  //region add-request
+
+  ipcMain.handle('add-request', async (event, { requestInfo }: {requestInfo: CreateRequestInfo}) : Promise<ResultT<HttpRequestModel, CreateRequestError>> => {
     try {
 
       console.log(`Check collectionPath`);
       // 1) Базовая валидация входа
-      if (!collectionPath || typeof collectionPath !== 'string') {
+      if (!requestInfo.collectionPath || typeof requestInfo.collectionPath !== 'string') {
         return createRequestError(`Путь к коллекции должен быть заполнен`);
       }
-      if (!requestInfo || typeof requestInfo !== 'object') {
-        return createRequestError(`requestInfo must be an object`);
+      if (!requestInfo) {
+        return createRequestError(`Объект запроса null`);
       }
 
       console.log(`Check request name`);
@@ -41,9 +48,9 @@ export function initializeRequest(store: ElectronStore<CollectionsStoreSchema>, 
       }
 
       const safeName = rawName
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 200);
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 200);
 
       if (!safeName) {
       return createRequestError(`Название файла некорректно`);
@@ -60,38 +67,16 @@ export function initializeRequest(store: ElectronStore<CollectionsStoreSchema>, 
         return createRequestError(`Тип запроса должен быть из списка: ${requestTypes.join(', ')}`);
       }
 
-      // if (type === 'HTTP') {
-      //   const method = String(requestInfo.method ?? '').trim().toUpperCase();
-      //   const url = String(requestInfo.url ?? '').trim();
-
-      //   console.log(`Request method ${method}`);
-
-      //   if (!HttpMethods.includes(method as HttpMethod)) {
-      //     return result(false, { error: 'invalid_method', message: `Метод должен быть из списка: ${HttpMethods.join(', ')}` });
-      //   }
-      //   if (!url) {
-      //     return result(false, { error: 'invalid_url', message: 'Необходимо ввести путь запроса' });
-      //   }
-      //   // Опционально: базовая проверка URL (не строгая)
-      //   try {
-      //     console.log(`Url path ${url}`);
-      //     // если нужно требовать схемы (http/https) - оставить; иначе можно убрать.
-      //     new URL(url);
-      //   } catch {
-      //     return result(false, { error: 'invalid_url_format', message: 'Путь запроса некорректен' });
-      //   }
-      // }
-
       console.log(`Prepare file path`);
 
       // 3) Подготовка пути и имя файла
-      const resolvedPath = path.resolve(collectionPath);
+      const resolvedPath = path.resolve(requestInfo.collectionPath);
       const finalFileName = `${safeName}.json`;
       const finalPath = path.join(resolvedPath, finalFileName);
 
 
       console.log(`Check file does not exist`);
-      // 4) Проверка существования по имени (case-insensitive среди .json файлов)
+
       const dirFiles = await fs.promises.readdir(resolvedPath);
       const hasDuplicate = dirFiles.some(f => {
         if (path.extname(f).toLowerCase() !== '.json') return false;
@@ -102,16 +87,18 @@ export function initializeRequest(store: ElectronStore<CollectionsStoreSchema>, 
         return createRequestError("Запрос с таким именем уже есть");
       }
 
-      // 5) Подготовка сохраняемого объекта
-      const savedRequest: RequestModel = mapCreateRequestModel(requestInfo, uuidv4(), finalPath);
+      const savedRequest: RequestModel = mapCreateRequestModel(requestInfo, uuidv4());
 
-      // 6) Атомарная запись: временный файл + переименование
       const payload = JSON.stringify(savedRequest, null, 2);
 
       console.log(`Payload: ${payload}`);
       console.log(`FinalPath: ${finalPath}`);
 
       await fs.promises.writeFile(finalPath, payload, { encoding: 'utf8' });
+
+      const requestsFromStore = store.get(REQUESTS_KEY, []);
+      requestsFromStore.push(savedRequest)
+      store.set(REQUESTS_KEY, requestsFromStore)
 
       return buildSuccessResultT(savedRequest);
     } catch (err: any) {
@@ -120,11 +107,141 @@ export function initializeRequest(store: ElectronStore<CollectionsStoreSchema>, 
     }
   });
 
+  //region load-requests
+
+  ipcMain.handle('load-requests', async (event, collectionInfo: LoadRequestDto) : Promise<ResultT<RequestModel[], string>> => {
+
+    console.log(`Load requests ${JSON.stringify(collectionInfo)}`);
+    console.log(`${collectionInfo.collectionPath}`);
+
+    if (!path.isAbsolute(collectionInfo.collectionPath)) 
+      return buildFailureResultT(`Путь до коллекции должен быть абсолютным`);
+    if (!collectionInfo.collectionId)
+      return buildFailureResultT(`Collection id is null!`);
+
+    let requestsFromCollectionPath: RequestModel[] = [];
+    let requestsFileInfo: fs.Dirent[];
+
+    try {
+      requestsFileInfo = await fs.promises.readdir(collectionInfo.collectionPath, {withFileTypes: true});
+    } catch (error) {
+      return buildFailureResultT(`Ошибка при загрузке файлов`);
+    }
+
+    for (const fileInfo of requestsFileInfo) {
+      if(fileInfo.name !== COLLECTION_CONFIG_FILE_NAME && fileInfo.isFile()){
+        try {
+          const raw = JSON.parse(await fs.promises.readFile(path.join(collectionInfo.collectionPath, fileInfo.name), { encoding: 'utf8'})) as RequestModel;
+
+          requestsFromCollectionPath.push(HttpRequestSchema.parse(raw) as RequestModel);
+          console.log(`File with name: ${fileInfo.name} successfully loaded`);
+
+        } catch (error) {
+          
+          if(error instanceof ZodError){
+            return buildFailureResultT(`Ошибка при загрузке файла ${fileInfo.name} , ${error.message}`);
+          }
+          if (error instanceof SyntaxError) {
+            return buildFailureResultT(`Невалидный JSON в файле ${fileInfo.name} , ${error.message}`);
+          }
+
+          return buildFailureResultT(`Неизвестная ошибка в файле ${fileInfo.name} , ${error}`);
+        }
+      }
+    }
+
+    store.set(REQUESTS_KEY, requestsFromCollectionPath);
+
+    return buildSuccessResultT(requestsFromCollectionPath);
+  });
+
+    // ipcMain.handle('open-collection-in-fs', async (event, collectionId: string) => {
+  //   const coll = store.get(COLLECTIONS_KEY, []).find(c => c.id === collectionId);
+
+  //   if(!coll)  throw new Error("Коллекция не найдена");
+  //   if (!coll.path) throw new Error("Путь коллекции не найден");
+
+  //   const platformName = platform().toLowerCase().replace(/[0-9]/g, '').replace('darwin', 'macos');
+    
+  //   switch (platformName) {
+  //       case 'win':
+  //           console.log(`before spawn`);
+  //           spawn('explorer.exe', [coll.path], { 
+  //               stdio: 'ignore', 
+  //               detached: true 
+  //           });
+  //           console.log(`after spawn`);
+  //           break;
+  //       case 'linux':
+  //           spawn('xdg-open', [coll.path]);
+  //           break;
+  //       case 'macos':
+  //           spawn('open', [coll.path]);
+  //           break;
+  //       default:
+  //           throw new Error("Неподдерживаемая ОС");
+  //   }
+    
+  //   return true; 
+  // });
+
+
+  // region renane-request
+  ipcMain.handle('rename-request', async (event, requestInfo: RenameRequestDto) : Promise<ResultT<RequestModel, string>> => {
+    validateRenameRequestDto(requestInfo);
+
+    console.log(`Rename request ${JSON.stringify(requestInfo)}`);
+
+    const requestFromStore = store.get(REQUESTS_KEY, []);
+    const requestById = requestFromStore.find(r => r.id === requestInfo.requestId);
+
+    if(!requestById) return buildFailureResultT(`Запрос ${requestById.name} не найден`);
+
+    requestById.name = requestInfo.newName;
+    requestById.fileName = requestInfo.newFileName;
+
+    console.log(`new request: ${JSON.stringify(requestById)}`);
+
+    try {
+      await fs.promises.rename(path.join(requestInfo.collectionPath, requestInfo.oldFileName + '.json'), path.join(requestInfo.collectionPath, requestInfo.newFileName+ '.json'));
+    } catch (err) {
+      if (err.code === "ENOENT") {
+        console.error(`Запрос ${requestById.name} не найден , ${err}`);
+      }
+    }
+
+    const requestJSON = JSON.stringify(requestById, null, 2);
+    await fs.promises.writeFile(path.join(requestInfo.collectionPath, requestInfo.newFileName+ '.json'), requestJSON, { encoding: 'utf8' });
+
+    requestFromStore.splice(requestFromStore.findIndex(c => c.id === requestInfo.requestId), 1, requestById);
+    store.set(REQUESTS_KEY, requestFromStore)
+
+    console.log(`New requests ${JSON.stringify(requestFromStore)}`);
+
+    return buildSuccessResultT(requestById);
+  });
+
+};
+
+
+function validateRenameRequestDto(requestInfo: RenameRequestDto){
+    if(!requestInfo.newName){
+        throw new Error(`Название запроса обязательно`);
+    }
+
+    if(!requestInfo.newFileName){
+        throw new Error(`Название папки обязательно`);
+    }
+
+    if(!path.isAbsolute(requestInfo.collectionPath)){
+        throw new Error(`Путь к файлу должен быть абсолютным`);
+    }
+}
+
 
   function mapCreateRequestModel(
     requestInfo: CreateRequestInfo,
-    id: string,
-    filePath: string
+    id: string
   ): HttpRequestModel {
     switch (requestInfo.type) {
       case RequestTypes.HTTP:
@@ -135,6 +252,7 @@ export function initializeRequest(store: ElectronStore<CollectionsStoreSchema>, 
           method: requestInfo.method as HttpMethod,
           url: requestInfo.url,
           collectionId: requestInfo.collectionId, 
+          fileName: requestInfo.name, 
           headers: null,
           body: null,
         };
@@ -165,9 +283,6 @@ export function initializeRequest(store: ElectronStore<CollectionsStoreSchema>, 
         throw new Error(`Unsupported request type: ${requestInfo.type}`);
     }
   }
-
-
-}
 
 function createRequestError<T>(errorMessage: string): ResultT<T, CreateRequestError>{
   return buildFailureResultT({

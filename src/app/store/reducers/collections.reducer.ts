@@ -17,7 +17,7 @@ export const collectionsReducer = createReducer(
     on(addCollectionSuccess, (state, { collection }) =>
         collectionsAdapter.addOne(collection, state)
     ),
-    on(loadCollectionsFailure, (state, { error }) => ({
+    on(loadCollectionsFailure, (state, { errorMessage: error }) => ({
         ...state,
         loading: false,
         error: error

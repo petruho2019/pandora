@@ -1,4 +1,4 @@
-.rename-collection-modal {
+.rename-modal {
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -11,11 +11,11 @@
   border: var(--modal-border-style)
 }
 
-.rename-collection-content {
+.rename-content {
   padding: 14px;
 }
 
-.collection-name {
+.name {
     display: flex;
     flex-direction: column;
 }

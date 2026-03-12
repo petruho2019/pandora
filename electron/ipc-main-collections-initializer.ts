@@ -1,3 +1,4 @@
+import { RenameDto } from './../shared/models/dto/shared-dtos';
 import { dialog, BrowserWindow, IpcMain } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from "path";
@@ -10,20 +11,22 @@ import { buildFailureResult, buildFailureResultT, buildSuccessResult, buildSucce
 import { CollectionYmlConfig } from '../shared/models/collections/collection-config'
 import ElectronStore = require('electron-store');
 import yaml from 'js-yaml';
-import { CloneCollectionDto, RenameCollectionDto } from '../shared/models/collections/dto/collection-action-dtos';
+import { CloneCollectionDto } from '../shared/models/collections/dto/collection-action-dtos';
+import { spawn } from 'child_process';
+import { platform } from 'os';
 
 const COLLECTIONS_KEY = 'loadedCollections';
 
 export function initializeCollection(store: ElectronStore<CollectionsStoreSchema>, ipcMain: IpcMain){
 
     //#region load-collections
-    ipcMain.handle('load-collections', () => {
+    ipcMain.handle('load-collections', async () : Promise<Collection[]> => {
 
         const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
 
         console.log(`Collections from store ${JSON.stringify(collectionsFromStore)}`);
 
-        const [validCollections, isCollectionPathsValid] = validateCollectionPaths(collectionsFromStore);
+        const [validCollections, isCollectionPathsValid] = await validateCollectionPaths(collectionsFromStore);
 
         if (!isCollectionPathsValid) {
             console.log(`Store updated: ${validCollections.length} collections`);
@@ -34,7 +37,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             return validCollections;
         }
         else{
-            //console.log(`Collections from store are valid: ${JSON.stringify(collectionsFromStore)}`);
+            console.log(`Collections from store are valid: ${JSON.stringify(collectionsFromStore)}`);
 
             return collectionsFromStore;
         }
@@ -44,35 +47,39 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
     //#region add-collection
 
-    ipcMain.handle('add-collection', async (event, { collectionName, collectionPath }: {collectionName: string, collectionPath: string  }) => {
+    ipcMain.handle('add-collection', async (event, { collectionName, collectionPath }: {collectionName: string, collectionPath: string  }) : Promise<ResultT<Collection, string>> => {
         if (!collectionPath || !collectionName) {
-            throw new Error('Требуются path и collectionName');
+            return buildFailureResultT('Требуются path и collectionName');
         }
         if (!path.isAbsolute(collectionPath)) {
-            throw new Error('Путь должен быть абсолютным');
+            return buildFailureResultT('Путь должен быть абсолютным');
         }
 
         const fullCollectionPath = path.join(collectionPath, collectionName);
 
-        if (fs.existsSync(fullCollectionPath)) {
-            throw new Error('Папка коллекции уже существует');
-        }
+        fs.stat(fullCollectionPath, ((err, stat) => {
+            if (err) {
+                if (err.code === 'ENOENT') return;
+                return buildFailureResultT('Ошибка при добавлении коллекции');
+            }
+            if (stat.isDirectory()) return buildFailureResultT('Коллекции уже существует');
+        })) 
 
         const collections = store.get(COLLECTIONS_KEY, []);
 
-        const exists = collections.some(
+        const existsInStore = collections.some(
             item => item.path === fullCollectionPath
         );
 
-        if (exists) {
-            throw new Error('Коллекция уже добавлена');
+        if (existsInStore) {
+            return buildFailureResultT('Коллекция уже добавлена');
         }
 
         try {
             fs.mkdirSync(fullCollectionPath, { recursive: true });
         } catch (err) {
             console.error('Ошибка создания папки', err);
-            throw new Error('Не удалось создать папку коллекции');
+            return buildFailureResultT('Не удалось создать папку коллекции');
         }
 
         console.log(`Full path to the collection ${fullCollectionPath}`);
@@ -81,7 +88,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             path: fullCollectionPath
         };
 
-        var createCollectionConfigFileResult = createCollectionConfigFile(collectionEntity, collectionName);
+        var createCollectionConfigFileResult = await createCollectionConfigFile(collectionEntity, collectionName);
 
         if(createCollectionConfigFileResult.isSuccess){
             const newCollection = mapCollection(collectionEntity, createCollectionConfigFileResult.body);
@@ -89,10 +96,10 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             collections.push(newCollection);
             store.set(COLLECTIONS_KEY, collections);
 
-            return newCollection;
+            return buildSuccessResultT(newCollection);
         }
 
-        throw new Error(createCollectionConfigFileResult.error);
+        return buildFailureResultT(createCollectionConfigFileResult.error);
     });
 
     //#region remove-collection
@@ -119,39 +126,40 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
     //#region open-collection
 
-    ipcMain.handle('open-collection', (event, collectionPath) : CollectionEntity => {
+    ipcMain.handle('open-collection', async (event, collectionPath) : Promise<ResultT<Collection, string>> => {
         if (!collectionPath) {
-            throw new Error('Требуются путь к коллекции');
+            return buildFailureResultT('Требуются путь к коллекции');
         }
         if (!path.isAbsolute(collectionPath)) {
-            throw new Error('Путь должен быть абсолютным');
+            return buildFailureResultT('Путь должен быть абсолютным');
         }
         if (!fs.existsSync(collectionPath)) {
-            throw new Error('Папки не существует');
+            return buildFailureResultT('Папки не существует');
         }
         
         let collectionConfig: CollectionYmlConfig;
         try{
-            collectionConfig = yaml.load(fs.readFileSync(path.join(collectionPath, COLLECTION_CONFIG_FILE_NAME), 'utf-8')) as CollectionYmlConfig;
+            
+            collectionConfig = yaml.load(await fs.promises.readFile(path.join(collectionPath, COLLECTION_CONFIG_FILE_NAME), 'utf-8')) as CollectionYmlConfig;
             console.log(`Config file found: ${JSON.stringify(collectionConfig)}`);
         }
         catch{
-            throw new Error(COLLECTION_CONFIG_FILE_FORMAT_ERROR) 
+            return buildFailureResultT(COLLECTION_CONFIG_FILE_FORMAT_ERROR) 
         }
 
         const collections = store.get(COLLECTIONS_KEY, []);
-        const exists = collections.some(
+        const existsInStore = collections.some(
             item => item.path === collectionPath
         );
 
-        if (exists) {
-            throw new Error('Collection already added');
+        if (existsInStore) {
+            return buildFailureResultT('Коллекция уже добавлена');
         }
 
         var openedCollectionResult = buildCollection({path: collectionPath});
 
         if (openedCollectionResult.isFailure){
-            throw new Error(openedCollectionResult.error);
+            return buildFailureResultT(openedCollectionResult.error);
         }
 
         console.log(`Opened collection: ${openedCollectionResult.body.path}`);
@@ -159,38 +167,45 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
         collections.push(openedCollectionResult.body);
         store.set(COLLECTIONS_KEY, collections);
 
-        return openedCollectionResult.body;
+        return buildSuccessResultT(openedCollectionResult.body);
     });
 
     //region clone-collection
 
-    ipcMain.handle('clone-collection',  (event, collectionInfo: CloneCollectionDto): Collection => {
+    ipcMain.handle('clone-collection',  async (event, collectionInfo: CloneCollectionDto): Promise<ResultT<Collection, string>> => {
 
-        validateCloneCollectionDto(collectionInfo);
+        const validationResult = validateCloneCollectionDto(collectionInfo);
+        if(validationResult.isFailure) return buildFailureResultT(validationResult.errorMessage);
 
         const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
         const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.sourceCollectionId);
 
         if(!collectionFromStore)
-            throw new Error(`Коллекция из стора не найдена`);
+            return buildFailureResultT(`Коллекция не найдена`);
 
         const newCollectionPath = path.join(collectionInfo.collectionPath, collectionInfo.folderName);
 
         console.log(`New collection path: ${newCollectionPath}`);
 
         try {
-            fs.cpSync(collectionFromStore.path, newCollectionPath, {recursive: true});
+            await fs.promises.cp(collectionFromStore.path, newCollectionPath, {recursive: true});
         }
         catch(err){
-            throw new Error(err);
+            return buildFailureResultT(err);
         }
 
         const configFilePath = path.join(newCollectionPath, COLLECTION_CONFIG_FILE_NAME);
 
         try {
-            fs.unlinkSync(configFilePath);
+            fs.unlink(configFilePath, (err) => {
+                if (err) {
+                    if (err.code === 'ENOENT') return;
+
+                    return buildFailureResultT('Ошибка при удалении старого конфигурационного файла коллекции');
+                }
+            });
         } catch (err) {
-            throw new Error(err);
+            return buildFailureResultT(err);
         }
 
 
@@ -200,7 +215,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
         console.log(`NewCollpath: ${newCollectionPath}, ${collectionInfo.collectionName}`);
 
-        var createCollectionConfigFileResult = createCollectionConfigFile(collectionEntity, collectionInfo.collectionName);
+        var createCollectionConfigFileResult = await createCollectionConfigFile(collectionEntity, collectionInfo.collectionName);
 
         if(createCollectionConfigFileResult.isSuccess){
             const newCollection = mapCollection(collectionEntity, createCollectionConfigFileResult.body);
@@ -208,61 +223,95 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             collectionsFromStore.push(newCollection);
             store.set(COLLECTIONS_KEY, collectionsFromStore);
 
-            return newCollection;
+            return buildSuccessResultT(newCollection);
         }
 
-        throw new Error(`Builder collection ${createCollectionConfigFileResult.error}`);
+        return buildFailureResultT(`Builder collection ${createCollectionConfigFileResult.error}`);
     });
 
 
     //region rename-collection
 
-    ipcMain.handle('rename-collection',  (event, collectionInfo: RenameCollectionDto): Collection => {
+    ipcMain.handle('rename-collection',  (event, collectionInfo: RenameDto): ResultT<Collection,string> => {
 
         console.log(`rename-collection: ${JSON.stringify(collectionInfo)}`);
 
-        if(!collectionInfo.collectionName){
-            throw new Error(`Название коллeкции обязательно`);
+        if(!collectionInfo.name){
+            return buildFailureResultT(`Название коллeкции обязательно`);
         }
 
         const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
-        const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.collectionId);
+        const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.id);
 
-        if(!collectionFromStore)
-            throw new Error(`Коллекция из стора не найдена`);
+        if(!collectionFromStore) return buildFailureResultT(`Коллекция не найдена`);
 
-        collectionFromStore.name = collectionInfo.collectionName;
+        collectionFromStore.name = collectionInfo.name;
 
-        collectionsFromStore.splice(collectionsFromStore.findIndex(c => c.id === collectionInfo.collectionId), 1, collectionFromStore);
+        collectionsFromStore.splice(collectionsFromStore.findIndex(c => c.id === collectionInfo.id), 1, collectionFromStore);
 
         console.log(`\n Collections from store with renamed item: ${collectionsFromStore}`);
 
         // collectionsFromStore.push(newCollection);
         // store.set(COLLECTIONS_KEY, collectionsFromStore);
 
-        return collectionFromStore;
+        return buildSuccessResultT(collectionFromStore);
     });
 
+    //region open-collection-in-fs
+    ipcMain.handle('open-collection-in-fs', async (event, collectionId: string) => {
+
+        console.log(`Trying to open collection in fs: ${collectionId}`);
+
+        const coll = store.get(COLLECTIONS_KEY, []).find(c => c.id === collectionId);
+
+        if(!coll)  return buildFailureResultT("Коллекция не найдена");
+        if (!coll.path) return buildFailureResultT("Путь коллекции не найден");
+
+        const platformName = platform().toLowerCase().replace(/[0-9]/g, '').replace('darwin', 'macos');
+        
+        switch (platformName) {
+            case 'win':
+                console.log(`before spawn`);
+                spawn('explorer.exe', [coll.path], { 
+                    stdio: 'ignore', 
+                    detached: true 
+                });
+                console.log(`after spawn`);
+                break;
+            case 'linux':
+                spawn('xdg-open', [coll.path]);
+                break;
+            case 'macos':
+                spawn('open', [coll.path]);
+                break;
+            default:
+                throw new Error("Неподдерживаемая ОС");
+        }
+        
+        return true; 
+    });
 }
 
 //region functions
 
-function validateCloneCollectionDto(collectionInfo: CloneCollectionDto){
+function validateCloneCollectionDto(collectionInfo: CloneCollectionDto): Result {
     if(!collectionInfo.collectionName){
-        throw new Error(`Название коллeкции обязательно`);
+        return buildFailureResult(`Название коллeкции обязательно`);
     }
 
     if(!collectionInfo.folderName){
-        throw new Error(`Название папки обязательно`);
+        return buildFailureResult(`Название папки обязательно`);
     }
 
     if(!collectionInfo.collectionPath){
-        throw new Error(`Путь коллекции обязательно`);
+        return buildFailureResult(`Путь коллекции обязательно`);
     }
 
     if(!path.isAbsolute(collectionInfo.collectionPath)){
-        throw new Error(`Путь должен быть абсолютным`);
+        return buildFailureResult(`Путь должен быть абсолютным`);
     }
+
+    return buildSuccessResult();
 }
 
 function buildCollection(collectionEntity: CollectionEntity): ResultT<Collection, string>{
@@ -280,13 +329,13 @@ function buildCollection(collectionEntity: CollectionEntity): ResultT<Collection
         return buildSuccessResultT(mapCollection(collectionEntity, collectionConfigResult.body));
 }
 
-function createCollectionConfigFile(collectionInfo: CollectionEntity, collectionName: string): ResultT<CollectionYmlConfig, string> {
+async function createCollectionConfigFile(collectionInfo: CollectionEntity, collectionName: string): Promise<ResultT<CollectionYmlConfig, string>> { // todo Вынести writeFile в другой метод
 
     const collectionConfigFile: CollectionYmlConfig =
         createCollectionConfigByCollection(collectionName);
 
     try {
-        fs.writeFileSync(
+        await fs.promises.writeFile(
             path.join(collectionInfo.path, COLLECTION_CONFIG_FILE_NAME),
             yaml.dump(collectionConfigFile)
         );
@@ -335,20 +384,33 @@ function validationCollectionYmlConfig(config: CollectionYmlConfig) : Result{
     return buildSuccessResult();
 }
 
-function validateCollectionPaths(collectionsFromStore: Collection[]): [Collection[], boolean]{
-    let validCollections: Collection[] = [];
-    let isCollectionPathsValid: boolean = true;
-    for(let col of collectionsFromStore) {
-        if (!fs.existsSync(col.path)) {
-            console.log(`Collection ${col.path} not exist, will delete`);
+async function validateCollectionPaths(collectionsFromStore: Collection[]): Promise<[Collection[], boolean]> {
+    const validCollections: Collection[] = [];
+    let isCollectionPathsValid = true;
+
+    for (const col of collectionsFromStore) {
+        try {
+            const stat = await fs.promises.stat(col.path);
+
+            if (!stat.isDirectory()) {
+                console.error(`Ошибка при загрузке коллекции ${col.path}`);
+                isCollectionPathsValid = false;
+                continue;
+            }
+
+            validCollections.push(col);
+        } catch (err: any) {
+            if (err.code === "ENOENT") {
+                console.error(`Коллекция ${col.path} не найдена`);
+            } else {
+                console.error(`Ошибка при проверке коллекции ${col.path}: ${err.message}`);
+            }
             isCollectionPathsValid = false;
-            continue; 
         }
-        validCollections.push(col);
     }
 
     return [validCollections, isCollectionPathsValid];
-} 
+}
 
 function mapCollection(collection: CollectionEntity, collectionConfigYml: CollectionYmlConfig): Collection {
     return {

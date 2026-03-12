@@ -1,0 +1,23 @@
+<div class="rename-modal">
+  <modal-header [title]="headerTitle" (onClose)="close()"></modal-header>
+
+  <div class="rename-content">
+    <div class="name">
+      <label for="name" class="modal-label">Название</label>
+      <input
+        type="text"
+        id="name"
+        class="pandora-input"
+        [placeholder]="namePlaceholder"
+        [(ngModel)]="newName"
+      />
+    </div>
+
+    <ng-content></ng-content>
+
+    <div class="modal-actions">
+      <button (click)="close()" class="modal-close-button action-button">Закрыть</button>
+      <button (click)="rename()" class="modal-create-button action-button">Переименовать</button>
+    </div>
+  </div>
+</div>

@@ -1,16 +1,16 @@
-import { ElectronService } from "../../services/electron-service";
-import { catchError, EMPTY, exhaustMap, from, map, of, switchMap } from "rxjs";
+import { CollectionElectronService } from "../../../../services/collection-electron-service";
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, exhaustMap, from, map, of, switchMap, tap } from "rxjs";
 
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { addCollection, addCollectionSuccess, cloneCollection, cloneCollectionFailure, cloneCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionSuccess, removeCollection, removeCollectionFailure, removeCollectionSuccess, renameCollection, renameCollectionFailure, renameCollectionSuccess } from '../actions/collections.actions';
+import { addCollection, addCollectionFailure, addCollectionSuccess, cloneCollection, cloneCollectionFailure, cloneCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionInFS, openCollectionSuccess, removeCollection, removeCollectionFailure, removeCollectionSuccess, renameCollection, renameCollectionFailure, renameCollectionSuccess } from '../actions/collections.actions';
 import { Collection } from "../../../../shared/models/collections/collection";
 import { CloneCollectionDto } from "../../../../shared/models/collections/dto/collection-action-dtos";
 
 
 export class CollectionEffects {
   private actions$ = inject(Actions); 
-  private electronService = inject(ElectronService);
+  private electronService = inject(CollectionElectronService);
 
   loadCollections$ = createEffect(() =>
     this.actions$.pipe(
@@ -18,16 +18,10 @@ export class CollectionEffects {
       switchMap(() =>
         from(this.electronService.loadCollections()).pipe(
           map((colls) => {
-            const collectionsArray = Array.isArray(colls) ? colls : [];
-
-            const prepared: Collection[] = collectionsArray.map(c => ({
-              ...c,
-              requests: c.requests ?? []
-            }));
-            return loadCollectionsSuccess({ collections: prepared });
+            return loadCollectionsSuccess({ collections: colls });
           }),
           catchError(error =>
-            of(loadCollectionsFailure({ error: error.message }))
+            of(loadCollectionsFailure({ errorMessage: error.message }))
           )
         )
       )
@@ -39,9 +33,9 @@ export class CollectionEffects {
       ofType(addCollection),
       switchMap(({ name, path }) =>
         from(this.electronService.addCollection({ name, path })).pipe(
-          map(collection =>{
-            console.log(`Collection successfully added`);
-            return addCollectionSuccess({ collection })
+          map(addCollectionResult =>{
+            if(addCollectionResult.isSuccess)  return addCollectionSuccess({ collection: addCollectionResult.body as Collection });
+            else return addCollectionFailure({errorMessage: addCollectionResult.error});
           }
           ),
           catchError(err => {
@@ -74,7 +68,10 @@ export class CollectionEffects {
           return of(openCollectionCancel());
         }
         return from(this.electronService.openCollection({collectionPath: path})).pipe(
-          map(collection => openCollectionSuccess({collection})),
+          map(openCollectionResult => {
+            if(openCollectionResult.isSuccess) return openCollectionSuccess({collection: openCollectionResult.body as Collection});
+            else return openCollectionFailure({errorMessage: openCollectionResult.error});
+      }),
           catchError(err => {
             console.error(err);
             return of(openCollectionFailure(err));
@@ -96,23 +93,40 @@ export class CollectionEffects {
   );
 
   cloneCollection = createEffect(() => this.actions$.pipe(
-    ofType(cloneCollection),
-    switchMap(({ collectionInfo }) =>
-      from(this.electronService.cloneCollection(collectionInfo)).pipe(
-        map(collection => cloneCollectionSuccess({ clonedCollection: collection })),
-        catchError((err) => of(cloneCollectionFailure({ errorMessage: err })))
+      ofType(cloneCollection),
+      switchMap(({ collectionInfo }) =>
+        from(this.electronService.cloneCollection(collectionInfo)).pipe(
+          map(clonecollectionResult => {
+              if(clonecollectionResult.isSuccess) return cloneCollectionSuccess({clonedCollection: clonecollectionResult.body as Collection});
+              else return cloneCollectionFailure({errorMessage: clonecollectionResult.error as string})
+          }),
+          catchError((err) => of(cloneCollectionFailure({ errorMessage: err })))
+        )
       )
     )
-  ));
+  );
 
 
   renameCollection = createEffect(() => this.actions$.pipe(
     ofType(renameCollection),
     switchMap(({ collectionInfo }) =>
       from(this.electronService.renameCollection(collectionInfo)).pipe(
-        map(collection => renameCollectionSuccess({ renamedCollection: collection })),
+        map(renameCollectionResult => {
+              if(renameCollectionResult.isSuccess) return renameCollectionSuccess({renamedCollection: renameCollectionResult.body as Collection});
+              else return renameCollectionFailure({errorMessage: renameCollectionResult.error as string})
+          }),
         catchError((err) => of(renameCollectionFailure({ errorMessage: err })))
       )
+    )
+  ));
+
+
+  openCollectionInFS = createEffect(() => this.actions$.pipe(
+    ofType(openCollectionInFS),
+    debounceTime(300),        
+    distinctUntilChanged(),
+    tap(({ collectionId }) =>
+      this.electronService.openCollectionInFS({collectionId: collectionId})
     )
   ));
 

@@ -1,59 +1,12 @@
-.request-item{
-    padding: 1.5px;
-}
-
-.request-item:hover {
-    background-color: rgba(155, 155, 155, 0.1);
-}
-
-.request-item-info{
-    display: flex;
-    padding: 1px;
-    width: 100%;
-    min-width: 0;
-    overflow: hidden;
-}
-
-.request-item-info > *{
-    display: flex;
-}
-
-.http-method {
-    padding-right: 10px;
-    padding-right: 10px;
-}
-
-.http-request-info {
-    display: flex;
-    width: 100%;
-    padding-left: 24px;
-}
-
-.request-name{
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap; 
-    flex: 1;
-    padding-right: 2.5px;
-}
-
-
 .request-item {
   display: flex;
-  min-width: 0;
-}
-
-.http-request-info {
-  display: flex;
-  min-width: 0;
-  overflow: hidden;
-  vertical-align: center;
-}
-
-.request-actions {
-    padding-right: 10px;
+  position: relative;
+  border: 1px solid;
+  border-color: transparent;
+  padding-left: 32px;
+  align-items: center;
+  padding: 2px 10px 2px 32px;
+  margin-right: 1px;
 }
 
 .request-item:hover {
@@ -72,8 +25,71 @@
   background-color: rgba(115, 115, 115, 0.1);
 }
 
+.request-actions {
+  display: flex;
+  margin-left: auto;
+  align-items: center;
+}
+
+.http-method {
+    padding-right: 10px;
+    padding-right: 10px;
+}
+
+.http-request-info {
+    display: flex;
+    width: 100%;
+    padding-left: 24px;
+}
+
+.request-file-name {
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+  margin-bottom: 20px;
+}
+
+.current-request-file-name-con {
+  padding: 8px 10px;
+  background-color: #181818;
+  border-radius: 4px;
+}
+
+.current-request-file-name{
+  max-width: 700px;
+  word-wrap: break-word;
+  color: var(--contrasting-color)
+}
 
 .actions-icon {
   opacity: 0;
+}
+
+.actions-menu {
+  position: absolute;
+  top: 110%;
+  left: 88%;
+  background: #313131;
+  border-radius: 6px;
+  padding: 4px;
+  z-index: 2;
+  border: 1px solid rgba(155, 155, 155, 0.315);
+  cursor: default;
+}
+
+.action-item {
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.action-item:hover {
+  background: #3a3a3a;
+}
+
+.edit-request-file-name-icon {
+  fill: rgba(212, 212, 212, 0.5);
+  align-items: cetner;
 }
 

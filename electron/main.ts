@@ -7,11 +7,19 @@ import path from "path";
 import { CollectionsStoreSchema } from "../shared/store/schemes/collection-store-schema";
 import ElectronStore = require("electron-store");
 import { initializeRequest } from "./ipc-main-requests-initializer";
+import { RequestsStoreSchema } from "../shared/store/schemes/request-store-schema";
 
-const store = new ElectronStore<CollectionsStoreSchema>({
+const collectionStore = new ElectronStore<CollectionsStoreSchema>({
   name: 'collections',
   defaults: {
     loadedCollections: []
+  }
+});
+
+const requestsStore = new ElectronStore<RequestsStoreSchema>({
+  name: 'requests',
+  defaults: {
+    loadedRequests: []
   }
 });
 
@@ -24,8 +32,7 @@ const indexPath = path.join(
 
 let win: BrowserWindow | null;
 
-initializeCollection(store, ipcMain);
-initializeRequest(store, ipcMain);
+
 
 const createWindow = () => {
   win = new BrowserWindow({
@@ -51,10 +58,17 @@ const createWindow = () => {
   win.on('closed', () => {
     win = null;
   });
+
+
   win.removeMenu();
 }
 
-app.on('ready', createWindow);
+app.on('ready', () => {
+
+  initializeCollection(collectionStore, ipcMain);
+  initializeRequest(requestsStore, ipcMain);
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   app.quit();

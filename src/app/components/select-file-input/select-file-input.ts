@@ -1,5 +1,5 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { ElectronService } from '../../services/electron-service';
+import { CollectionElectronService } from '../../../../services/collection-electron-service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class SelectFileInput {
 
-  private electronService = inject(ElectronService);
+  private electronService = inject(CollectionElectronService);
 
   @Input() placeholder: string;
   @Input() label: string;

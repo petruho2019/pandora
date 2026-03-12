@@ -5,6 +5,7 @@
   border-bottom: solid 1px rgba(155, 155, 155, 0.315);
   font-size: 10px;
   margin-bottom: 6px;
+  position:relative;
   justify-content: space-between;
 }
 
@@ -17,7 +18,7 @@
 
 .collection-actions {
   position: absolute;
-  top: 3.5%;
+  top: 110%;
   right: 4%;
   border: 1px solid rgba(155, 155, 155, 0.315); 
   border-radius: 6px;
@@ -37,4 +38,12 @@
 
 .collection-action:hover {
   background-color: #414141;
+}
+
+.actions-icon {
+  transition: stroke 0.1s;
+}
+
+.actions-icon:hover {
+  stroke: rgb(228, 228, 228)
 }

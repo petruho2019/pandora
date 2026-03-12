@@ -1,11 +1,11 @@
 import { ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input, OnInit, Output } from '@angular/core';
-import { ModalHeader } from "../../../reuseable/modal-header/modal-header";
 import { SelectFileInput } from "../../../select-file-input/select-file-input";
-import { ElectronService } from '../../../../services/electron-service';
+import { CollectionElectronService } from '../../../../../../services/collection-electron-service';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { cloneCollection } from '../../../../store/actions/collections.actions';
 import { CloneCollectionDto } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
+import { ModalHeader } from '../../../reuseable/modals/modal-header/modal-header';
 
 @Component({
   selector: 'clone-collection-modal',
@@ -14,7 +14,7 @@ import { CloneCollectionDto } from '../../../../../../shared/models/collections/
   styleUrl: './clone-collection-modal.css',
 })
 export class CloneCollectionModal implements OnInit {
-  private electronService = inject(ElectronService)
+  private electronService = inject(CollectionElectronService)
   private changeDetectorRef = inject(ChangeDetectorRef)
 
   headerTitle: string = "Клонировать коллекцию";

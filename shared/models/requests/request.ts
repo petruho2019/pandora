@@ -15,5 +15,6 @@ export interface BaseRequestModel {
   name: string,
   url: string,
   type: RequestType,
-  collectionId: string
+  collectionId: string,
+  fileName: string
 }

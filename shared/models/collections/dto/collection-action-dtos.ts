@@ -5,11 +5,6 @@ export interface CloneCollectionDto {
     sourceCollectionId: string
 }
 
-export interface RenameCollectionDto {
-    collectionName: string,
-    collectionId: string
-}
-
 export interface RemoveCollectionInfo {
     collectionName: string,
     collectionId: string,

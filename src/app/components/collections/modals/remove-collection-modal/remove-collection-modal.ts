@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostListener, inject, Input, Output } from '@angular/core';
-import { ModalHeader } from "../../../reuseable/modal-header/modal-header";
 import { RemoveCollectionInfo } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
+import { ModalHeader } from '../../../reuseable/modals/modal-header/modal-header';
 
 @Component({
   selector: 'remove-collection-modal',

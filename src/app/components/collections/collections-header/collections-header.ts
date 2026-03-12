@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject, viewChild } from '@angular/core';
 import { AddCollectionModal } from "../modals/add-collection-modal/add-collection-modal";
-import { ActionsMenuService } from '../../../services/actions-menu-service';
+import { ActionsMenuService } from '../../../../../services/actions-menu-service';
 import { Store } from '@ngrx/store';
 import { addCollection, openCollection } from '../../../store/actions/collections.actions';
 import { take } from 'rxjs';
