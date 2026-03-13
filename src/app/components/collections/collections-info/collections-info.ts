@@ -9,7 +9,7 @@ import { AddRequestModal } from "../../requests/modals/add-request-modal/add-req
 import { createHttpRequest, createRequestFailure, loadRequests } from '../../../store/actions/requests.actions';
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info'
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
-import { cloneCollection, loadCollections, openCollectionInFS, removeCollection, renameCollection } from '../../../store/actions/collections.actions';
+import { cloneCollection, loadCollections, moveCollection, openCollectionInFS, removeCollection, renameCollection } from '../../../store/actions/collections.actions';
 import { ofType } from '@ngrx/effects';
 import { RequestCollectionItem } from '../../requests/request-collection-item/request-collection-item';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
@@ -22,11 +22,12 @@ import { RenameModal } from "../../reuseable/modals/rename-modal/rename-modal";
 import { RenameDto } from "../../../../../shared/models/dto/shared-dtos";
 import { selectRequestsByCollectionId } from '../../../store/selectors/requests.selector';
 import { Collection } from '../../../../../shared/models/collections/collection';
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 
 
 @Component({
   selector: 'collections-info',
-  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal, CloneCollectionModal, RemoveCollectionModal, RenameModal],
+  imports: [CollectionsHeader, CommonModule, RequestCollectionItem, PortalModule, AddRequestModal, CloneCollectionModal, RemoveCollectionModal, RenameModal, CdkDropList, CdkDrag],
   templateUrl: './collections-info.html',
   styleUrl: './collections-info.css',
 })
@@ -39,9 +40,9 @@ export class CollectionsInfo implements OnInit {
 
   public renameCollectionHeader: string = "Переименовать коллекцию";
 
-  public readonly collections$ = this.store.select(selectAll);
+  //public readonly collections$ = this.store.select(selectAll);
 
-  //public collections$: Observable<Collection[]> | null = null; // Test
+  public collections$: Observable<Collection[]> | null = null; // Test
 
   public openCollections: Record<string, boolean> = {};
   
@@ -80,10 +81,10 @@ export class CollectionsInfo implements OnInit {
       alert(errorBody.error.message);
     })
 
-    // this.collections$ = of([
-    //   { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
-    //   { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
-    // ]);
+    this.collections$ = of([
+      { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
+      { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
+    ]);
 
     this.collections$.pipe(take(1)).subscribe(collections => {
       this.openCollections = collections.reduce((acc, c) => {
@@ -237,22 +238,21 @@ export class CollectionsInfo implements OnInit {
   }
 
   getRequestsByCollectionId(collectionId: string, collectionPath: string): Observable<RequestModel[]>{
-    // if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b'){
-    //   return of([ { id: "085059cb-2e3e-4550-b364-aff15fe5c849", name:"asdasd", type: "HTTP", method: "GET", url: "asdasd" , headers: null , body: null, collectionId: collectionId}, { id: "531ce6c4-a7ee-4f85-9015-2e776ab38db0", name:"фывфыв", type: "HTTP", method: "GET", url: "фывфыв" , headers: null , body: null, collectionId: collectionId} ]);
-    // }
+    if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b'){
+      return of([ { id: "085059cb-2e3e-4550-b364-aff15fe5c849", name:"asdasd", type: "HTTP", method: "GET", url: "asdasd" , headers: null , body: null, collectionId: collectionId, fileName: "asdasd"} as RequestModel, { id: "531ce6c4-a7ee-4f85-9015-2e776ab38db0", name:"фывфыв", type: "HTTP", method: "GET", url: "фывфыв" , headers: null , body: null, collectionId: collectionId , fileName: "фывфыв"} as RequestModel ]);
+    }
 
-    // if (collectionId === '33abfac2-d678-481c-aa9a-39ac8361bd3e'){
-    //   return of([ { id: "9058196d-801b-44df-9ef8-17f331c958c5", name:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", type: "HTTP", method: "GET", url: "asdasd" , headers: null , body: null, collectionId: collectionId }] );
-    // }
-
-    // TODO Добавить Record для запросов коллекции которых открывались
-
-    console.log(`Подгружаем запросы для ${collectionId}`);
+    if (collectionId === '33abfac2-d678-481c-aa9a-39ac8361bd3e'){
+      return of([ { id: "9058196d-801b-44df-9ef8-17f331c958c5", name:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", type: "HTTP", method: "GET", url: "asdasd" , headers: null , body: null, collectionId: collectionId, fileName: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" } as RequestModel] );
+    }
 
     this.store.dispatch(loadRequests({collectionInfo: {collectionPath: collectionPath, collectionId: collectionId}}))
-    const test = this.store.select(selectRequestsByCollectionId({collectionId: collectionId}));
 
-    return test;
+    return this.store.select(selectRequestsByCollectionId({collectionId: collectionId}));
+  }
+
+  dropCollection($event: CdkDragDrop<string[]>){
+    this.store.dispatch(moveCollection({fromIndex: $event.previousIndex, toIndex: $event.currentIndex}));
   }
 
   onRightClick($event: MouseEvent, collectionId: string) {

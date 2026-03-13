@@ -37,3 +37,5 @@ export const renameCollectionFailure = createAction('[Collection] Rename Failure
 export const openCollectionInFS = createAction('[Collections] Open in FS', props<{collectionId: string}>());
 export const openCollectionInFSSuccess = createAction('[Collections] Open Success in FS');
 export const openCollectionInFSFailure = createAction('[Collections] Open Failure in FS');
+
+export const moveCollection = createAction('[Collections] Move', props<{fromIndex: number, toIndex: number }>());

@@ -1,7 +1,10 @@
 import { createReducer, on, State } from "@ngrx/store";
 import { CollectionState } from "../states/collection-state";
-import { addCollectionSuccess, cloneCollectionSuccess, removeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollectionSuccess, renameCollectionSuccess } from "../actions/collections.actions";
+import { addCollectionSuccess, cloneCollectionSuccess, removeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollectionSuccess, renameCollectionSuccess, moveCollection } from "../actions/collections.actions";
 import { collectionsAdapter } from "../adapters/collection-adapter";
+import { moveItemInArray } from "@angular/cdk/drag-drop";
+import { selectAll } from "../selectors/collections.selector";
+import { Collection } from "../../../../shared/models/collections/collection";
 
 export const collectionFeatureKey = 'collections';
 
@@ -41,6 +44,15 @@ export const collectionsReducer = createReducer(
                 changes: collection
             },
             state
-        ))
+        )),
+
+    on(moveCollection, (state, {fromIndex: fromIndex, toIndex: toIndex}) => {
+        const collections = Object.values(state.entities);
+        console.log(`Коллекции перед перемещением: ${JSON.stringify(collections)}`);
+        moveItemInArray(collections, fromIndex, toIndex);
+        console.log(`Коллекции после перемещения: ${JSON.stringify(collections)}`);
+        return collectionsAdapter.setAll(collections as Collection[], state);
+    }
+    )
     
 )
