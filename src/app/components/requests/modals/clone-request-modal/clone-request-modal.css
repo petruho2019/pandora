@@ -1,0 +1,89 @@
+.clone-collection-modal {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 30%;
+  min-width: 500px;
+  max-width: 700px;
+  background: var(--modal-background-color);
+  border: var(--modal-border-style)
+}
+
+.clone-collection-content {
+  padding: 14px;
+}
+
+.collection-name{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.select-collection-path-input {
+  margin-bottom: 0px;
+}
+
+.select-file-input-con {
+  display: flex;
+  flex-direction: column;
+  text-align: justify;
+}
+
+.select-folder-a {
+  margin-top: 4px;
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 650;
+  color: rgb(139, 194, 249);
+  width: 100%;
+  width: fit-content;
+}
+
+.select-folder-a:hover {
+  text-decoration: underline;
+}
+
+.folder-name {
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+  margin-bottom: 20px;
+}
+
+.modal-label {
+  margin: 0px;
+}
+
+.edit-select-folder-icon {
+  fill: rgba(212, 212, 212, 0.5);
+  align-items: cetner;
+}
+
+.current-folder-name-con {
+  padding: 8px 10px;
+  background-color: #181818;
+  border-radius: 4px;
+}
+
+.current-folder-name{
+  max-width: 700px;
+  word-wrap: break-word;
+  color: var(--contrasting-color)
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.modal-close-button {
+  background-color: #202020;
+}
+
+.modal-close-button:hover {
+  background-color: rgba(155, 155, 155, 0.150);
+}
