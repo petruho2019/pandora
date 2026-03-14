@@ -1,11 +1,11 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Component, Input, signal } from '@angular/core';
 import { ResizableBar } from "../resizable-bar/resizable-bar";
-import { CollectionsInfo } from "../collections/collections-info/collections-info";
+import { SideBarContent } from "./side-bar-content/side-bar-content";
 
 @Component({
   selector: 'side-bar',
-  imports: [DragDropModule, ResizableBar,CollectionsInfo],
+  imports: [DragDropModule, ResizableBar, SideBarContent],
   templateUrl: './side-bar.html',
   styleUrl: './side-bar.css',
 })
@@ -16,4 +16,6 @@ export class SideBarResizeComponent {
     updateCurrentWidth(newWidth: any){
       this.currentWidth.set(newWidth);
     }
+
+    
 }

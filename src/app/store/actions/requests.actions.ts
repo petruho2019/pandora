@@ -16,3 +16,5 @@ export const createRequestFailure = createAction( '[Request] Create Failure', pr
 export const renameRequest = createAction('[Request] Rename', props<{requestInfo: RenameRequestDto}>());
 export const renameRequestSuccess = createAction('[Request] Rename Success', props<{renamedRequest: RequestModel}>());
 export const renameRequestFailure = createAction('[Request] Rename Failure', props<{errorMessage: string}>());
+
+export const moveRequest = createAction('[Request] Move', props<{fromIndex: number, toIndex: number }>());

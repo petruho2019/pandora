@@ -1,5 +1,3 @@
-
-
 .collection-item {
   display: flex;
   position: relative;
@@ -52,7 +50,6 @@
   background-color: rgba(105, 105, 105, 0.315);;
 }
 
-
 .collection-name{
   padding-top: 1px;
   padding-bottom: 1px;
@@ -90,10 +87,4 @@
 
 .action-item.danger {
   color: #ff6b6b;
-}
-
-
-
-.requests{
-  width: 100%;
 }

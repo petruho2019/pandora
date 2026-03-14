@@ -1,24 +1,25 @@
-import { ChangeDetectorRef, Component, HostListener, inject, Input, OnInit, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
+import { Component, inject, Input, OnInit, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { CollectionEntity } from '../../../../../shared/models/entitys/collection-entity';
-import { AsyncPipe, NgClass } from '@angular/common';
 import { BlurService } from '../../../../../services/blur-service';
 import { ActionsMenuService } from '../../../../../services/actions-menu-service';
-import { RenameModal } from "../../reuseable/modals/rename-modal/rename-modal";
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { RenameDto } from '../../../../../shared/models/dto/shared-dtos';
 import { take } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { RenameRequestDto } from '../../../../../shared/models/requests/dto/request-dtos';
+import { CloneRequestDto, RenameRequestDto } from '../../../../../shared/models/requests/dto/request-dtos';
 import { Store } from '@ngrx/store';
 import { renameRequest } from '../../../store/actions/requests.actions';
+import { CloneRequestModal } from '../modals/clone-request-modal/clone-request-modal';
+import { RenameModal } from "../../reuseable/modals/rename-modal/rename-modal";
+import { AsyncPipe, NgClass } from '@angular/common';
 
 @Component({
-  selector: 'request-collection-item',
-  imports: [NgClass, AsyncPipe, RenameModal, FormsModule],
-  templateUrl: './request-collection-item.html',
-  styleUrl: './request-collection-item.css',
+  selector: 'request-item',
+  imports: [NgClass, AsyncPipe, FormsModule, CloneRequestModal, RenameModal],
+  templateUrl: './request-item.html',
+  styleUrl: './request-item.css',
 })
 export class RequestCollectionItem implements OnInit {
   
@@ -37,6 +38,9 @@ export class RequestCollectionItem implements OnInit {
 
   renamePortal = viewChild.required<TemplateRef<any>>('rename');
   renameOverlayRef: OverlayRef;
+
+  clonePortal = viewChild.required<TemplateRef<any>>('clone');
+  cloneOverlayRef: OverlayRef;
 
   canBeEdit: boolean = false;
   newRequestFolderName: string;
@@ -65,7 +69,7 @@ export class RequestCollectionItem implements OnInit {
   }
 
 
-  showRenameCollectionModal(){
+  showRenameModal(){
     this.actionsMenuService.close();
 
     this.renameOverlayRef = this.buildOverlayRef(this.overlay);
@@ -79,7 +83,21 @@ export class RequestCollectionItem implements OnInit {
     this.renameOverlayRef.attach(portal);
   }
 
-  handleRenameRequest(requestInfoFromModal: RenameDto){
+  showCloneModal(){
+    this.actionsMenuService.close();
+
+    this.cloneOverlayRef = this.buildOverlayRef(this.overlay);
+
+    this.cloneOverlayRef.backdropClick().subscribe(() => {
+      this.cloneOverlayRef?.dispose();
+    });
+
+    const portal = new TemplatePortal(this.clonePortal(), this.viewContainerRef);
+
+    this.cloneOverlayRef.attach(portal);
+  }
+
+  handleRename(requestInfoFromModal: RenameDto){
     //this.newRequestFolderName = this.request.name;
 
     const requestInfo: RenameRequestDto = {
@@ -91,6 +109,10 @@ export class RequestCollectionItem implements OnInit {
     } 
 
     this.store.dispatch(renameRequest({requestInfo: requestInfo}));
+  }
+
+  handleClone(requestInfo: CloneRequestDto){
+
   }
 
   buildOverlayRef(overlay: Overlay){
@@ -105,6 +127,10 @@ export class RequestCollectionItem implements OnInit {
 
   changeFolderNameEditMode(){
     this.canBeEdit = !this.canBeEdit;
+  }
+
+  closeModal(){
+    this.renameOverlayRef.dispose();
   }
 
 }

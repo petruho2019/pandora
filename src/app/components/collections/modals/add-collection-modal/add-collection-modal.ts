@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostListener, inject, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms'
-import { SelectFileInput } from "../../../select-file-input/select-file-input";
+import { SelectFileInput } from "../../../reuseable/select-file-input/select-file-input";
 import { ModalHeader } from '../../../reuseable/modals/modal-header/modal-header';
 
 @Component({

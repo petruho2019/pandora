@@ -4,6 +4,8 @@
   [ngClass]="{ 'blur-item': blurService.currentBlurId === request.id }"
   (click)="this.blurService.clearBlur()"
   (blur)="onBlurRequest()"
+  cdkDrag
+  cdkDragHandle
 >
   @if (isHttp()) {
     <span class="http-method item-name" [ngClass]="request.method.toLowerCase()">
@@ -37,13 +39,9 @@
 
   @if ((currentOpenRequestId$ | async) === request.id) {
     <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
-      <div class="action-item pointer" (click)="this.showRenameCollectionModal()">
-        Переименовать
-      </div>
-      <!-- <div class="action-item" (click)="showCloneCollectionModal(collection.id, collection.name)">
-          Клонировать
-        </div>
-        <div
+      <div class="action-item pointer" (click)="this.showRenameModal()">Переименовать</div>
+      <div class="action-item pointer" (click)="showCloneModal()">Клонировать</div>
+      <!-- <div
           class="action-item"
           (click)="showRenameCollectionModal(collection.id, collection.name)"
         >
@@ -67,7 +65,7 @@
 <ng-template cdkPortal #rename>
   <rename-modal
     (onClose)="renameOverlayRef.dispose()"
-    (onRename)="handleRenameRequest($event)"
+    (onRename)="handleRename($event)"
     [itemId]="request.id"
     [newName]="request.name"
     [headerTitle]="renameHeader"
@@ -139,4 +137,13 @@
       }
     </div>
   </rename-modal>
+</ng-template>
+
+<ng-template cdkPortal #clone>
+  <clone-request-modal
+    [requestName]="request.name"
+    (onClone)="handleClone($event)"
+    (onClose)="closeModal()"
+  >
+  </clone-request-modal>
 </ng-template>

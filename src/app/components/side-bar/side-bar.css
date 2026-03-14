@@ -1,27 +1,23 @@
-.side-bar {
+.side-bar-con {
     display: flex;
     height: 100%;
     position: relative; 
     word-wrap: break-word;
     overflow-wrap: break-word;
 
-      -webkit-user-select: none; /* Chrome/Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE/Edge */
-  user-select: none; /* Стандартный синтаксис */
+    -webkit-user-select: none; /* Chrome/Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+    user-select: none; /* Стандартный синтаксис */
 }
 
-.side-bar-main {
+.side-bar {
     display: flex;
     width: 100%;
     flex-direction: column;
     flex: 1;
 }
 
-.side-bar-content {
-    flex: 1;
-    min-width: 0;
-}
 
 
 

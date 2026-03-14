@@ -1,0 +1,36 @@
+<div class="side-bar-content">
+  <side-bar-header></side-bar-header>
+
+  @if (this.collections$ | async; as collections) {
+    @if (collections.length === 0) {
+      <div>No collections found</div>
+      <div><a>Create</a> or <a>import</a> collection</div>
+    } @else {
+      <div class="collections" cdkDropList (cdkDropListDropped)="dropCollection($event)">
+        @for (collection of collections; track collection.path) {
+          <collection-item
+            cdkDrag
+            [collection]="collection"
+            (handleAddRequest)="handleCreateRequest($event.overlay, $event.addRequestInfo)"
+            (handleCloneCollection)="
+              handleCloneCollection($event.overlay, $event.cloneCollectionDto)
+            "
+            (handleRenameCollection)="handleRenameCollection($event.overlay, $event.renameDto)"
+            (handleRemoveCollection)="handleRemoveCollection($event.overlay, $event.collectionId)"
+            (handleOpenCollection)="handleOpenCollection($event.collectionId, $event.isOpen)"
+          ></collection-item>
+
+          @if (openCollections()[collection.id]) {
+            <div class="requests" cdkDropList (cdkDropListDropped)="dropRequest($event)">
+              @for (req of this.requests()[collection.id]?.requests; track req.id) {
+                <request-item [request]="req" [collection]="collection"></request-item>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  } @else {
+    <div>Loading...</div>
+  }
+</div>

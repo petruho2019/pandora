@@ -1,7 +1,9 @@
 import { createReducer, on } from "@ngrx/store";
 import { RequestState } from "../states/request-state";
 import { requestAdapter } from "../adapters/request-adapter";
-import { createRequestSuccess, loadRequestsSuccess, renameRequestSuccess } from "../actions/requests.actions";
+import { createRequestSuccess, loadRequestsSuccess, moveRequest, renameRequestSuccess } from "../actions/requests.actions";
+import { moveItemInArray } from "@angular/cdk/drag-drop";
+import { RequestModel } from "../../../../shared/models/requests/request";
 
 export const requestFeatureKey = 'requests';
 
@@ -28,6 +30,14 @@ export const requestsReducer = createReducer(
             id: req.id,
             changes: req
         }, state)
+    ),
+    on(moveRequest, (state, {fromIndex: fromIndex, toIndex: toIndex}) => {
+        const requests = Object.values(state.entities);
+        console.log(`Запросы перед перемещением: ${JSON.stringify(requests)}`);
+        moveItemInArray(requests, fromIndex, toIndex);
+        console.log(`Запросы после перемещения: ${JSON.stringify(requests)}`);
+        return requestAdapter.setAll(requests as RequestModel[], state);
+    }
     )
 );
  

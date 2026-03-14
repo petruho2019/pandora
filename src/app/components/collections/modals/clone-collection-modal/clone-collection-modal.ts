@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input, OnInit, Output } from '@angular/core';
-import { SelectFileInput } from "../../../select-file-input/select-file-input";
+import { SelectFileInput } from "../../../reuseable/select-file-input/select-file-input";
 import { CollectionElectronService } from '../../../../../../services/collection-electron-service';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';

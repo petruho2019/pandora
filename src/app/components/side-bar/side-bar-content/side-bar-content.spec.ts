@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CollectionsHeader } from './collections-header';
+import { SideBarContent } from './side-bar-content';
 
-describe('CollectionsHeader', () => {
-  let component: CollectionsHeader;
-  let fixture: ComponentFixture<CollectionsHeader>;
+describe('SideBarContent', () => {
+  let component: SideBarContent;
+  let fixture: ComponentFixture<SideBarContent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CollectionsHeader]
+      imports: [SideBarContent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CollectionsHeader);
+    fixture = TestBed.createComponent(SideBarContent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

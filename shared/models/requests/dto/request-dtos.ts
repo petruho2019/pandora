@@ -6,6 +6,13 @@ export interface RenameRequestDto {
     newFileName: string
 }
 
+export interface CloneRequestDto {
+    newName: string,
+    newFileName: string,
+    requestId?: string,
+    collectionPath?: string
+}
+
 export interface LoadRequestDto {
     collectionPath: string, 
     collectionId: string

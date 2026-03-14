@@ -1,0 +1,141 @@
+<div
+  class="collection-item pointer"
+  tabindex="0"
+  [ngClass]="{ 'blur-item': blurService.currentBlurId === collection.id }"
+  (click)="openCollectionIfNotOpen($event, collection.id)"
+  (contextmenu)="onRightClick($event, collection.id)"
+  (blur)="onBlurItem(collection.id)"
+>
+  <div class="open-collection-icon-con">
+    @if (isOpen) {
+      <svg
+        class="open-collection-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="15"
+        height="22"
+        viewBox="4 -17 17.7 45"
+        (click)="openCollection($event)"
+      >
+        <path
+          d="M 0.939,2.197
+C 1.848,3.1 2.573,3.812 4.148,5.371
+c 0.778,0.76 1.69,1.661 3.295,3.242 0.952,0.948 3.955,3.903 4.47,4.41
+l 0.358,0.351 0.262,-0.253
+c 0.29,-0.288 1.939,-1.92 3.824,-3.783 0.666,-0.662 1.732,-1.712 2.362,-2.339 1.549,-1.53 3.144,-3.117 4.584,-4.539 1.12,-1.115 1.183,-1.183 1.154,-1.222 -0.016,-0.029 -0.108,-0.125 -0.206,-0.223 -0.145,-0.153 -0.834,-0.887 -0.919,-0.983 -0.029,-0.033 -0.198,0.116 -3.888,3.385 -0.517,0.46 -1.252,1.111 -1.638,1.448 -0.384,0.341 -1.12,0.995 -1.638,1.456 -0.517,0.458 -1.352,1.203 -1.865,1.652 -0.503,0.449 -1.169,1.032 -1.471,1.303 -0.3,0.266 -0.556,0.484 -0.562,0.484 -0.01,0 -0.484,-0.409 -1.046,-0.909
+C 10.663,8.349 9.523,7.348 8.7,6.617 7.877,5.886 6.802,4.938 6.314,4.505 5.826,4.074 4.837,3.198 4.112,2.562 3.393,1.925 2.439,1.084 1.997,0.693
+c -0.443,-0.39 -0.809,-0.701 -0.823,-0.69 -0.01,0.01 -0.247,0.266 -0.529,0.568 -0.278,0.308 -0.539,0.584 -0.574,0.625
+l -0.069,0.069
+z"
+        ></path>
+      </svg>
+    } @else {
+      <svg
+        class="open-collection-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="15"
+        height="22"
+        viewBox="-6 -12 25 45"
+      >
+        <path
+          d="M 2.1946543,23.523081
+C 3.0977982,22.614188 3.8089502,21.889425 5.368391,20.314534 6.1285205,19.536882 7.0297049,18.624072 8.6106958,17.019799 9.5588985,16.067813 12.513216,13.064943 13.020622,12.549773
+L 13.3713,12.19131 13.118577,11.928828
+C 12.830589,11.638922 11.198662,9.9895962 9.3355615,8.1052119 8.6733869,7.4392133 7.6233111,6.3736156 6.9964002,5.7428757 5.4663458,4.1934495 3.8794776,2.5989704 2.4571735,1.159238 1.3424477,0.03879332 1.2738787,-0.02388891 1.2346971,0.00549339 1.205312,0.02116394 1.1093154,0.11322846 1.0113601,0.21116943 0.85855078,0.35612207 0.12388919,1.0456265 0.02789369,1.1298558 -0.00541315,1.1592379 0.14348002,1.3276965 3.4132126,5.0181125 3.8736004,5.5352407 4.5240204,6.2697981 4.8609849,6.6556855 5.2018677,7.0396142 5.856206,7.7761302 6.3165937,8.2932586 6.7750222,8.810387 7.519479,9.6448441 7.9681121,10.158055
+c 0.448633,0.503416 1.0324438,1.169415 1.3027991,1.471073 0.2664371,0.2997 0.4838968,0.556305 0.4838968,0.562182 0,0.0098 -0.4094511,0.483828 -0.9090206,1.046009
+C 8.3462177,13.7995 7.3451194,14.939533 6.6143763,15.762238 5.8836333,16.584942 4.9354306,17.660333 4.5024704,18.14808 4.071469,18.635826 3.1957529,19.625029 2.5590466,20.349792 1.9223403,21.068679 1.0818878,22.022625 0.69006898,22.465318 0.30020775,22.908011 -0.01128797,23.27431 4.6608713e-4,23.288022 0.01029795,23.297852 0.26690312,23.534833 0.56860452,23.816903 0.87618296,24.095055 1.1524154,24.355579 1.1935569,24.390837
+l 0.068569,0.06856
+z"
+        ></path>
+      </svg>
+    }
+  </div>
+
+  <span class="text-ellipsis collection-name">{{ collection.name }}</span>
+  <div class="collection-actions" (click)="toggleCollectionActions($event, collection.id)">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="actions-icon"
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      stroke-width="2"
+      stroke="currentColor"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <circle cx="5" cy="12" r="1"></circle>
+      <circle cx="12" cy="12" r="1"></circle>
+      <circle cx="19" cy="12" r="1"></circle>
+    </svg>
+
+    @if ((currentOpenedCollectionId$ | async) === collection.id) {
+      <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
+        <div
+          class="action-item pointer"
+          (click)="this.showAddRequestModal(collection.id, collection.path)"
+        >
+          Добавить запрос
+        </div>
+        <div class="action-item" (click)="showCloneCollectionModal(collection.id, collection.name)">
+          Клонировать
+        </div>
+        <div
+          class="action-item"
+          (click)="showRenameCollectionModal(collection.id, collection.name)"
+        >
+          Переименовать
+        </div>
+
+        <div
+          class="action-item"
+          (click)="showCloseCollectionModal(collection.id, collection.name, collection.path)"
+        >
+          Удалить коллекцию
+        </div>
+
+        <div class="action-item" (click)="showFolderCollection(collection.id)">
+          Открыть в файловой системе
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template cdkPortal #addRequest>
+  <add-request-modal
+    (close)="addRequestOverlayRef.dispose()"
+    (create)="this.addRequest($event)"
+    [collectionId]="addRequestCollectionId"
+    [collectionPath]="addRequestCollectionPath"
+  />
+</ng-template>
+
+<ng-template cdkPortal #cloneCollection>
+  <clone-collection-modal
+    (onClose)="cloneCollectionOverlayRef.dispose()"
+    (onClone)="this.cloneCollection($event)"
+    [collectionName]="cloneCollectionName"
+    [collectionId]="cloneCollectionId"
+  />
+</ng-template>
+
+<ng-template cdkPortal #renameCollection>
+  <rename-modal
+    (onClose)="renameCollectionOverlayRef.dispose()"
+    (onRename)="this.renameCollection($event)"
+    [itemId]="renameCollectionId"
+    [newName]="renameCollectionName"
+    [headerTitle]="renameCollectionHeader"
+    [namePlaceholder]="renameCollectionPlacholder"
+  />
+</ng-template>
+
+<ng-template cdkPortal #closeCollection>
+  <remove-collection-modal
+    (onClose)="removeCollectionOverlayRef.dispose()"
+    (onRemove)="this.removeCollection($event)"
+    [collectionInfo]="removeCollectionInfo"
+  />
+</ng-template>

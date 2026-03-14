@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RequestCollectionItem } from './request-collection-item';
+import { RequestCollectionItem } from './request-item';
 
 describe('RequestCollectionItem', () => {
   let component: RequestCollectionItem;

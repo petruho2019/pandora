@@ -1,21 +1,21 @@
-import { CommonModule } from '@angular/common';
-import { Component, HostListener, inject, viewChild } from '@angular/core';
-import { AddCollectionModal } from "../modals/add-collection-modal/add-collection-modal";
-import { ActionsMenuService } from '../../../../../services/actions-menu-service';
-import { Store } from '@ngrx/store';
-import { addCollection, openCollection } from '../../../store/actions/collections.actions';
-import { take } from 'rxjs';
-import { CdkPortal, PortalModule } from '@angular/cdk/portal';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { Component, inject, viewChild } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { ActionsMenuService } from '../../../../../services/actions-menu-service';
+import { CdkPortal, PortalModule } from '@angular/cdk/portal';
+import { take } from 'rxjs';
+import { addCollection, openCollection } from '../../../store/actions/collections.actions';
+import { CommonModule } from '@angular/common';
+import { AddCollectionModal } from '../../collections/modals/add-collection-modal/add-collection-modal';
 
 @Component({
-  selector: 'collections-header',
+  selector: 'side-bar-header',
   imports: [CommonModule, AddCollectionModal, PortalModule],
-  templateUrl: './collections-header.html',
-  styleUrl: './collections-header.css',
+  templateUrl: './side-bar-header.html',
+  styleUrl: './side-bar-header.css',
 })
-export class CollectionsHeader {
-
+export class SideBarHeader {
+  
   readonly store = inject(Store);
   private overlay = inject(Overlay)
   private actionsMenuService = inject(ActionsMenuService);
@@ -66,5 +66,6 @@ export class CollectionsHeader {
   addCollection(collectionInfo: { name: string, path: string }){
     this.store.dispatch(addCollection(collectionInfo));
   }
+
 
 }
