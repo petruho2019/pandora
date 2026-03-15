@@ -34,7 +34,7 @@ export class CloneRequestModal {
     let requestInfo: CloneRequestDto = {
       newName: this.newName,
       newFileName: this.newFileName
-    }
+    };
 
     this.onClone.emit(requestInfo)
 

@@ -1,4 +1,4 @@
-.clone-collection-modal {
+.clone-request-modal {
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -11,41 +11,18 @@
   border: var(--modal-border-style)
 }
 
-.clone-collection-content {
+.clone-request-content {
   padding: 14px;
 }
 
-.collection-name{
+.request-name{
   display: flex;
   flex-direction: column;
   margin-bottom: 14px;
 }
 
-.select-collection-path-input {
-  margin-bottom: 0px;
-}
 
-.select-file-input-con {
-  display: flex;
-  flex-direction: column;
-  text-align: justify;
-}
-
-.select-folder-a {
-  margin-top: 4px;
-  font-size: 13px;
-  text-decoration: none;
-  font-weight: 650;
-  color: rgb(139, 194, 249);
-  width: 100%;
-  width: fit-content;
-}
-
-.select-folder-a:hover {
-  text-decoration: underline;
-}
-
-.folder-name {
+.file-name {
   display: flex;
   flex-direction: column;
   margin-top: 14px;
@@ -56,18 +33,23 @@
   margin: 0px;
 }
 
-.edit-select-folder-icon {
+.change-file-name-edit-mode-icon {
   fill: rgba(212, 212, 212, 0.5);
   align-items: cetner;
+  transition: fill 0.2s
 }
 
-.current-folder-name-con {
+.change-file-name-edit-mode-icon:hover {
+  fill: rgba(212, 212, 212, 0.85);
+}
+
+.current-file-name-con {
   padding: 8px 10px;
   background-color: #181818;
   border-radius: 4px;
 }
 
-.current-folder-name{
+.current-file-name{
   max-width: 700px;
   word-wrap: break-word;
   color: var(--contrasting-color)

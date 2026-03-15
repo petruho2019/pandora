@@ -15,7 +15,7 @@
 
     <div class="file-name">
       <div class="justify-space-between flex items-center" style="margin-bottom: 8px">
-        <label for="file-name" class="modal-label">Название файла</label>
+        <label for="file-name" class="modal-label">Название файла в файловой системе</label>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class=""
@@ -64,10 +64,10 @@
         </svg>
       </div>
       @if (canBeEdit) {
-        <input type="text" id="folder-name" class="pandora-input" [(ngModel)]="newFileName" />
+        <input type="text" id="file-name" class="pandora-input" [(ngModel)]="newFileName" />
       } @else {
-        <div class="current-folder-name-con">
-          <p class="current-folder-name">{{ newFileName }}</p>
+        <div class="current-file-name-con">
+          <p class="current-file-name">{{ newFileName }}</p>
         </div>
       }
     </div>
