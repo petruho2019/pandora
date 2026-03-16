@@ -1,19 +1,22 @@
+import { buildSuccessResult, Result } from './../shared/models/result';
 import { RequestsStoreSchema } from './../shared/store/schemes/request-store-schema';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import * as fs from 'fs';
-import { IpcMain } from 'electron';
 import { RequestModel, RequestType, RequestTypes } from '../shared/models/requests/request'
-import { buildFailureResult, buildFailureResultT, buildSuccessResult, buildSuccessResultT, ResultT } from '../shared/models/result'
+import { buildFailureResult, buildFailureResultT, buildSuccessResultT, ResultT } from '../shared/models/result'
 import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http-request-model';
 import { CreateRequestError } from '../shared/models/error/error';
 import ElectronStore = require('electron-store');
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
-import { LoadRequestDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
+import { CloneRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
 import { COLLECTION_CONFIG_FILE_NAME } from '../shared/models/constants';
 import { ZodError } from 'zod';
+import { platform } from 'os';
+import { spawn } from 'child_process';
+import { IpcMain } from 'electron';
+import { REQUESTS_KEY } from './main';
 
-const REQUESTS_KEY = 'loadedRequests';
 
 
 export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipcMain: IpcMain) {
@@ -221,7 +224,108 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
     return buildSuccessResultT(requestById);
   });
 
+  //region clone-request
+  ipcMain.handle('clone-request', async (event, requestInfo: CloneRequestDto) : Promise<ResultT<RequestModel, string>> => {
+    
+    console.log(`ipc-main-requests-initializer clone request: ${JSON.stringify(requestInfo)}`);
+
+    if(!requestInfo.newFileName)
+      return buildFailureResultT(`Новое название файла не может быть пустым`);
+    if(!requestInfo.newName)
+      return buildFailureResultT(`Новое название не может быть пустым`);
+    if(!(await fs.promises.stat(requestInfo.collectionPath)).isDirectory())
+      return buildFailureResultT(`Коллекция ${requestInfo.collectionPath} не существует`);
+
+    const requestsFromStore = store.get(REQUESTS_KEY, []);
+    const requestFromStoreById = requestsFromStore.find(r => r.id === requestInfo.requestId);
+
+    if(requestsFromStore.find(req => req.name === requestInfo.newName))
+      return buildFailureResultT(`Запрос с таким именем уже существует`);
+    if(requestsFromStore.find(req => req.fileName === requestInfo.newFileName))
+      return buildFailureResultT(`Файл запроса с таким именем уже существует`);
+
+    const clonedRequest = mapCloneDtoToRequestModel(requestFromStoreById, requestInfo);
+
+    console.log(`Object of cloned request: ${JSON.stringify(clonedRequest)}`);
+
+    try {
+      console.log(`Trying to write file by path: ${path.join(requestInfo.collectionPath, requestInfo.newFileName)}`);
+      await fs.promises.writeFile(path.join(requestInfo.collectionPath, requestInfo.newFileName) + '.json', JSON.stringify(clonedRequest, null, 2), {encoding: `utf-8`});
+    } catch (err) {
+      return buildFailureResultT(`Ошибка при клонировании запроса`);
+    }
+
+    requestsFromStore.push(clonedRequest);
+
+    store.set(REQUESTS_KEY, requestsFromStore);
+
+    return buildSuccessResultT(clonedRequest);
+  });
+
+  //region open-request-in-fs
+
+  ipcMain.handle('open-request-in-fs', async (event, requestInfo: OpenRequestInFSDto) : Promise<Result> => {
+  
+    console.log(`Trying to open request in fs: ${requestInfo.requestId}`);
+
+    const request = store.get(REQUESTS_KEY, []).find(r => r.id === requestInfo.requestId);
+
+    if(!requestInfo) return buildFailureResult("Запрос не найден");
+
+    const fullPath = path.join(requestInfo.collectionPath, request.fileName + '.json');
+    
+    fs.stat(fullPath, ((err, stat) => {
+        if (err) {
+            if (err.code === 'ENOENT') return buildFailureResultT('Не удалось найди запрос');;
+        }
+        if (stat.isDirectory()) return buildFailureResultT('Путь до файла запроса некорректен');
+    })) 
+
+    const platformName = platform().toLowerCase().replace(/[0-9]/g, '').replace('darwin', 'macos');
+    
+    switch (platformName) {
+        case 'win':
+            console.log(`before spawn`);
+            spawn('explorer.exe', ['/select,', fullPath], { 
+                stdio: 'ignore', 
+                detached: true 
+            });
+            console.log(`after spawn`);
+            break;
+        case 'linux':
+            spawn('xdg-open', [fullPath]);
+            break;
+        case 'macos':
+            spawn('open', [fullPath]);
+            break;
+        default:
+            throw new Error("Неподдерживаемая ОС");
+    }
+
+    return buildSuccessResult();
+});
+
 };
+
+function mapCloneDtoToRequestModel(baseRequest: RequestModel, cloneRequestDto: CloneRequestDto) : RequestModel {
+
+  switch(baseRequest.type){
+    case RequestTypes.HTTP:{
+      return {
+        id: uuidv4(),
+        name: cloneRequestDto.newName,
+        fileName: cloneRequestDto.newFileName,
+        method: baseRequest.method,
+        url: baseRequest.url,
+        type: RequestTypes.HTTP,
+        headers: baseRequest.headers,
+        body: baseRequest.body,
+        collectionId: baseRequest.collectionId
+      }
+    }
+  }
+}
+
 
 
 function validateRenameRequestDto(requestInfo: RenameRequestDto){

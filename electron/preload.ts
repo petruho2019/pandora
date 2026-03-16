@@ -2,7 +2,7 @@ import { RenameDto } from './../shared/models/dto/shared-dtos';
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
 import { CloneCollectionDto } from '../shared/models/collections/dto/collection-action-dtos';
 import { contextBridge, ipcRenderer } from 'electron';
-import { LoadRequestDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
+import { CloneRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   addCollection: (data: { name: string; path: string; }) => ipcRenderer.invoke('add-collection', data),
@@ -16,5 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   addRequest: (collectionPath: string, requestInfo: CreateRequestInfo) => ipcRenderer.invoke('add-request', collectionPath, requestInfo),
   renameRequest: (requestInfo: RenameRequestDto) => ipcRenderer.invoke('rename-request', requestInfo),
-  loadRequests: (collectionInfo: LoadRequestDto) => ipcRenderer.invoke('load-requests', collectionInfo),
+  loadRequests: (requestInfo: LoadRequestDto) => ipcRenderer.invoke('load-requests', requestInfo),
+  cloneRequest: (requestInfo: CloneRequestDto) => ipcRenderer.invoke('clone-request', requestInfo),
+  openRequestInFS: (requestInfo: OpenRequestInFSDto) => ipcRenderer.invoke('open-request-in-fs', requestInfo),
 });

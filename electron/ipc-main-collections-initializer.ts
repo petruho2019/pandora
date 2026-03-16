@@ -14,15 +14,19 @@ import yaml from 'js-yaml';
 import { CloneCollectionDto } from '../shared/models/collections/dto/collection-action-dtos';
 import { spawn } from 'child_process';
 import { platform } from 'os';
+import { RequestModel } from '../shared/models/requests/request';
+import { ZodError } from 'zod';
+import { HttpRequestSchema } from '../shared/models/requests/http-request-model';
+import { RequestsStoreSchema } from '../shared/store/schemes/request-store-schema';
+import { COLLECTIONS_KEY, REQUESTS_KEY } from './main';
 
-const COLLECTIONS_KEY = 'loadedCollections';
 
-export function initializeCollection(store: ElectronStore<CollectionsStoreSchema>, ipcMain: IpcMain){
+export function initializeCollection(collectionStore: ElectronStore<CollectionsStoreSchema>, requestStore: ElectronStore<RequestsStoreSchema>, ipcMain: IpcMain){
 
     //#region load-collections
     ipcMain.handle('load-collections', async () : Promise<Collection[]> => {
 
-        const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
+        const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
 
         console.log(`Collections from store ${JSON.stringify(collectionsFromStore)}`);
 
@@ -30,7 +34,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
         if (!isCollectionPathsValid) {
             console.log(`Store updated: ${validCollections.length} collections`);
-            store.set(COLLECTIONS_KEY, validCollections);
+            collectionStore.set(COLLECTIONS_KEY, validCollections);
 
             //console.log(`Valid collections: ${JSON.stringify(validCollections)}`);
 
@@ -63,9 +67,9 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
                 return buildFailureResultT('Ошибка при добавлении коллекции');
             }
             if (stat.isDirectory()) return buildFailureResultT('Коллекции уже существует');
-        })) 
+        }));
 
-        const collections = store.get(COLLECTIONS_KEY, []);
+        const collections = collectionStore.get(COLLECTIONS_KEY, []);
 
         const existsInStore = collections.some(
             item => item.path === fullCollectionPath
@@ -94,7 +98,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             const newCollection = mapCollection(collectionEntity, createCollectionConfigFileResult.body);
 
             collections.push(newCollection);
-            store.set(COLLECTIONS_KEY, collections);
+            collectionStore.set(COLLECTIONS_KEY, collections);
 
             return buildSuccessResultT(newCollection);
         }
@@ -107,9 +111,9 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
     ipcMain.handle('remove-collection', (event, collectionId: string) : Collection[] => {
         console.log(`Remove collection, collectionId: ${collectionId}`);
 
-        const collections = store.get(COLLECTIONS_KEY, []);
+        const collections = collectionStore.get(COLLECTIONS_KEY, []);
         const filtered = collections.filter(item => item.id !== collectionId);
-        store.set(COLLECTIONS_KEY, filtered);
+        collectionStore.set(COLLECTIONS_KEY, filtered);
 
         return filtered;
     });
@@ -147,7 +151,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             return buildFailureResultT(COLLECTION_CONFIG_FILE_FORMAT_ERROR) 
         }
 
-        const collections = store.get(COLLECTIONS_KEY, []);
+        const collections = collectionStore.get(COLLECTIONS_KEY, []);
         const existsInStore = collections.some(
             item => item.path === collectionPath
         );
@@ -165,7 +169,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
         console.log(`Opened collection: ${openedCollectionResult.body.path}`);
 
         collections.push(openedCollectionResult.body);
-        store.set(COLLECTIONS_KEY, collections);
+        collectionStore.set(COLLECTIONS_KEY, collections);
 
         return buildSuccessResultT(openedCollectionResult.body);
     });
@@ -177,15 +181,13 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
         const validationResult = validateCloneCollectionDto(collectionInfo);
         if(validationResult.isFailure) return buildFailureResultT(validationResult.errorMessage);
 
-        const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
+        const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
         const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.sourceCollectionId);
 
         if(!collectionFromStore)
             return buildFailureResultT(`Коллекция не найдена`);
-
+        
         const newCollectionPath = path.join(collectionInfo.collectionPath, collectionInfo.folderName);
-
-        console.log(`New collection path: ${newCollectionPath}`);
 
         try {
             await fs.promises.cp(collectionFromStore.path, newCollectionPath, {recursive: true});
@@ -194,10 +196,10 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             return buildFailureResultT(err);
         }
 
-        const configFilePath = path.join(newCollectionPath, COLLECTION_CONFIG_FILE_NAME);
+        const configFilePathToDelete = path.join(newCollectionPath, COLLECTION_CONFIG_FILE_NAME);
 
         try {
-            fs.unlink(configFilePath, (err) => {
+            fs.unlink(configFilePathToDelete, (err) => {
                 if (err) {
                     if (err.code === 'ENOENT') return;
 
@@ -207,21 +209,24 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
         } catch (err) {
             return buildFailureResultT(err);
         }
-
-
-        console.log(`File ${configFilePath}`);
-
         const collectionEntity = {path: newCollectionPath};
-
-        console.log(`NewCollpath: ${newCollectionPath}, ${collectionInfo.collectionName}`);
 
         var createCollectionConfigFileResult = await createCollectionConfigFile(collectionEntity, collectionInfo.collectionName);
 
         if(createCollectionConfigFileResult.isSuccess){
             const newCollection = mapCollection(collectionEntity, createCollectionConfigFileResult.body);
 
+            const requestsWithChangedCollectionIdResult = await changeCollectionIdInRequests(newCollection.path, newCollection.id)
+
+            if(requestsWithChangedCollectionIdResult.isFailure) return buildFailureResultT(requestsWithChangedCollectionIdResult.error);
+
+            console.log(`requestsWithChangedCollectionIdResult: ${JSON.stringify(requestsWithChangedCollectionIdResult)}`);
+
+            const requestsFromStore = requestStore.get(REQUESTS_KEY, []);
+            requestsFromStore.push(...requestsWithChangedCollectionIdResult.body);
+
             collectionsFromStore.push(newCollection);
-            store.set(COLLECTIONS_KEY, collectionsFromStore);
+            collectionStore.set(COLLECTIONS_KEY, collectionsFromStore);
 
             return buildSuccessResultT(newCollection);
         }
@@ -240,7 +245,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
             return buildFailureResultT(`Название коллeкции обязательно`);
         }
 
-        const collectionsFromStore = store.get(COLLECTIONS_KEY, []);
+        const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
         const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.id);
 
         if(!collectionFromStore) return buildFailureResultT(`Коллекция не найдена`);
@@ -262,7 +267,7 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 
         console.log(`Trying to open collection in fs: ${collectionId}`);
 
-        const coll = store.get(COLLECTIONS_KEY, []).find(c => c.id === collectionId);
+        const coll = collectionStore.get(COLLECTIONS_KEY, []).find(c => c.id === collectionId);
 
         if(!coll)  return buildFailureResultT("Коллекция не найдена");
         if (!coll.path) return buildFailureResultT("Путь коллекции не найден");
@@ -293,6 +298,50 @@ export function initializeCollection(store: ElectronStore<CollectionsStoreSchema
 }
 
 //region functions
+
+async function changeCollectionIdInRequests(collectionPath: string, newCollectionId: string) : Promise<ResultT<RequestModel[], string>>{
+
+    let requestFiles: fs.Dirent[];
+
+    try {
+        requestFiles = await fs.promises.readdir(collectionPath, {withFileTypes: true});
+    } catch (error) {
+        return buildFailureResultT(`Ошибка при клонировании коллекции`);
+    }
+
+    let requestsWithNewCollectionId: RequestModel[] = []; 
+
+    for (const requestFileInfo of requestFiles) {
+        
+        if(requestFileInfo.name !== COLLECTION_CONFIG_FILE_NAME && requestFileInfo.isFile()){
+            try {
+                const requestFullPath = path.join(collectionPath, requestFileInfo.name);
+                const raw = JSON.parse(await fs.promises.readFile(requestFullPath, { encoding: 'utf8'})) as RequestModel;
+
+                const requestModel = HttpRequestSchema.parse(raw) as RequestModel;
+
+                requestModel.collectionId = newCollectionId;
+
+                await fs.promises.writeFile(requestFullPath, JSON.stringify(requestModel, null, 2));
+
+                requestsWithNewCollectionId.push(requestModel);
+
+            } catch (error) {
+                
+                if(error instanceof ZodError){
+                    console.error(`Incorrect file content ${requestFileInfo.name}, ${error}`);
+                }
+                if (error instanceof SyntaxError) {
+                    console.error(`Error when processing file ${requestFileInfo.name}, ${error}`);
+                }
+
+                console.error(`Error when copying request ${requestFileInfo.name}, ${error}`);
+            }
+        }
+    };
+
+    return buildSuccessResultT(requestsWithNewCollectionId);
+}
 
 function validateCloneCollectionDto(collectionInfo: CloneCollectionDto): Result {
     if(!collectionInfo.collectionName){

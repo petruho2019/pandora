@@ -9,6 +9,9 @@ import ElectronStore = require("electron-store");
 import { initializeRequest } from "./ipc-main-requests-initializer";
 import { RequestsStoreSchema } from "../shared/store/schemes/request-store-schema";
 
+
+export const COLLECTIONS_KEY = 'loadedCollections';
+
 const collectionStore = new ElectronStore<CollectionsStoreSchema>({
   name: 'collections',
   defaults: {
@@ -22,6 +25,8 @@ const requestsStore = new ElectronStore<RequestsStoreSchema>({
     loadedRequests: []
   }
 });
+
+export const REQUESTS_KEY = 'loadedRequests';
 
 const indexPath = path.join(
   path.resolve(app.getAppPath(), '..'),
@@ -65,7 +70,7 @@ const createWindow = () => {
 
 app.on('ready', () => {
 
-  initializeCollection(collectionStore, ipcMain);
+  initializeCollection(collectionStore, requestsStore, ipcMain);
   initializeRequest(requestsStore, ipcMain);
   createWindow();
 });

@@ -1,6 +1,6 @@
 import { createReducer, on, State } from "@ngrx/store";
 import { CollectionState } from "../states/collection-state";
-import { addCollectionSuccess, cloneCollectionSuccess, removeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollectionSuccess, renameCollectionSuccess, moveCollection } from "../actions/collections.actions";
+import { addCollectionSuccess, cloneCollectionSuccess, removeCollectionSuccess, loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollectionSuccess, renameCollectionSuccess, moveCollection, cloneCollectionFailure } from "../actions/collections.actions";
 import { collectionsAdapter } from "../adapters/collection-adapter";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 import { selectAll } from "../selectors/collections.selector";
@@ -10,7 +10,8 @@ export const collectionFeatureKey = 'collections';
 
 export const initialState: CollectionState = 
     collectionsAdapter.getInitialState({
-        loading: false
+        loading: false,
+        error: null
     })
 ;
 
@@ -36,6 +37,7 @@ export const collectionsReducer = createReducer(
 
     on(cloneCollectionSuccess, (state, {clonedCollection: collection}) => 
         collectionsAdapter.addOne(collection, state)),
+    on(cloneCollectionFailure, (state, {errorMessage: errorMessage}) => ({...state, error: errorMessage})),
 
     on(renameCollectionSuccess, (state, {renamedCollection: collection}) => 
         collectionsAdapter.updateOne(

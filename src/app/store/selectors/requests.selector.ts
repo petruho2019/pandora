@@ -24,3 +24,7 @@ export const selectRequestsByCollectionId = (props: { collectionId: string }) =>
     requests.filter(r => r.collectionId === props.collectionId)
 );
 
+export const selectRequestError = () => createSelector(
+  selectRequestsState,
+  (state) => state.error
+);

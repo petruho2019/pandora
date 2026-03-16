@@ -1,7 +1,8 @@
+import { cloneCollection } from './../actions/collections.actions';
 import { createReducer, on } from "@ngrx/store";
 import { RequestState } from "../states/request-state";
 import { requestAdapter } from "../adapters/request-adapter";
-import { createRequestSuccess, loadRequestsSuccess, moveRequest, renameRequestSuccess } from "../actions/requests.actions";
+import { cloneRequestFailure, cloneRequestSuccess, createRequestSuccess, loadRequestsSuccess, moveRequest, openRequestInFSFailure, renameRequestSuccess } from "../actions/requests.actions";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 import { RequestModel } from "../../../../shared/models/requests/request";
 
@@ -9,9 +10,9 @@ export const requestFeatureKey = 'requests';
 
 export const initialState: RequestState = {
     ...requestAdapter.getInitialState(),
-    loadedByCollectionId: new Map<string, boolean>()
-}
-;
+    loadedByCollectionId: new Map<string, boolean>(),
+    error: null
+};
 
 export const requestsReducer = createReducer(
     initialState,
@@ -37,7 +38,11 @@ export const requestsReducer = createReducer(
         moveItemInArray(requests, fromIndex, toIndex);
         console.log(`Запросы после перемещения: ${JSON.stringify(requests)}`);
         return requestAdapter.setAll(requests as RequestModel[], state);
-    }
-    )
+    }),
+
+    on(cloneRequestSuccess, (state, {clonedRequest}) => requestAdapter.addOne(clonedRequest, {...state, error: null})),
+    on(cloneRequestFailure, (state, {errorMessage}) => ({...state, error: errorMessage})),
+    
+    on(openRequestInFSFailure, (state, {errorMessage}) => ({...state, error: errorMessage})),
 );
  

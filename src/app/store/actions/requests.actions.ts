@@ -1,4 +1,4 @@
-import { LoadRequestDto } from './../../../../shared/models/requests/dto/request-dtos';
+import { CloneRequestDto, LoadRequestDto, OpenRequestInFSDto } from './../../../../shared/models/requests/dto/request-dtos';
 import { createAction, props } from "@ngrx/store";
 import { CreateRequestInfo as CreateRequestInfo } from "../../../../shared/models/event-models/add-request-info";
 import { RequestModel } from "../../../../shared/models/requests/request";
@@ -18,3 +18,11 @@ export const renameRequestSuccess = createAction('[Request] Rename Success', pro
 export const renameRequestFailure = createAction('[Request] Rename Failure', props<{errorMessage: string}>());
 
 export const moveRequest = createAction('[Request] Move', props<{fromIndex: number, toIndex: number }>());
+
+export const cloneRequest = createAction('[Request] Clone', props<{requestInfo: CloneRequestDto}>());
+export const cloneRequestSuccess = createAction('[Request] Clone Success', props<{clonedRequest: RequestModel}>());
+export const cloneRequestFailure = createAction('[Request] Clone Failure', props<{errorMessage: string}>());
+
+export const openRequestInFS = createAction('[Request] Open in FS', props<{requestInfo: OpenRequestInFSDto}>());
+export const openRequestInFSSuccess = createAction('[Request] Open Success in FS');
+export const openRequestInFSFailure = createAction('[Request] Open Failure in FS', props<{errorMessage: string}>());

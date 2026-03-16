@@ -105,37 +105,45 @@ z"
 
 <ng-template cdkPortal #addRequest>
   <add-request-modal
-    (close)="addRequestOverlayRef.dispose()"
+    (close)="addRequestOverlayRef.detach()"
     (create)="this.addRequest($event)"
     [collectionId]="addRequestCollectionId"
     [collectionPath]="addRequestCollectionPath"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
   />
 </ng-template>
 
 <ng-template cdkPortal #cloneCollection>
   <clone-collection-modal
-    (onClose)="cloneCollectionOverlayRef.dispose()"
+    (onClose)="cloneCollectionOverlayRef.detach()"
     (onClone)="this.cloneCollection($event)"
     [collectionName]="cloneCollectionName"
     [collectionId]="cloneCollectionId"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
   />
 </ng-template>
 
 <ng-template cdkPortal #renameCollection>
   <rename-modal
-    (onClose)="renameCollectionOverlayRef.dispose()"
+    (onClose)="renameCollectionOverlayRef.detach()"
     (onRename)="this.renameCollection($event)"
     [itemId]="renameCollectionId"
     [newName]="renameCollectionName"
     [headerTitle]="renameCollectionHeader"
     [namePlaceholder]="renameCollectionPlacholder"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
   />
 </ng-template>
 
 <ng-template cdkPortal #closeCollection>
   <remove-collection-modal
-    (onClose)="removeCollectionOverlayRef.dispose()"
+    (onClose)="removeCollectionOverlayRef.detach()"
     (onRemove)="this.removeCollection($event)"
     [collectionInfo]="removeCollectionInfo"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
   />
 </ng-template>

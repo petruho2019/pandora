@@ -21,7 +21,7 @@ import { createHttpRequest, createRequestFailure, loadRequests, moveRequest } fr
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { RenameDto } from '../../../../../shared/models/dto/shared-dtos';
-import { selectRequestsByCollectionId } from '../../../store/selectors/requests.selector';
+import { selectRequestError, selectRequestsByCollectionId } from '../../../store/selectors/requests.selector';
 import { CollectionItem } from "../../collections/collection-item/collection-item";
 import { selectAll } from '../../../store/selectors/collections.selector';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
@@ -55,7 +55,7 @@ export class SideBarContent {
       ofType(createRequestFailure)
     ).subscribe(errorBody => {
       alert(errorBody.error.message);
-    })
+    });
 
     this.collections$ = of([
       { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
@@ -99,7 +99,6 @@ export class SideBarContent {
   }
 
   handleOpenCollection(collectionId: string, isOpen: boolean){
-    console.log(`Open collection: ${collectionId}, ${isOpen}`);
     this.openCollections.update(col => {
       col[collectionId] = isOpen;
       return col
@@ -121,20 +120,20 @@ export class SideBarContent {
   }
 
   loadRequestsByCollectionId(collectionId: string, collectionPath: string){
-    console.log(`Получаем запросы`);
-
-
     this.store.dispatch(loadRequests({collectionInfo: {collectionPath: collectionPath, collectionId: collectionId}}))
 
     this.store.select(selectRequestsByCollectionId({collectionId: collectionId}))
       .subscribe(reqs => {
+        console.log(`Обновляем запросы по collectionId: ${collectionId} , пришедшие запросы: ${reqs}`);
         this.requests.update(reqState => ({
           ...reqState,
           [collectionId]: {
             isLoaded: true,
             requests: reqs
           }
-        }))
+        }));
+
+        console.log(`Запросы после обновления: ${JSON.stringify(this.requests())}`);
     });
 
     if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b') {

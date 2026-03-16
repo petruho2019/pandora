@@ -41,35 +41,21 @@
     <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
       <div class="action-item pointer" (click)="this.showRenameModal()">Переименовать</div>
       <div class="action-item pointer" (click)="showCloneModal()">Клонировать</div>
-      <!-- <div
-          class="action-item"
-          (click)="showRenameCollectionModal(collection.id, collection.name)"
-        >
-          Переименовать
-        </div>
-
-        <div
-          class="action-item"
-          (click)="showCloseCollectionModal(collection.id, collection.name, collection.path)"
-        >
-          Удалить коллекцию
-        </div>
-
-        <div class="action-item" (click)="showCollectionFolder(collection.id)">
-          Открыть в файловой системе
-        </div> -->
+      <div class="action-item pointer" (click)="showRequestInFS()">Открыть в файловой системе</div>
     </div>
   }
 </div>
 
 <ng-template cdkPortal #rename>
   <rename-modal
-    (onClose)="renameOverlayRef.dispose()"
+    (onClose)="renameOverlayRef.detach()"
     (onRename)="handleRename($event)"
     [itemId]="request.id"
     [newName]="request.name"
     [headerTitle]="renameHeader"
     [namePlaceholder]="renameRequestNamePlacholder"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
   >
     <div class="request-file-name">
       <div class="justify-space-between flex items-center" style="margin-bottom: 6px">
@@ -143,7 +129,9 @@
   <clone-request-modal
     [requestName]="request.name"
     (onClone)="handleClone($event)"
-    (onClose)="closeModal()"
+    (onClose)="cloneOverlayRef.detach()"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
   >
   </clone-request-modal>
 </ng-template>

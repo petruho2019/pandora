@@ -56,9 +56,14 @@
   margin: 0px;
 }
 
-.edit-select-folder-icon {
+.change-folder-name-edit-mode-icon {
   fill: rgba(212, 212, 212, 0.5);
   align-items: cetner;
+  transition: fill 0.2s
+}
+
+.change-folder-name-edit-mode-icon:hover {
+  fill: rgba(212, 212, 212, 0.85);
 }
 
 .current-folder-name-con {

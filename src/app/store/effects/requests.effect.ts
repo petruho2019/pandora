@@ -1,8 +1,8 @@
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { concatLatestFrom } from "@ngrx/operators";
 import { inject } from '@angular/core';
-import { createHttpRequest, createRequestFailure, createRequestSuccess, loadRequests, loadRequestsFailure, loadRequestsSuccess, renameRequest, renameRequestFailure, renameRequestSuccess } from "../actions/requests.actions";
-import { catchError, filter, switchMap, } from "rxjs/operators";
+import { cloneRequest, cloneRequestFailure, cloneRequestSuccess, createHttpRequest, createRequestFailure, createRequestSuccess, loadRequests, loadRequestsFailure, loadRequestsSuccess, openRequestInFS, openRequestInFSFailure, openRequestInFSSuccess, renameRequest, renameRequestFailure, renameRequestSuccess } from "../actions/requests.actions";
+import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, tap, } from "rxjs/operators";
 import { HttpRequestModel } from "../../../../shared/models/requests/http-request-model";
 import { CreateRequestError } from "../../../../shared/models/error/error";
 import { from, of,map } from "rxjs";
@@ -10,7 +10,6 @@ import { RequestElectronService } from "../../../../services/request-electron-se
 import { Store } from "@ngrx/store";
 import { RequestModel } from "../../../../shared/models/requests/request";
 import { selectLoadedByCollectionId } from "../selectors/requests.selector";
-import { renameCollectionSuccess } from "../actions/collections.actions";
 
 export class RequestEffects {
     private actions$ = inject(Actions); 
@@ -42,7 +41,6 @@ export class RequestEffects {
         concatLatestFrom(({collectionInfo: collInfo}) => this.store.select(selectLoadedByCollectionId({collectionId: collInfo.collectionId}))),
         filter(([action, isLoaded]) => !isLoaded),
         switchMap(([{collectionInfo: collectionInfo}, isLoaded]) => {
-            console.log(`Тестовый вызов switchMap ${collectionInfo} , ${isLoaded}`);
             return from(this.electronService.loadRequests({collectionId: collectionInfo.collectionId, collectionPath: collectionInfo.collectionPath})).pipe(
                 map(loadRequestsResult => {
                               if(loadRequestsResult.isSuccess) return loadRequestsSuccess({loadedRequests: loadRequestsResult.body as RequestModel[], collectionId: collectionInfo.collectionId});
@@ -64,8 +62,39 @@ export class RequestEffects {
                 })
             )
         })
-    ))
-        // tap(([collectionInfo, isLoaded]) => {
+    ));
 
-        // })
+    cloneRequest = createEffect(() => this.actions$.pipe(
+        ofType(cloneRequest),
+        switchMap(({requestInfo}) => {
+            return from(this.electronService.cloneRequest(requestInfo)).pipe(
+                map((cloneRequestResult) => {
+                    console.log(`Результат клонирования: ${JSON.stringify(cloneRequestResult)}`);
+                    if(cloneRequestResult.isSuccess) return cloneRequestSuccess({clonedRequest: cloneRequestResult.body as RequestModel});
+                    else return cloneRequestFailure({errorMessage: cloneRequestResult.error  as string})
+                }),
+                catchError((err) => of(cloneRequestFailure(err)))
+            )
+        })
+    ));
+
+
+    openRequestInFS = createEffect(() => this.actions$.pipe(
+        ofType(openRequestInFS),
+        debounceTime(300),        
+        distinctUntilChanged(),
+        switchMap(({ requestInfo }) =>{
+            console.log(`Effect openRequestInFS`);
+          return from(this.electronService.openRequestInFS(requestInfo)).pipe(
+            map((openRequestInFsResult) => {
+                console.log(`openRequestInFsResult ${JSON.stringify(openRequestInFsResult)}`);
+                if(openRequestInFsResult.isFailure)
+                    return openRequestInFSSuccess();
+                else
+                    return openRequestInFSFailure({errorMessage: openRequestInFsResult.errorMessage as string});
+            }),
+            catchError(err => of(openRequestInFSFailure({errorMessage: err}))
+        ))
+    })
+    ));
 }

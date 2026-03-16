@@ -6,22 +6,29 @@ import { ActionsMenuService } from '../../../../../services/actions-menu-service
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { RenameDto } from '../../../../../shared/models/dto/shared-dtos';
-import { take } from 'rxjs';
+import { Subject, take, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CloneRequestDto, RenameRequestDto } from '../../../../../shared/models/requests/dto/request-dtos';
 import { Store } from '@ngrx/store';
-import { renameRequest } from '../../../store/actions/requests.actions';
+import { cloneRequest, cloneRequestFailure, openRequestInFS, renameRequest } from '../../../store/actions/requests.actions';
 import { CloneRequestModal } from '../modals/clone-request-modal/clone-request-modal';
 import { RenameModal } from "../../reuseable/modals/rename-modal/rename-modal";
 import { AsyncPipe, NgClass } from '@angular/common';
+import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
+import { Collection } from '../../../../../shared/models/collections/collection';
+import { ofType } from '@ngrx/effects';
+import { selectRequestError } from '../../../store/selectors/requests.selector';
+import { openCollectionInFS } from '../../../store/actions/collections.actions';
 
 @Component({
   selector: 'request-item',
-  imports: [NgClass, AsyncPipe, FormsModule, CloneRequestModal, RenameModal],
+  imports: [NgClass, AsyncPipe, FormsModule, CloneRequestModal, RenameModal, CdkDrag, CdkDragHandle],
   templateUrl: './request-item.html',
   styleUrl: './request-item.css',
 })
 export class RequestCollectionItem implements OnInit {
+
+  private _destroy$ = new Subject<void>();
   
   public blurService = inject(BlurService);
   private actionsMenuService = inject(ActionsMenuService)
@@ -34,7 +41,7 @@ export class RequestCollectionItem implements OnInit {
   public currentOpenRequestId$ = this.actionsMenuService.openedId$;
 
   @Input() request!: RequestModel;
-  @Input() collection!: CollectionEntity;
+  @Input() collection!: Collection;
 
   renamePortal = viewChild.required<TemplateRef<any>>('rename');
   renameOverlayRef: OverlayRef;
@@ -75,7 +82,7 @@ export class RequestCollectionItem implements OnInit {
     this.renameOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.renameOverlayRef.backdropClick().subscribe(() => {
-      this.renameOverlayRef?.dispose();
+      this.renameOverlayRef?.detach();
     });
 
     const portal = new TemplatePortal(this.renamePortal(), this.viewContainerRef);
@@ -89,12 +96,17 @@ export class RequestCollectionItem implements OnInit {
     this.cloneOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.cloneOverlayRef.backdropClick().subscribe(() => {
-      this.cloneOverlayRef?.dispose();
+      this.cloneOverlayRef?.detach();
     });
 
     const portal = new TemplatePortal(this.clonePortal(), this.viewContainerRef);
 
     this.cloneOverlayRef.attach(portal);
+  }
+
+  showRequestInFS() {
+    this.store.dispatch(openRequestInFS({requestInfo: {requestId: this.request.id, collectionPath: this.collection.path}}));
+    this.actionsMenuService.close();
   }
 
   handleRename(requestInfoFromModal: RenameDto){
@@ -112,25 +124,25 @@ export class RequestCollectionItem implements OnInit {
   }
 
   handleClone(requestInfo: CloneRequestDto){
+    requestInfo.requestId = this.request.id;
+    requestInfo.collectionPath = this.collection.path;
 
+    this.store.dispatch(cloneRequest({ requestInfo: requestInfo }));
   }
 
-  buildOverlayRef(overlay: Overlay){
+  buildOverlayRef(overlay: Overlay) : OverlayRef{
     return overlay.create({
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-dark-backdrop',
       positionStrategy: this.overlay.position()
         .global()
-        .centerHorizontally()
+        .centerHorizontally(),
+      disableAnimations: false
     });
   }
 
   changeFolderNameEditMode(){
     this.canBeEdit = !this.canBeEdit;
-  }
-
-  closeModal(){
-    this.renameOverlayRef.dispose();
   }
 
 }

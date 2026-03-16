@@ -1,4 +1,5 @@
-import { Component, EventEmitter, inject, Input, Output, Signal, signal, TemplateRef, viewChild, ViewContainerRef, WritableSignal } from '@angular/core';
+import { CloseModalService } from './../../../../../services/close-modal-service';
+import { Component, EventEmitter, inject, Input, OnInit, Output, Signal, signal, TemplateRef, viewChild, ViewContainerRef, WritableSignal } from '@angular/core';
 import { Collection } from '../../../../../shared/models/collections/collection';
 import { ActionsMenuService } from '../../../../../services/actions-menu-service';
 import { BlurService } from '../../../../../services/blur-service';
@@ -16,18 +17,24 @@ import { RemoveCollectionModal } from "../modals/remove-collection-modal/remove-
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info';
 import { RenameDto } from '../../../../../shared/models/dto/shared-dtos';
 
+
 @Component({
   selector: 'collection-item',
   imports: [CommonModule, AddRequestModal, CloneCollectionModal, RenameModal, RemoveCollectionModal],
   templateUrl: './collection-item.html',
-  styleUrl: './collection-item.css',
+  styleUrl: './collection-item.css'
 })
-export class CollectionItem {
+export class CollectionItem implements OnInit{
+  ngOnInit(): void {
+      this.overlay
+  }
+
   private store = inject(Store);
   public blurService = inject(BlurService);
   private actionsMenuService = inject(ActionsMenuService);
-    private overlay = inject(Overlay)
+  private overlay = inject(Overlay)
   private viewContainerRef = inject(ViewContainerRef);
+  closeModalService = inject(CloseModalService);
 
   public renameCollectionHeader: string = "Переименовать коллекцию";
 
@@ -77,7 +84,6 @@ export class CollectionItem {
 
 
   openCollectionIfNotOpen(event: MouseEvent, id: string) {
-    console.log(`openCollectionIfNotOpen collectionId: ${id}`);
     event.stopPropagation();
 
     if(!this.isOpen){
@@ -105,7 +111,7 @@ export class CollectionItem {
     this.addRequestOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.addRequestOverlayRef.backdropClick().subscribe(() => {
-      this.addRequestOverlayRef?.dispose();
+      this.addRequestOverlayRef?.detach();
     });
 
     const portal = new TemplatePortal(this.addRequestPortal(), this.viewContainerRef);
@@ -122,7 +128,7 @@ export class CollectionItem {
     this.cloneCollectionOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.cloneCollectionOverlayRef.backdropClick().subscribe(() => {
-      this.cloneCollectionOverlayRef?.dispose();
+      this.cloneCollectionOverlayRef?.detach();
     });
 
     const portal = new TemplatePortal(this.cloneCollectionPortal(), this.viewContainerRef);
@@ -139,7 +145,7 @@ export class CollectionItem {
     this.renameCollectionOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.renameCollectionOverlayRef.backdropClick().subscribe(() => {
-      this.renameCollectionOverlayRef?.dispose();
+      this.renameCollectionOverlayRef?.detach();
     });
 
     const portal = new TemplatePortal(this.renameCollectionPortal(), this.viewContainerRef);
@@ -160,16 +166,17 @@ export class CollectionItem {
     this.removeCollectionOverlayRef = this.buildOverlayRef(this.overlay);
 
     this.removeCollectionOverlayRef.backdropClick().subscribe(() => {
-      this.removeCollectionOverlayRef?.dispose();
+      this.removeCollectionOverlayRef?.detach();
     });
 
     const portal = new TemplatePortal(this.removeCollectionPortal(), this.viewContainerRef);
 
     this.removeCollectionOverlayRef.attach(portal);
+
   }
 
   showFolderCollection(collectionId: string){
-    this.store.dispatch(openCollectionInFS({collectionId: collectionId}))
+    this.store.dispatch(openCollectionInFS({collectionId: collectionId}));
     this.actionsMenuService.close();
   }
 
@@ -202,13 +209,14 @@ export class CollectionItem {
     this.blurService.setCurrentBlurId(id as string);
   }
 
-  buildOverlayRef(overlay: Overlay){
+  buildOverlayRef(overlay: Overlay) : OverlayRef{
     return overlay.create({
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-dark-backdrop',
       positionStrategy: this.overlay.position()
         .global()
-        .centerHorizontally()
+        .centerHorizontally(),
+      disableAnimations: false
     });
   }
 

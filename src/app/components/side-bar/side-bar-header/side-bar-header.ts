@@ -51,11 +51,10 @@ export class SideBarHeader {
     });
 
     this.overlayRef.backdropClick().subscribe(() => {
-      this.overlayRef?.dispose();
+      this.overlayRef?.detach();
     });
 
     this.overlayRef.attach(this.portal());
-
   }
 
   openCollection(){

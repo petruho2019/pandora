@@ -17,3 +17,8 @@ export interface LoadRequestDto {
     collectionPath: string, 
     collectionId: string
 }
+
+export interface OpenRequestInFSDto {
+    requestId: string,
+    collectionPath: string
+}

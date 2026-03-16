@@ -119,6 +119,38 @@ html, body {
   background-color: rgba(115, 115, 115, 0.1);
 }
 
+.enter-animation {
+  animation: enter-slide-fade 0.5s;
+}
+
+@keyframes enter-slide-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leave-animation {
+  animation: leave-slide-fade 0.5s;
+}
+
+@keyframes leave-slide-fade {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+}
+
 
 .flex {
   display: flex;
