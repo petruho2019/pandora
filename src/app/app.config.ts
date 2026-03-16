@@ -9,7 +9,6 @@ import { RequestEffects } from './store/effects/requests.effect';
 import { requestFeatureKey, requestsReducer } from './store/reducers/requests.reducer';
 import { BlurService } from '../../services/blur-service';
 import { RequestElectronService } from '../../services/request-electron-service';
-import { CloseModalService } from '../../services/close-modal-service';
 
 
 export const appConfig: ApplicationConfig = {
@@ -22,8 +21,7 @@ export const appConfig: ApplicationConfig = {
     provideEffects([CollectionEffects, RequestEffects]),
     CollectionElectronService,
     BlurService,
-    RequestElectronService,
-    CloseModalService
+    RequestElectronService
   ]
 };
 

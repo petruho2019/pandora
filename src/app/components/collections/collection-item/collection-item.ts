@@ -1,5 +1,4 @@
-import { CloseModalService } from './../../../../../services/close-modal-service';
-import { Component, EventEmitter, inject, Input, OnInit, Output, Signal, signal, TemplateRef, viewChild, ViewContainerRef, WritableSignal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
 import { Collection } from '../../../../../shared/models/collections/collection';
 import { ActionsMenuService } from '../../../../../services/actions-menu-service';
 import { BlurService } from '../../../../../services/blur-service';
@@ -34,7 +33,6 @@ export class CollectionItem implements OnInit{
   private actionsMenuService = inject(ActionsMenuService);
   private overlay = inject(Overlay)
   private viewContainerRef = inject(ViewContainerRef);
-  closeModalService = inject(CloseModalService);
 
   public renameCollectionHeader: string = "Переименовать коллекцию";
 

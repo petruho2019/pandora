@@ -65,7 +65,7 @@
 .actions-menu {
   position: absolute;
   top: 110%;
-  left: 88%;
+  right: -12.7rem;
   background: #313131;
   border-radius: 6px;
   padding: 4px;
