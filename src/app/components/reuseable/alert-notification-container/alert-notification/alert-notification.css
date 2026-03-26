@@ -2,30 +2,32 @@
   display: flex;
   background-color: #424244;
   max-width: 370px;
-  padding: 8px 10px;
+  padding: 8px 10px 8px 8px;
   border-radius: 8px;
   pointer-events: all;
   text-align: center;
   align-items: center;
-
 
   box-shadow: 0px 1px 4px rgb(82, 82, 82);
 }
 
 .error-icon-con {
   display: flex;
-  padding-right: 5px;
+  padding-right: 4px;
   justify-content: center;
   align-items: center;
+  fill-rule: nonzero;
+  fill: white;
 }
 
 .error-icon-svg {
-  flex-shrink: 0; /* Предотвращает сжатие */
+  flex-shrink: 0;
+  fill-rule: nonzero;
+
 }
 
-.error-icon-path {
+.stroke-circle {
   fill: #C41E3A;
-  fill-rule: nonzero;
 }
 
 .message {

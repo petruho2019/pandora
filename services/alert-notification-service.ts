@@ -37,26 +37,26 @@ export class AlertNotificationService {
 
     addAlertNotification(message: string){
         this.alertNotificationMessages.set([{ id: uuidv4(), text: message }, ...this.alertNotificationMessages()]);
-        this.startQueue();
+        //this.startQueue();
     }
 
     startQueue(){
-        if(this.intervalId !== null) return;
+        // if(this.intervalId !== null) return;
 
-        this.intervalId = window.setInterval(() => {
-            const messages = this.alertNotificationMessages();
-            if(messages.length === 0) {
-                this.stopQueue();
-                return;
-            };
+        // this.intervalId = window.setInterval(() => {
+        //     const messages = this.alertNotificationMessages();
+        //     if(messages.length === 0) {
+        //         this.stopQueue();
+        //         return;
+        //     };
 
-            this.removeFirstAlertNotificationMessage();
+        //     this.removeFirstAlertNotificationMessage();
 
-            if(messages.length === 0) {
-                this.stopQueue();
-                return;
-            };
-        }, 1000)
+        //     if(messages.length === 0) {
+        //         this.stopQueue();
+        //         return;
+        //     };
+        // }, 1000)
     }
 
     stopQueue() {
