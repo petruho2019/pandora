@@ -6,7 +6,6 @@ import * as fs from 'fs';
 import { RequestModel, RequestType, RequestTypes } from '../shared/models/requests/request'
 import { buildFailureResult, buildFailureResultT, buildSuccessResultT, ResultT } from '../shared/models/result'
 import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http-request-model';
-import { CreateRequestError } from '../shared/models/error/error';
 import ElectronStore = require('electron-store');
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
 import { CloneRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
@@ -22,12 +21,11 @@ import { REQUESTS_KEY } from './main';
 export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipcMain: IpcMain) {
 
   //region add-request
-
-  ipcMain.handle('add-request', async (event, { requestInfo }: {requestInfo: CreateRequestInfo}) : Promise<ResultT<HttpRequestModel, CreateRequestError>> => {
+  ipcMain.handle('add-request', async (event, { requestInfo }: {requestInfo: CreateRequestInfo}) : Promise<ResultT<HttpRequestModel, string>> => {
     try {
 
       console.log(`Check collectionPath`);
-      // 1) Базовая валидация входа
+
       if (!requestInfo.collectionPath || typeof requestInfo.collectionPath !== 'string') {
         return createRequestError(`Путь к коллекции должен быть заполнен`);
       }
@@ -36,8 +34,8 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       }
 
       console.log(`Check request name`);
-      // 2) Проверяем минимальные поля
-      const rawName = String(requestInfo.name ?? '').trim();
+
+      const rawName = requestInfo.name.trim();
       if (!rawName) {
         return createRequestError(`Название запроса должно быть заполнено`);
       }
@@ -72,11 +70,9 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
 
       console.log(`Prepare file path`);
 
-      // 3) Подготовка пути и имя файла
       const resolvedPath = path.resolve(requestInfo.collectionPath);
       const finalFileName = `${safeName}.json`;
       const finalPath = path.join(resolvedPath, finalFileName);
-
 
       console.log(`Check file does not exist`);
 
@@ -388,8 +384,6 @@ function validateRenameRequestDto(requestInfo: RenameRequestDto){
     }
   }
 
-function createRequestError<T>(errorMessage: string): ResultT<T, CreateRequestError>{
-  return buildFailureResultT({
-    message: errorMessage
-  });
+function createRequestError<T>(errorMessage: string): ResultT<T, string>{
+  return buildFailureResultT(errorMessage);
 }

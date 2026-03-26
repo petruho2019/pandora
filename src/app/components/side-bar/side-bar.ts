@@ -1,7 +1,7 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { Component, Input, signal } from '@angular/core';
-import { ResizableBar } from "../resizable-bar/resizable-bar";
 import { SideBarContent } from "./side-bar-content/side-bar-content";
+import { ResizableBar } from './resizable-bar/resizable-bar';
 
 @Component({
   selector: 'side-bar',

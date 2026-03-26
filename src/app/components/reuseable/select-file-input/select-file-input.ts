@@ -18,7 +18,6 @@ export class SelectFileInput {
   @Input() selectedPath: string;
 
   selectFolder(){
-    console.log("Select folder");
     this.electronService.selectFolder().then((path: string | null) => {
       if (path) {
         this.selectedPath = path

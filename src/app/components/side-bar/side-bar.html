@@ -3,5 +3,5 @@
     <side-bar-content></side-bar-content>
   </div>
 
-  <resizable-bar (onWidthChanged)="updateCurrentWidth($event)"></resizable-bar>
+  <resizable-bar animate.enter="alert-notification-enter" (onWidthChanged)="updateCurrentWidth($event)"></resizable-bar>
 </div>

@@ -1,4 +1,4 @@
-import { RenameDto } from '../shared/models/dto/shared-dtos';
+import { AddCollectionDto, RenameDto } from '../shared/models/dto/shared-dtos';
 import { Injectable } from "@angular/core";
 import { Collection } from "../shared/models/collections/collection";
 import { CloneCollectionDto } from "../shared/models/collections/dto/collection-action-dtos";
@@ -10,8 +10,8 @@ export class CollectionElectronService {
     loadCollections(): Promise<Collection[]> {
         return (window as any).electronAPI?.loadCollections();
     };
-    addCollection( {name, path} : { name: string; path: string; } ) : Promise<ResultT<Collection, string>>{
-        return (window as any).electronAPI?.addCollection({ collectionName: name, collectionPath: path });
+    addCollection( collectionInfo : AddCollectionDto ) : Promise<ResultT<Collection, string>>{
+        return (window as any).electronAPI?.addCollection({ collectionName: collectionInfo.name, collectionPath: collectionInfo.path });
     };
     openCollection({collectionPath}: {collectionPath: string}) : Promise<ResultT<Collection, string>> {
         return (window as any).electronAPI?.openCollection(collectionPath);

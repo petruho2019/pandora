@@ -1,0 +1,11 @@
+<div class="alert-notification-container">
+  @for (message of alertNotificationMessages(); track message.id) {
+    <alert-notification
+      [message]="message.text"
+      animate.enter="enter-alert-notification"
+      animate.leave="leave-alert-notification"
+      (mouseEnter)="handleMouseEnterOnAlertNotification()"
+      (mouseLeave)="handleMouseLeaveOnAlertNotification()"
+    ></alert-notification>
+  }
+</div>

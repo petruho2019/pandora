@@ -1,4 +1,21 @@
+<ng-template cdkPortal>
+  <alert-notification-container> </alert-notification-container>
+</ng-template>
+
 <div class="main">
   <side-bar></side-bar>
   <main></main>
 </div>
+
+<div
+  style="
+    position: absolute;
+    top: 50%;
+    bottom: 50%;
+    width: 20px;
+    height: 20px;
+    background-color: black;
+    z-index: auto;
+  "
+  (click)="test()"
+></div>

@@ -1,0 +1,34 @@
+.alert-notification {
+  display: flex;
+  background-color: #424244;
+  max-width: 370px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  pointer-events: all;
+  text-align: center;
+  align-items: center;
+
+
+  box-shadow: 0px 1px 4px rgb(82, 82, 82);
+}
+
+.error-icon-con {
+  display: flex;
+  padding-right: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.error-icon-svg {
+  flex-shrink: 0; /* Предотвращает сжатие */
+}
+
+.error-icon-path {
+  fill: #C41E3A;
+  fill-rule: nonzero;
+}
+
+.message {
+  display: flex;
+  justify-content: center;
+}

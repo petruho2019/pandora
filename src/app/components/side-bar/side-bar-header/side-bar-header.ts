@@ -4,9 +4,11 @@ import { Store } from '@ngrx/store';
 import { ActionsMenuService } from '../../../../../services/actions-menu-service';
 import { CdkPortal, PortalModule } from '@angular/cdk/portal';
 import { take } from 'rxjs';
-import { addCollection, openCollection } from '../../../store/actions/collections.actions';
+import { openCollection } from '../../../store/actions/collections.actions';
 import { CommonModule } from '@angular/common';
-import { AddCollectionModal } from '../../collections/modals/add-collection-modal/add-collection-modal';
+import { AddCollectionModal } from '../collections/modals/add-collection-modal/add-collection-modal';
+import { addCollectionModal } from '../../../store/actions/modal-actions/collections-modal.actions';
+import { AddCollectionDto } from '../../../../../shared/models/dto/shared-dtos';
 
 @Component({
   selector: 'side-bar-header',
@@ -42,17 +44,7 @@ export class SideBarHeader {
     console.log(`Show add collection modal`);
     this.actionsMenuService.close();
 
-    this.overlayRef = this.overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally()
-    });
-
-    this.overlayRef.backdropClick().subscribe(() => {
-      this.overlayRef?.detach();
-    });
+    this.overlayRef = this.buildOverlayRef(this.overlay);
 
     this.overlayRef.attach(this.portal());
   }
@@ -62,8 +54,25 @@ export class SideBarHeader {
     this.store.dispatch(openCollection());
   }
 
-  addCollection(collectionInfo: { name: string, path: string }){
-    this.store.dispatch(addCollection(collectionInfo));
+  addCollection(collectionInfo: AddCollectionDto){
+    this.store.dispatch(addCollectionModal({actionData: { modalOverlayRef: this.overlayRef , body: collectionInfo}}));
+  }
+
+  buildOverlayRef(overlay: Overlay) : OverlayRef{
+     const overlayRef = overlay.create({
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      positionStrategy: this.overlay.position()
+        .global()
+        .centerHorizontally(),
+        usePopover: false
+    })
+
+    overlayRef.backdropClick().subscribe(() => {
+      overlayRef?.detach();
+    });
+
+    return overlayRef;
   }
 
 

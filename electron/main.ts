@@ -28,12 +28,15 @@ const requestsStore = new ElectronStore<RequestsStoreSchema>({
 
 export const REQUESTS_KEY = 'loadedRequests';
 
-const indexPath = path.join(
-  path.resolve(app.getAppPath(), '..'),
-  'silver',
-  'browser',
-  'index.html'
-);
+const isDev = !app.isPackaged;
+
+console.log(`IsDev: ${isDev}`);
+
+const indexPath = isDev
+  ? path.join(__dirname, '../pandora/browser/index.html')
+  : path.join(app.getAppPath(), 'dist/pandora/browser/index.html');
+
+console.log(`Index: ${indexPath} isdev: ${isDev}`);
 
 let win: BrowserWindow | null;
 

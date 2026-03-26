@@ -1,30 +1,27 @@
-import { Component, computed, HostListener, inject, Signal, signal, TemplateRef, viewChild, ViewContainerRef, WritableSignal } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { SideBarHeader } from "../side-bar-header/side-bar-header";
-import { AsyncPipe, CommonModule } from '@angular/common';
-import { RequestCollectionItem } from '../../requests/request-item/request-item';
-import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
-import { AddRequestModal } from '../../requests/modals/add-request-modal/add-request-modal';
-import { CloneCollectionModal } from '../../collections/modals/clone-collection-modal/clone-collection-modal';
-import { RemoveCollectionModal } from '../../collections/modals/remove-collection-modal/remove-collection-modal';
-import { RenameModal } from '../../reuseable/modals/rename-modal/rename-modal';
+import { AsyncPipe } from '@angular/common';
+import { PortalModule } from '@angular/cdk/portal';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { Store } from '@ngrx/store';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { OverlayRef } from '@angular/cdk/overlay';
 import { BlurService } from '../../../../../services/blur-service';
 import { ActionsMenuService } from '../../../../../services/actions-menu-service';
-import { map, Observable, of, take } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Collection } from '../../../../../shared/models/collections/collection';
-import { CloneCollectionDto, RemoveCollectionInfo } from '../../../../../shared/models/collections/dto/collection-action-dtos';
-import { cloneCollection, loadCollections, moveCollection, openCollectionInFS, removeCollection, renameCollection } from '../../../store/actions/collections.actions';
-import { ofType } from '@ngrx/effects';
-import { createHttpRequest, createRequestFailure, loadRequests, moveRequest } from '../../../store/actions/requests.actions';
+import { CloneCollectionDto } from '../../../../../shared/models/collections/dto/collection-action-dtos';
+import { loadCollections, moveCollection } from '../../../store/actions/collections.actions';
+import { loadRequests, moveRequest } from '../../../store/actions/requests.actions';
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { RenameDto } from '../../../../../shared/models/dto/shared-dtos';
-import { selectRequestError, selectRequestsByCollectionId } from '../../../store/selectors/requests.selector';
-import { CollectionItem } from "../../collections/collection-item/collection-item";
+import { selectRequestsByCollectionId } from '../../../store/selectors/requests.selector';
 import { selectAll } from '../../../store/selectors/collections.selector';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
+import { CollectionItem } from '../collections/collection-item/collection-item';
+import { RequestCollectionItem } from '../requests/request-item/request-item';
+import { cloneCollectionModal, removeCollectionModal, renameCollectionModal } from '../../../store/actions/modal-actions/collections-modal.actions';
+import { createHttpRequest } from '../../../store/actions/modal-actions/request-modal.actions';
 
 @Component({
   selector: 'side-bar-content',
@@ -51,12 +48,6 @@ export class SideBarContent {
   ngOnInit(): void {
     this.store.dispatch(loadCollections());
 
-    this.store.pipe(
-      ofType(createRequestFailure)
-    ).subscribe(errorBody => {
-      alert(errorBody.error.message);
-    });
-
     this.collections$ = of([
       { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
       { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
@@ -76,26 +67,22 @@ export class SideBarContent {
 
       case RequestTypes.HTTP:
         console.log(`onCreateRequest addHttpRequest: ${JSON.stringify(request)} , collectionId ${this.actionsMenuService.currentId}`);
-        this.store.dispatch(createHttpRequest({ requestInfo: request }));
+        this.store.dispatch(createHttpRequest({ actionData: { body: request, modalOverlayRef: overlay } }));
       break;
 
       // case 'gRPC':
       //   this.store.dispatch(addGrpcRequest({ request }));
       //   break;
     }
-
-    overlay.dispose();
   }
 
   handleCloneCollection(overlay: OverlayRef, collectionInfo: CloneCollectionDto) {
-    this.store.dispatch(cloneCollection({ collectionInfo }));
-    overlay.dispose();
+    this.store.dispatch(cloneCollectionModal({ actionData: { modalOverlayRef: overlay, body: collectionInfo } }));
   }
 
   handleRenameCollection(overlay: OverlayRef, collectionInfo: RenameDto) {
     console.log(`handleRenameCollection ${JSON.stringify(collectionInfo)}`);
-    this.store.dispatch(renameCollection({ collectionInfo }));
-    overlay.dispose();
+    this.store.dispatch(renameCollectionModal({ actionData: { modalOverlayRef: overlay, body: collectionInfo} }));
   }
 
   handleOpenCollection(collectionId: string, isOpen: boolean){
@@ -115,8 +102,7 @@ export class SideBarContent {
   }
 
   handleRemoveCollection(overlay: OverlayRef, collectionId: string) {
-    this.store.dispatch(removeCollection({ collectionId: collectionId }));
-    overlay.dispose();
+    this.store.dispatch(removeCollectionModal({ actionData: { modalOverlayRef: overlay, body: {collectionId: collectionId}} }));
   }
 
   loadRequestsByCollectionId(collectionId: string, collectionPath: string){

@@ -110,7 +110,6 @@ html, body {
   font-weight: 650;
 }
 
-
 .cdk-overlay-dark-backdrop {
   background-color: rgba(0, 0, 0, 0.450);
 }
@@ -151,6 +150,40 @@ html, body {
   }
 }
 
+.enter-alert-notification {
+  animation: enter-alert-notification 0.4s ;
+  z-index: -1;
+  transform-origin: 50% -30px;
+  transition: max-height 0.25s ease-in;
+}
+
+@keyframes enter-alert-notification {
+  from {
+    max-height: 0px;
+    transform: scale(0);
+  }
+
+  to {
+    max-height: 50px;
+    transform: scale(1);
+  }
+}
+
+.leave-alert-notification {
+  animation: leave-alert-notification 0.4s ease both;
+  transform-origin: 50% -30px;
+  z-index: -1;
+}
+
+@keyframes leave-alert-notification {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(0);
+  }
+}
 
 .flex {
   display: flex;

@@ -5,7 +5,6 @@ import * as path from "path";
 import * as fs from 'fs';
 import { CollectionsStoreSchema } from '../shared/store/schemes/collection-store-schema';
 import { Collection } from '../shared/models/collections/collection';
-import { CollectionEntity }from '../shared/models/entitys/collection-entity';
 import { COLLECTION_CONFIG_FILE_NAME, COLLECTION_CONFIG_FILE_FORMAT_ERROR }from '../shared/models/constants';
 import { buildFailureResult, buildFailureResultT, buildSuccessResult, buildSuccessResultT, Result, ResultT }from '../shared/models/result';
 import { CollectionYmlConfig } from '../shared/models/collections/collection-config'
@@ -52,9 +51,14 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
     //#region add-collection
 
     ipcMain.handle('add-collection', async (event, { collectionName, collectionPath }: {collectionName: string, collectionPath: string  }) : Promise<ResultT<Collection, string>> => {
-        if (!collectionPath || !collectionName) {
-            return buildFailureResultT('Требуются path и collectionName');
+        
+        if (!collectionName ) {
+            return buildFailureResultT('Требуются название коллекции');
         }
+        if (!collectionPath ) {
+            return buildFailureResultT('Требуются путь к коллекции');
+        }
+
         if (!path.isAbsolute(collectionPath)) {
             return buildFailureResultT('Путь должен быть абсолютным');
         }
@@ -88,14 +92,10 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
 
         console.log(`Full path to the collection ${fullCollectionPath}`);
 
-        const collectionEntity = {
-            path: fullCollectionPath
-        };
-
-        var createCollectionConfigFileResult = await createCollectionConfigFile(collectionEntity, collectionName);
+        var createCollectionConfigFileResult = await createCollectionConfigFile(fullCollectionPath, collectionName);
 
         if(createCollectionConfigFileResult.isSuccess){
-            const newCollection = mapCollection(collectionEntity, createCollectionConfigFileResult.body);
+            const newCollection = mapCollection(fullCollectionPath, createCollectionConfigFileResult.body);
 
             collections.push(newCollection);
             collectionStore.set(COLLECTIONS_KEY, collections);
@@ -151,6 +151,9 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildFailureResultT(COLLECTION_CONFIG_FILE_FORMAT_ERROR) 
         }
 
+        const isValidCollectionConfigResult = validationCollectionYmlConfig(collectionConfig);
+        if(isValidCollectionConfigResult.isFailure) return {body: null, isSuccess: false, isFailure: true, error: isValidCollectionConfigResult.errorMessage};
+
         const collections = collectionStore.get(COLLECTIONS_KEY, []);
         const existsInStore = collections.some(
             item => item.path === collectionPath
@@ -160,18 +163,14 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildFailureResultT('Коллекция уже добавлена');
         }
 
-        var openedCollectionResult = buildCollection({path: collectionPath});
+        var openedCollection = mapCollection(collectionPath, collectionConfig);
 
-        if (openedCollectionResult.isFailure){
-            return buildFailureResultT(openedCollectionResult.error);
-        }
+        console.log(`Opened collection: ${openedCollection.path}`);
 
-        console.log(`Opened collection: ${openedCollectionResult.body.path}`);
-
-        collections.push(openedCollectionResult.body);
+        collections.push(openedCollection);
         collectionStore.set(COLLECTIONS_KEY, collections);
 
-        return buildSuccessResultT(openedCollectionResult.body);
+        return buildSuccessResultT(openedCollection);
     });
 
     //region clone-collection
@@ -189,10 +188,13 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         
         const newCollectionPath = path.join(collectionInfo.collectionPath, collectionInfo.folderName);
 
+        if(collectionFromStore.path === newCollectionPath) return buildFailureResultT("В данной папке уже есть коллекция");
+
         try {
             await fs.promises.cp(collectionFromStore.path, newCollectionPath, {recursive: true});
         }
         catch(err){
+            console.log(`${err.code}`);
             return buildFailureResultT(err);
         }
 
@@ -209,12 +211,11 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         } catch (err) {
             return buildFailureResultT(err);
         }
-        const collectionEntity = {path: newCollectionPath};
 
-        var createCollectionConfigFileResult = await createCollectionConfigFile(collectionEntity, collectionInfo.collectionName);
+        var createCollectionConfigFileResult = await createCollectionConfigFile(newCollectionPath, collectionInfo.collectionName);
 
         if(createCollectionConfigFileResult.isSuccess){
-            const newCollection = mapCollection(collectionEntity, createCollectionConfigFileResult.body);
+            const newCollection = mapCollection(newCollectionPath, createCollectionConfigFileResult.body);
 
             const requestsWithChangedCollectionIdResult = await changeCollectionIdInRequests(newCollection.path, newCollection.id)
 
@@ -363,29 +364,14 @@ function validateCloneCollectionDto(collectionInfo: CloneCollectionDto): Result 
     return buildSuccessResult();
 }
 
-function buildCollection(collectionEntity: CollectionEntity): ResultT<Collection, string>{
-        const configPath = path.join(collectionEntity.path, COLLECTION_CONFIG_FILE_NAME);
-
-        const collectionConfigResult = getCollectionConfig<CollectionYmlConfig>(configPath);
-
-        if (collectionConfigResult.isFailure) return {body: null, isSuccess: false, isFailure: true, error: collectionConfigResult.error};
-
-        const isValidCollectionConfigResult = validationCollectionYmlConfig(collectionConfigResult.body);
-
-        if(isValidCollectionConfigResult.isFailure) 
-            return {body: null, isSuccess: false, isFailure: true, error: isValidCollectionConfigResult.errorMessage};
-
-        return buildSuccessResultT(mapCollection(collectionEntity, collectionConfigResult.body));
-}
-
-async function createCollectionConfigFile(collectionInfo: CollectionEntity, collectionName: string): Promise<ResultT<CollectionYmlConfig, string>> { // todo Вынести writeFile в другой метод
+async function createCollectionConfigFile(collectionPath: string, collectionName: string): Promise<ResultT<CollectionYmlConfig, string>> { // todo Вынести writeFile в другой метод
 
     const collectionConfigFile: CollectionYmlConfig =
         createCollectionConfigByCollection(collectionName);
 
     try {
         await fs.promises.writeFile(
-            path.join(collectionInfo.path, COLLECTION_CONFIG_FILE_NAME),
+            path.join(collectionPath, COLLECTION_CONFIG_FILE_NAME),
             yaml.dump(collectionConfigFile)
         );
 
@@ -461,11 +447,11 @@ async function validateCollectionPaths(collectionsFromStore: Collection[]): Prom
     return [validCollections, isCollectionPathsValid];
 }
 
-function mapCollection(collection: CollectionEntity, collectionConfigYml: CollectionYmlConfig): Collection {
+function mapCollection(collectionPath: string, collectionConfigYml: CollectionYmlConfig): Collection {
     return {
         id: collectionConfigYml.collectionInfo.id,
         name: collectionConfigYml.collectionInfo.name,
-        path: collection.path
+        path: collectionPath
     }
 }
 

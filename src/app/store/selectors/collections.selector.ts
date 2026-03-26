@@ -4,6 +4,8 @@ import { createSelector } from "@ngrx/store";
 
 
 export const selectCollectionsState = (state: any): CollectionState => state.collections;
+export const selectCollectionsModalState = (state: any): CollectionState => state.collectionsModal;
+
 export const {
   selectAll,
   selectEntities,
@@ -15,3 +17,9 @@ export const selectCollectionError = () => createSelector(
   selectCollectionsState,
   (state) => state.error
 );
+
+export const selectCollectionModalError = () => createSelector(
+  selectCollectionsModalState,
+  (state) => state.error
+);
+

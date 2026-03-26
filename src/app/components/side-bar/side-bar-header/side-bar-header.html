@@ -34,7 +34,7 @@
 
   <ng-template cdkPortal>
     <add-collection-modal
-      (closeModal)="overlayRef?.detach()"
+      (closeModal)="overlayRef.detach()"
       (addCollecton)="addCollection($event)"
       animate.enter="enter-animation"
       animate.leave="leave-animation"
