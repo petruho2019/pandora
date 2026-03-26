@@ -13,4 +13,4 @@ yarn run start:electron
 ```
 
 
-В компоненте collection-info можно указать тестовые данные
+В компоненте side-menu-content можно указать тестовые данные
