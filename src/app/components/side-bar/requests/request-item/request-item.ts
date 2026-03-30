@@ -14,12 +14,13 @@ import { RequestModel, RequestTypes } from '../../../../../../shared/models/requ
 import { Collection } from '../../../../../../shared/models/collections/collection';
 import { openRequestInFS } from '../../../../store/actions/requests.actions';
 import { RenameDto } from '../../../../../../shared/models/dto/shared-dtos';
-import { CloneRequestDto, RenameRequestDto } from '../../../../../../shared/models/requests/dto/request-dtos';
-import { cloneRequest, renameRequest } from '../../../../store/actions/modal-actions/request-modal.actions';
+import { CloneRequestDto, DeleteRequestDto, RenameRequestDto } from '../../../../../../shared/models/requests/dto/request-dtos';
+import { cloneRequest, deleteRequest, renameRequest } from '../../../../store/actions/modal-actions/request-modal.actions';
+import { DeleteRequestModal } from "../modals/delete-request-modal/delete-request-modal";
 
 @Component({
   selector: 'request-item',
-  imports: [NgClass, AsyncPipe, FormsModule, CloneRequestModal, RenameModal, CdkDrag, CdkDragHandle],
+  imports: [NgClass, AsyncPipe, FormsModule, CloneRequestModal, RenameModal, CdkDrag, CdkDragHandle, DeleteRequestModal],
   templateUrl: './request-item.html',
   styleUrl: './request-item.css',
 })
@@ -43,6 +44,10 @@ export class RequestCollectionItem implements OnInit {
 
   clonePortal = viewChild.required<TemplateRef<any>>('clone');
   cloneOverlayRef: OverlayRef;
+
+  deletePortal = viewChild.required<TemplateRef<any>>('delete');
+  deleteOverlayRef: OverlayRef;
+
 
   canBeEdit: boolean = false;
   newRequestFolderName: string;
@@ -92,6 +97,14 @@ export class RequestCollectionItem implements OnInit {
     this.actionsMenuService.close();
   }
 
+  showDeleteRequest() {
+    this.actionsMenuService.close();
+
+    this.deleteOverlayRef = this.buildOverlayRef(this.overlay);
+    const portal = new TemplatePortal(this.deletePortal(), this.viewContainerRef);
+    this.deleteOverlayRef.attach(portal);
+  }
+
   handleRename(requestInfoFromModal: RenameDto){
     //this.newRequestFolderName = this.request.name;
 
@@ -113,6 +126,17 @@ export class RequestCollectionItem implements OnInit {
     this.store.dispatch(cloneRequest({ actionData: { body: requestInfo , modalOverlayRef: this.cloneOverlayRef }  }));
   }
 
+  handleDelete(requestId: string){
+    console.log(`Удаление запроса ${requestId}`);
+
+    const requestInfo : DeleteRequestDto = {
+      requestId: requestId,
+      collectionPath: this.collection.path
+    };
+
+    this.store.dispatch(deleteRequest({ actionData: { modalOverlayRef: this.deleteOverlayRef, body: requestInfo } }))
+  }
+
   buildOverlayRef(overlay: Overlay) : OverlayRef{
      const overlayRef = overlay.create({
       hasBackdrop: true,
@@ -132,6 +156,11 @@ export class RequestCollectionItem implements OnInit {
 
   changeFolderNameEditMode(){
     this.canBeEdit = !this.canBeEdit;
+  }
+
+  onRightClick($event: MouseEvent) {
+    console.log(`on right click`);
+    this.toggleActions($event);
   }
 
 }

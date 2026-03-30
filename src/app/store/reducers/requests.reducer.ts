@@ -4,7 +4,7 @@ import { requestAdapter } from "../adapters/request-adapter";
 import { loadRequestsSuccess, moveRequest } from "../actions/requests.actions";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 import { RequestModel } from "../../../../shared/models/requests/request";
-import { cloneRequestSuccess, createRequestSuccess, renameRequestSuccess } from "../actions/modal-actions/request-modal.actions";
+import { cloneRequestSuccess, createRequestSuccess, deleteRequestSuccess, renameRequestSuccess } from "../actions/modal-actions/request-modal.actions";
 
 export const requestFeatureKey = 'requests';
 
@@ -46,8 +46,11 @@ export const requestsReducer = createReducer(
     }),
 
     on(cloneRequestSuccess, (state, {clonedRequest}) => 
-        requestAdapter.addOne(clonedRequest, {...state, error: null
+        requestAdapter.addOne(clonedRequest, {...state, error: null})
+    ),
 
-    })),
+    on(deleteRequestSuccess, (state, { newRequests }) => 
+        requestAdapter.setAll(newRequests, state )
+    )
 );
  

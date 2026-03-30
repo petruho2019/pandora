@@ -8,7 +8,7 @@ import { buildFailureResult, buildFailureResultT, buildSuccessResultT, ResultT }
 import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http-request-model';
 import ElectronStore = require('electron-store');
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
-import { CloneRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
+import { CloneRequestDto, DeleteRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
 import { COLLECTION_CONFIG_FILE_NAME } from '../shared/models/constants';
 import { ZodError } from 'zod';
 import { platform } from 'os';
@@ -29,30 +29,35 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       if (!requestInfo.collectionPath || typeof requestInfo.collectionPath !== 'string') {
         return createRequestError(`Путь к коллекции должен быть заполнен`);
       }
-      if (!requestInfo) {
-        return createRequestError(`Объект запроса null`);
+
+      let collectionStat: fs.Stats;
+      try {
+        collectionStat = await fs.promises.stat(requestInfo.collectionPath);
+      } catch (err) {
+        console.log(`Error ${err}`);
+
+        if(err.code === 'ENOENT')
+          return buildFailureResultT(`Попытка добавить запрос в удаленную коллекцию`)
+
+        return buildFailureResultT(`Ошибка при создании запроса`)
       }
 
-      console.log(`Check request name`);
+      if(!collectionStat.isDirectory())
+        return buildFailureResultT(`Ошибка при создании запроса`)
 
+      console.log(`Check request name`);
       const rawName = requestInfo.name.trim();
       if (!rawName) {
         return createRequestError(`Название запроса должно быть заполнено`);
       }
 
       console.log(`Check request name with regex`);
-
       const invalidCharsRegex = /[<>:"/\\|?*\x00-\x1F]/;
-
       if (invalidCharsRegex.test(rawName)) {
       return createRequestError(`Название файла содержит недопустимые символы`);
       }
 
-      const safeName = rawName
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 200);
-
+      const safeName = rawName.trim();
       if (!safeName) {
       return createRequestError(`Название файла некорректно`);
       }
@@ -65,7 +70,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       console.log(`Request types ${requestTypes}`);
 
       if (!requestTypes.includes(type as RequestType)) {
-        return createRequestError(`Тип запроса должен быть из списка: ${requestTypes.join(', ')}`);
+        return createRequestError(`Некорректный тип запроса`);
       }
 
       console.log(`Prepare file path`);
@@ -154,37 +159,6 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
     return buildSuccessResultT(requestsFromCollectionPath);
   });
 
-    // ipcMain.handle('open-collection-in-fs', async (event, collectionId: string) => {
-  //   const coll = store.get(COLLECTIONS_KEY, []).find(c => c.id === collectionId);
-
-  //   if(!coll)  throw new Error("Коллекция не найдена");
-  //   if (!coll.path) throw new Error("Путь коллекции не найден");
-
-  //   const platformName = platform().toLowerCase().replace(/[0-9]/g, '').replace('darwin', 'macos');
-    
-  //   switch (platformName) {
-  //       case 'win':
-  //           console.log(`before spawn`);
-  //           spawn('explorer.exe', [coll.path], { 
-  //               stdio: 'ignore', 
-  //               detached: true 
-  //           });
-  //           console.log(`after spawn`);
-  //           break;
-  //       case 'linux':
-  //           spawn('xdg-open', [coll.path]);
-  //           break;
-  //       case 'macos':
-  //           spawn('open', [coll.path]);
-  //           break;
-  //       default:
-  //           throw new Error("Неподдерживаемая ОС");
-  //   }
-    
-  //   return true; 
-  // });
-
-
   // region renane-request
   ipcMain.handle('rename-request', async (event, requestInfo: RenameRequestDto) : Promise<ResultT<RequestModel, string>> => {
     validateRenameRequestDto(requestInfo);
@@ -272,7 +246,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
     
     fs.stat(fullPath, ((err, stat) => {
         if (err) {
-            if (err.code === 'ENOENT') return buildFailureResultT('Не удалось найди запрос');;
+            if (err.code === 'ENOENT') return buildFailureResultT('Запрос не найден в файловой системе');;
         }
         if (stat.isDirectory()) return buildFailureResultT('Путь до файла запроса некорректен');
     })) 
@@ -301,7 +275,41 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
     return buildSuccessResult();
 });
 
+//region delete-request
+
+  ipcMain.handle('delete-request', async (event, requestInfo: DeleteRequestDto) : Promise<ResultT<RequestModel[], string>> => {
+  
+    console.log(`Trying to delete request ${requestInfo.requestId}`);
+
+    const request = store.get(REQUESTS_KEY, []).find(r => r.id === requestInfo.requestId);
+
+    if(!request) return buildFailureResultT("Запрос не найден");
+
+    const fullPath = path.join(requestInfo.collectionPath, request.fileName + '.json');
+    
+    fs.stat(fullPath, ((err, stat) => {
+        if (err) {
+            if (err.code === 'ENOENT') return buildFailureResultT('Запрос не найден в файловой системе');
+        }
+        if (stat.isDirectory()) return buildFailureResultT('Путь до файла запроса некорректен');
+    })) 
+
+    try {
+      await fs.promises.unlink(fullPath);
+      console.log(`Файл успешно удален`);
+    } catch (error) {
+      return buildFailureResultT("Ошибка при удалении запроса");
+    }
+
+    const newRequests = store.get(REQUESTS_KEY).filter(r => r.id !== requestInfo.requestId);
+    store.set(REQUESTS_KEY, newRequests);
+
+    return buildSuccessResultT(newRequests);
+  });
+
 };
+
+// region functions
 
 function mapCloneDtoToRequestModel(baseRequest: RequestModel, cloneRequestDto: CloneRequestDto) : RequestModel {
 

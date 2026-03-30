@@ -5,7 +5,7 @@
   border: 1px solid;
   border-color: transparent;
   margin-right: 1px;
-  padding: 1px 10px 1px 6px;
+  padding: 1px 10px 1px 2px;
 }
 
 .collection-item:hover {
@@ -71,14 +71,24 @@
   padding: 4px;
   z-index: 2;
   border: 1px solid rgba(155, 155, 155, 0.315);
+  cursor: default;
 }
 
 .action-item {
-  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
   cursor: pointer;
   font-size: 12px;
   border-radius: 6px;
   white-space: nowrap;
+}
+
+.action-item-icon {
+  height: 14px;
+  flex: 0 0 16px;
+  display: block;
+  margin-right: 6px;
 }
 
 .action-item:hover {
@@ -87,4 +97,15 @@
 
 .action-item.danger {
   color: #ff6b6b;
+}
+
+
+.delimiter-line {
+  opacity: 10%;
+  height: 0.1px;
+  padding-right: 4px;
+  background-color: var(--action-icon-color);
+  margin: 6px 0;
+  pointer-events: none;
+  cursor: s-resize;
 }

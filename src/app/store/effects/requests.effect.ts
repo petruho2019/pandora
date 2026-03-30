@@ -10,7 +10,7 @@ import { Store } from "@ngrx/store";
 import { RequestModel } from "../../../../shared/models/requests/request";
 import { selectLoadedByCollectionId } from "../selectors/requests.selector";
 import { addAlertNotificationMessage } from "../actions/common.actions";
-import { cloneRequest, cloneRequestFailure, cloneRequestSuccess, createHttpRequest, createRequestFailure, createRequestSuccess, renameRequest, renameRequestFailure, renameRequestSuccess } from "../actions/modal-actions/request-modal.actions";
+import { cloneRequest, cloneRequestFailure, cloneRequestSuccess, createHttpRequest, createRequestFailure, createRequestSuccess, deleteRequest, deleteRequestFailure, deleteRequestSuccess, renameRequest, renameRequestFailure, renameRequestSuccess } from "../actions/modal-actions/request-modal.actions";
 import { OverlayRef } from "@angular/cdk/overlay";
 import { modalSuccess } from "../actions/modal-actions/modal.actions";
 
@@ -130,7 +130,7 @@ export class RequestEffects {
           return from(this.electronService.openRequestInFS(requestInfo)).pipe(
             map((openRequestInFsResult) => {
                 console.log(`openRequestInFsResult ${JSON.stringify(openRequestInFsResult)}`);
-                if(openRequestInFsResult.isFailure)
+                if(openRequestInFsResult.isSuccess)
                     return openRequestInFSSuccess();
                 else{
                     this.dispatchModalFailure(openRequestInFsResult.errorMessage!);
@@ -143,8 +143,35 @@ export class RequestEffects {
                 return of(openRequestInFSFailure({errorMessage: errorMessage}))
             }
         ))
-    })
-    ));
+    })));
+
+    deleteRequest$ = createEffect(() => this.actions$.pipe(
+        ofType(deleteRequest),
+        switchMap(( { actionData } ) => {
+            console.log(`Удаление запроса ${actionData.body} в effect!`);
+
+            return from(this.electronService.deleteRequest(actionData.body)).pipe(
+                map((deleteRequestResult) => {
+                    console.log(`deleteRequestResult ${JSON.stringify(deleteRequestResult)}`);
+                    if(deleteRequestResult.isSuccess){
+                        this.dispatchModalSuccess(actionData.modalOverlayRef);
+                        return deleteRequestSuccess({ newRequests: deleteRequestResult.body! });
+                    }
+
+                    else{
+                        this.dispatchModalFailure(deleteRequestResult.error!);
+                        return deleteRequestFailure({errorMessage: deleteRequestResult.error as string});
+                    }
+                }),
+            catchError(err => {
+                const errorMessage = "Непредвиденная ошибка при удалении запроса"
+                this.dispatchModalFailure(errorMessage)
+                return of(deleteRequestFailure({errorMessage: errorMessage}))
+            }))
+        })
+    ))
+
+
 
   dispatchModalSuccess(modalOverlayRef: OverlayRef) {
     this.store.dispatch( modalSuccess({ modalOverlay: modalOverlayRef }) );

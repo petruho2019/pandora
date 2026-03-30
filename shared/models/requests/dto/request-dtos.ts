@@ -22,3 +22,8 @@ export interface OpenRequestInFSDto {
     requestId: string,
     collectionPath: string
 }
+
+export interface DeleteRequestDto {
+    requestId: string,
+    collectionPath: string
+}

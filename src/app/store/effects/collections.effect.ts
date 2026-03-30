@@ -133,7 +133,7 @@ export class CollectionEffects {
               }
           }),
           catchError((err) => {
-            const errorMessage = "Непредвиденная ошибка при кдлнировании коллекций";
+            const errorMessage = "Непредвиденная ошибка при клонировании коллекций";
             this.store.dispatch(addAlertNotificationMessage({message: errorMessage}))
             return of(cloneCollectionModalFailure({ errorMessage: errorMessage }));
           })

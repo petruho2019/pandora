@@ -9,6 +9,18 @@
   justify-content: space-between;
 }
 
+.header-text {
+  display: flex;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.collection-icon {
+  flex: 0 0 16px;
+  display: block;
+  margin-right: 10px;
+}
+
 .collection-header-actions {
   position: relative;
   margin-left: auto;
@@ -30,14 +42,23 @@
 }
 
 .collection-action {
-  padding: 8px;
+  display: flex;
+  align-items: center;
+  padding: 6px;
   font-size: 12px;
   white-space: nowrap;
   border-radius: 6px;
 }
 
 .collection-action:hover {
-  background-color: #414141;
+  background-color: #3a3a3a;
+}
+
+.action-item-icon {
+  height: 13px;
+  flex: 0 0 16px;
+  display: block;
+  margin-right: 6px;
 }
 
 .actions-icon {
@@ -47,3 +68,5 @@
 .actions-icon:hover {
   stroke: rgb(228, 228, 228)
 }
+
+

@@ -1,7 +1,7 @@
 import { createAction, props } from "@ngrx/store";
 import { CreateRequestInfo } from "../../../../../shared/models/event-models/add-request-info";
 import { RequestModel } from "../../../../../shared/models/requests/request";
-import { CloneRequestDto, RenameRequestDto } from "../../../../../shared/models/requests/dto/request-dtos";
+import { CloneRequestDto, DeleteRequestDto, RenameRequestDto } from "../../../../../shared/models/requests/dto/request-dtos";
 import { ModalActionDataT } from "../../../../../shared/models/dto/action-modal-result-models";
 
 export const createHttpRequest = createAction( '[Request] Create Http', props<{ actionData: ModalActionDataT<CreateRequestInfo> }>());
@@ -15,3 +15,7 @@ export const renameRequestFailure = createAction('[Request] Rename Failure', pro
 export const cloneRequest = createAction('[Request] Clone', props<{actionData: ModalActionDataT<CloneRequestDto>}>());
 export const cloneRequestSuccess = createAction('[Request] Clone Success', props<{clonedRequest: RequestModel}>());
 export const cloneRequestFailure = createAction('[Request] Clone Failure', props<{errorMessage: string}>());
+
+export const deleteRequest = createAction('[Request] Delete', props<{actionData: ModalActionDataT<DeleteRequestDto>}>());
+export const deleteRequestSuccess = createAction('[Request] Delete Success', props<{newRequests: RequestModel[]}>());
+export const deleteRequestFailure = createAction('[Request] Delete Failure', props<{errorMessage: string}>());

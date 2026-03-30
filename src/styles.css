@@ -18,6 +18,9 @@ html, body {
   --contrasting-color: #98c5ff;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
   --modal-background-color: #202020;
   --background-color: #222222;
+
+  --action-icon-color: #d1d1d1; 
+  --delete-color: rgb(173, 30, 30);
 }
 
 .pointer {
@@ -46,7 +49,7 @@ html, body {
 
 .delete,
 .delete-arrow {
-  color: rgb(255, 67, 67);
+  color: var(--delete-color);
 }
 
 .text-ellipsis {
@@ -92,6 +95,11 @@ html, body {
 .modal-create-button {
   background-color: var(--contrasting-color);
   color: #202020;
+}
+
+.modal-delete-button {
+  background-color: var(--delete-color);
+  color: #d1d1d1;
 }
 
 .action-button {
@@ -183,6 +191,14 @@ html, body {
   to {
     transform: scale(0);
   }
+}
+
+.action-icon-color {
+  fill: var(--action-icon-color);
+}
+
+.stroke-action-icon-color {
+  stroke: var(--action-icon-color);
 }
 
 .flex {

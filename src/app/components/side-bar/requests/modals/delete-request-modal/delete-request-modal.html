@@ -1,0 +1,12 @@
+<div class="delete-request-modal">
+  <modal-header [title]="headerTitle" (onClose)="close()"></modal-header>
+
+  <div class="delete-request-content">
+    Вы уверены что хотите удалить <span style="font-weight: 600">{{ requestName }}</span> ?
+  </div>
+
+  <div class="modal-actions">
+    <button (click)="close()" class="modal-close-button action-button">Закрыть</button>
+    <button (click)="deleteRequest()" class="modal-delete-button action-button">Удалить</button>
+  </div>
+</div>

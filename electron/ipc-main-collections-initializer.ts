@@ -63,7 +63,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildFailureResultT('Путь должен быть абсолютным');
         }
 
-        const fullCollectionPath = path.join(collectionPath, collectionName);
+        const fullCollectionPath = path.join(collectionPath, collectionName.trim());
 
         fs.stat(fullCollectionPath, ((err, stat) => {
             if (err) {
@@ -84,9 +84,9 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         }
 
         try {
-            fs.mkdirSync(fullCollectionPath, { recursive: true });
+            await fs.promises.mkdir(fullCollectionPath, { recursive: true });
         } catch (err) {
-            console.error('Ошибка создания папки', err);
+            console.error('Error while creating collection folder', err);
             return buildFailureResultT('Не удалось создать папку коллекции');
         }
 
@@ -138,7 +138,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildFailureResultT('Путь должен быть абсолютным');
         }
         if (!fs.existsSync(collectionPath)) {
-            return buildFailureResultT('Папки не существует');
+            return buildFailureResultT('Некорректный путь');
         }
         
         let collectionConfig: CollectionYmlConfig;
@@ -152,7 +152,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         }
 
         const isValidCollectionConfigResult = validationCollectionYmlConfig(collectionConfig);
-        if(isValidCollectionConfigResult.isFailure) return {body: null, isSuccess: false, isFailure: true, error: isValidCollectionConfigResult.errorMessage};
+        if(isValidCollectionConfigResult.isFailure) return buildFailureResultT(isValidCollectionConfigResult.errorMessage);
 
         const collections = collectionStore.get(COLLECTIONS_KEY, []);
         const existsInStore = collections.some(
@@ -169,6 +169,14 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
 
         collections.push(openedCollection);
         collectionStore.set(COLLECTIONS_KEY, collections);
+
+        const getRequestsResult = await getRequestsByPath(openedCollection.path);
+
+        if(getRequestsResult.isFailure) return buildFailureResultT(getRequestsResult.error); 
+
+        const requestsFromStore = requestStore.get(REQUESTS_KEY, []);
+        requestsFromStore.push(...getRequestsResult.body);
+        requestStore.set(REQUESTS_KEY, requestsFromStore);
 
         return buildSuccessResultT(openedCollection);
     });
@@ -188,51 +196,55 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         
         const newCollectionPath = path.join(collectionInfo.collectionPath, collectionInfo.folderName);
 
-        if(collectionFromStore.path === newCollectionPath) return buildFailureResultT("В данной папке уже есть коллекция");
+        console.log(`Old path ${collectionFromStore.path} and new path ${newCollectionPath}`);
+
+        //if(collectionFromStore.path === newCollectionPath) return buildFailureResultT("В данной папке уже есть коллекция");
 
         try {
-            await fs.promises.cp(collectionFromStore.path, newCollectionPath, {recursive: true});
+            await fs.promises.mkdir(newCollectionPath);
         }
         catch(err){
+            console.log(`${err}`);
+
+            if(err.code === 'ERR_FS_CP_EINVAL'){
+                return buildFailureResultT('Невозможно клонировать коллекцию в её же папку или подпапку');
+            }
+            if(err.code === 'EEXIST'){
+                return buildFailureResultT(`Коллекция с таким именем уже существует по пути\n ${collectionInfo.collectionPath}`);
+            }
+
             console.log(`${err.code}`);
-            return buildFailureResultT(err);
-        }
-
-        const configFilePathToDelete = path.join(newCollectionPath, COLLECTION_CONFIG_FILE_NAME);
-
-        try {
-            fs.unlink(configFilePathToDelete, (err) => {
-                if (err) {
-                    if (err.code === 'ENOENT') return;
-
-                    return buildFailureResultT('Ошибка при удалении старого конфигурационного файла коллекции');
-                }
-            });
-        } catch (err) {
-            return buildFailureResultT(err);
+            return buildFailureResultT('Ошибка при клонировании коллекции');
         }
 
         var createCollectionConfigFileResult = await createCollectionConfigFile(newCollectionPath, collectionInfo.collectionName);
 
-        if(createCollectionConfigFileResult.isSuccess){
-            const newCollection = mapCollection(newCollectionPath, createCollectionConfigFileResult.body);
-
-            const requestsWithChangedCollectionIdResult = await changeCollectionIdInRequests(newCollection.path, newCollection.id)
-
-            if(requestsWithChangedCollectionIdResult.isFailure) return buildFailureResultT(requestsWithChangedCollectionIdResult.error);
-
-            console.log(`requestsWithChangedCollectionIdResult: ${JSON.stringify(requestsWithChangedCollectionIdResult)}`);
-
-            const requestsFromStore = requestStore.get(REQUESTS_KEY, []);
-            requestsFromStore.push(...requestsWithChangedCollectionIdResult.body);
-
-            collectionsFromStore.push(newCollection);
-            collectionStore.set(COLLECTIONS_KEY, collectionsFromStore);
-
-            return buildSuccessResultT(newCollection);
+        if(createCollectionConfigFileResult.isFailure){
+            await deleteFolder(newCollectionPath);
+            return buildFailureResultT(`Builder collection ${createCollectionConfigFileResult.error}`);
         }
 
-        return buildFailureResultT(`Builder collection ${createCollectionConfigFileResult.error}`);
+        const newCollection = mapCollection(newCollectionPath, createCollectionConfigFileResult.body);
+
+        const copiedRequestsResult = await copyRequests(collectionFromStore.path, newCollection.path, newCollection.id)
+
+        if(copiedRequestsResult.isFailure) {
+            await deleteFolder(newCollectionPath);
+            return buildFailureResultT(copiedRequestsResult.error);
+        }
+
+        console.log(`copiedRequestsResult: ${JSON.stringify(copiedRequestsResult)}`);
+
+        const requestsFromStore = requestStore.get(REQUESTS_KEY, []);
+        requestsFromStore.push(...copiedRequestsResult.body);
+
+        collectionsFromStore.push(newCollection);
+        collectionStore.set(COLLECTIONS_KEY, collectionsFromStore);
+
+
+        return buildSuccessResultT(newCollection);
+
+        
     });
 
 
@@ -300,48 +312,115 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
 
 //region functions
 
-async function changeCollectionIdInRequests(collectionPath: string, newCollectionId: string) : Promise<ResultT<RequestModel[], string>>{
+async function getRequestsByPath(collectionPath: string): Promise<ResultT<RequestModel[], string>>{
 
+    console.log(`changeCollectionIdAndRequestIdInRequests`);
     let requestFiles: fs.Dirent[];
-
+    let requests: RequestModel[] = [];
     try {
         requestFiles = await fs.promises.readdir(collectionPath, {withFileTypes: true});
     } catch (error) {
+        console.log(`Ошибка  ${error}`);
         return buildFailureResultT(`Ошибка при клонировании коллекции`);
     }
 
-    let requestsWithNewCollectionId: RequestModel[] = []; 
-
     for (const requestFileInfo of requestFiles) {
+
+        console.log(`Found ${requestFileInfo.name}`);
         
-        if(requestFileInfo.name !== COLLECTION_CONFIG_FILE_NAME && requestFileInfo.isFile()){
-            try {
-                const requestFullPath = path.join(collectionPath, requestFileInfo.name);
-                const raw = JSON.parse(await fs.promises.readFile(requestFullPath, { encoding: 'utf8'})) as RequestModel;
+        if(!requestFileInfo.isFile()){
+            console.log(`Found ${requestFileInfo.name} not file, will skip`);
+            continue;
+        }
+        if(requestFileInfo.name === COLLECTION_CONFIG_FILE_NAME){
+            console.log(`Found collection config file, will skip`);
+            continue;
+        }
 
-                const requestModel = HttpRequestSchema.parse(raw) as RequestModel;
+        try {
+            const requestFullPath = path.join(collectionPath, requestFileInfo.name);
+            const raw = JSON.parse(await fs.promises.readFile(requestFullPath, { encoding: 'utf8'})) as RequestModel;
 
-                requestModel.collectionId = newCollectionId;
+            const requestModel = HttpRequestSchema.parse(raw) as RequestModel;
 
-                await fs.promises.writeFile(requestFullPath, JSON.stringify(requestModel, null, 2));
+            console.log(`Request ${requestFileInfo.name} valid, will add to store`);
 
-                requestsWithNewCollectionId.push(requestModel);
-
-            } catch (error) {
-                
-                if(error instanceof ZodError){
-                    console.error(`Incorrect file content ${requestFileInfo.name}, ${error}`);
-                }
-                if (error instanceof SyntaxError) {
-                    console.error(`Error when processing file ${requestFileInfo.name}, ${error}`);
-                }
-
-                console.error(`Error when copying request ${requestFileInfo.name}, ${error}`);
+            requests.push(requestModel);
+        } catch (error) {
+            
+            if(error instanceof ZodError){
+                console.error(`Incorrect file content ${requestFileInfo.name}, ${error}`);
             }
+            if (error instanceof SyntaxError) {
+                console.error(`Error when processing file ${requestFileInfo.name}, ${error}`);
+            }
+
+            console.error(`Error when copying request ${requestFileInfo.name}, ${error}`);
         }
     };
 
-    return buildSuccessResultT(requestsWithNewCollectionId);
+    return buildSuccessResultT(requests);
+}
+
+async function deleteFolder(path: string){
+    await fs.promises.unlink(path);
+}
+
+async function copyRequests(oldCollectionPath: string, newCollectionPath: string, newCollectionId: string) : Promise<ResultT<RequestModel[], string>>{
+
+    console.log(`changeCollectionIdAndRequestIdInRequests`);
+    let requestFiles: fs.Dirent[];
+
+    try {
+        requestFiles = await fs.promises.readdir(oldCollectionPath, {withFileTypes: true});
+    } catch (error) {
+        console.log(`Ошибка  ${error}`);
+        return buildFailureResultT(`Ошибка при клонировании коллекции`);
+    }
+
+    let copiedRequests: RequestModel[] = []; 
+
+    for (const requestFileInfo of requestFiles) {
+
+        console.log(`Found ${requestFileInfo.name}`);
+        
+        if(!requestFileInfo.isFile()){
+            console.log(`Found not file, will skip`);
+            continue;
+        }
+        if(requestFileInfo.name === COLLECTION_CONFIG_FILE_NAME){
+            console.log(`Found collection config file, will skip`);
+            continue;
+        }
+
+        try {
+            const requestFullPath = path.join(oldCollectionPath, requestFileInfo.name);
+            const raw = JSON.parse(await fs.promises.readFile(requestFullPath, { encoding: 'utf8'})) as RequestModel;
+
+            const requestModel = HttpRequestSchema.parse(raw) as RequestModel;
+
+            console.log(`Request ${requestFileInfo.name} has parsed, will write`);
+
+            requestModel.collectionId = newCollectionId;
+            requestModel.id = uuidv4();
+
+            await fs.promises.writeFile(path.join(newCollectionPath, requestFileInfo.name), JSON.stringify(requestModel, null, 2));
+
+            copiedRequests.push(requestModel);
+        } catch (error) {
+            
+            if(error instanceof ZodError){
+                console.error(`Incorrect file content ${requestFileInfo.name}, ${error}`);
+            }
+            if (error instanceof SyntaxError) {
+                console.error(`Error when processing file ${requestFileInfo.name}, ${error}`);
+            }
+
+            console.error(`Error when copying request ${requestFileInfo.name}, ${error}`);
+        }
+    };
+
+    return buildSuccessResultT(copiedRequests);
 }
 
 function validateCloneCollectionDto(collectionInfo: CloneCollectionDto): Result {
