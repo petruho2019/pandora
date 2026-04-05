@@ -15,12 +15,14 @@ html, body {
 
 :root {
   --modal-border-style: 1px solid rgba(105, 105, 105, 0.315);
-  --contrasting-color: #98c5ff;   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
+  --border-style: 1px solid rgba(155, 155, 155, 0.215);
+  --contrasting-color: rgb(59,176,143);   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
   --modal-background-color: #202020;
   --background-color: #222222;
-
+  --background-color-opacity: rgba(155, 155, 155, 0.1);
   --action-icon-color: #d1d1d1; 
   --delete-color: rgb(173, 30, 30);
+  --action-background-color: rgba(155, 155, 155, 0.150);
 }
 
 .pointer {
@@ -87,14 +89,14 @@ html, body {
   transition: fill 0.2s
 }
 
-.modal-close-icon:hover {
-  background-color: rgba(155, 155, 155, 0.150);
+.close-icon-hover:hover {
+  background-color: var(--action-background-color);
   fill: rgba(212, 212, 212, 0.75);
 }
 
 .modal-create-button {
   background-color: var(--contrasting-color);
-  color: #202020;
+  color: #ffffff;
 }
 
 .modal-delete-button {
@@ -109,7 +111,7 @@ html, body {
   cursor: pointer;
 }
 
-.modal-label {
+.pandora-text {
   pointer-events: none;
   display: block;
   margin-bottom: 6px;
@@ -172,7 +174,7 @@ html, body {
   }
 
   to {
-    max-height: 50px;
+    max-height: 100px;
     transform: scale(1);
   }
 }
@@ -201,6 +203,9 @@ html, body {
   stroke: var(--action-icon-color);
 }
 
+.italic {
+  font-style: italic;
+}
 .flex {
   display: flex;
 }

@@ -3,8 +3,18 @@
 
   @if (this.collections$ | async; as collections) {
     @if (collections.length === 0) {
-      <div>No collections found</div>
-      <div><a>Create</a> or <a>import</a> collection</div>
+      <div class="no-collections">
+        <span>No collections found </span>
+        <br />
+        <span
+          ><a style="text-decoration: underline" class="pointer" (click)="showAddCollectionModal()"
+            >Create</a
+          >
+          or
+          <a style="text-decoration: underline" class="pointer" (click)="openCollection()">open</a>
+          collection</span
+        >
+      </div>
     } @else {
       <div class="collections" cdkDropList (cdkDropListDropped)="dropCollection($event)">
         @for (collection of collections; track collection.path) {

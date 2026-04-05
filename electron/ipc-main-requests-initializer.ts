@@ -5,7 +5,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { RequestModel, RequestType, RequestTypes } from '../shared/models/requests/request'
 import { buildFailureResult, buildFailureResultT, buildSuccessResultT, ResultT } from '../shared/models/result'
-import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http-request-model';
 import ElectronStore = require('electron-store');
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
 import { CloneRequestDto, DeleteRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
@@ -15,6 +14,7 @@ import { platform } from 'os';
 import { spawn } from 'child_process';
 import { IpcMain } from 'electron';
 import { REQUESTS_KEY } from './main';
+import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http/http-request-model';
 
 
 
@@ -168,7 +168,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
     const requestFromStore = store.get(REQUESTS_KEY, []);
     const requestById = requestFromStore.find(r => r.id === requestInfo.requestId);
 
-    if(!requestById) return buildFailureResultT(`Запрос ${requestById.name} не найден`);
+    if(!requestById) return buildFailureResultT(`Запрос ${requestById!.name} не найден`);
 
     requestById.name = requestInfo.newName;
     requestById.fileName = requestInfo.newFileName;
@@ -177,7 +177,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
 
     try {
       await fs.promises.rename(path.join(requestInfo.collectionPath, requestInfo.oldFileName + '.json'), path.join(requestInfo.collectionPath, requestInfo.newFileName+ '.json'));
-    } catch (err) {
+    } catch (err: any) {
       if (err.code === "ENOENT") {
         console.error(`Запрос ${requestById.name} не найден , ${err}`);
       }
@@ -203,7 +203,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       return buildFailureResultT(`Новое название файла не может быть пустым`);
     if(!requestInfo.newName)
       return buildFailureResultT(`Новое название не может быть пустым`);
-    if(!(await fs.promises.stat(requestInfo.collectionPath)).isDirectory())
+    if(!(await fs.promises.stat(requestInfo.collectionPath!)).isDirectory())
       return buildFailureResultT(`Коллекция ${requestInfo.collectionPath} не существует`);
 
     const requestsFromStore = store.get(REQUESTS_KEY, []);
@@ -214,13 +214,13 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
     if(requestsFromStore.find(req => req.fileName === requestInfo.newFileName))
       return buildFailureResultT(`Файл запроса с таким именем уже существует`);
 
-    const clonedRequest = mapCloneDtoToRequestModel(requestFromStoreById, requestInfo);
+    const clonedRequest = mapCloneDtoToRequestModel(requestFromStoreById!, requestInfo);
 
     console.log(`Object of cloned request: ${JSON.stringify(clonedRequest)}`);
 
     try {
-      console.log(`Trying to write file by path: ${path.join(requestInfo.collectionPath, requestInfo.newFileName)}`);
-      await fs.promises.writeFile(path.join(requestInfo.collectionPath, requestInfo.newFileName) + '.json', JSON.stringify(clonedRequest, null, 2), {encoding: `utf-8`});
+      console.log(`Trying to write file by path: ${path.join(requestInfo.collectionPath!, requestInfo.newFileName)}`);
+      await fs.promises.writeFile(path.join(requestInfo.collectionPath!, requestInfo.newFileName) + '.json', JSON.stringify(clonedRequest, null, 2), {encoding: `utf-8`});
     } catch (err) {
       return buildFailureResultT(`Ошибка при клонировании запроса`);
     }
@@ -242,7 +242,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
 
     if(!requestInfo) return buildFailureResult("Запрос не найден");
 
-    const fullPath = path.join(requestInfo.collectionPath, request.fileName + '.json');
+    const fullPath = path.join(requestInfo.collectionPath, request!.fileName + '.json');
     
     fs.stat(fullPath, ((err, stat) => {
         if (err) {

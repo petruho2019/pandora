@@ -2,8 +2,7 @@ import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { concatLatestFrom } from "@ngrx/operators";
 import { inject } from '@angular/core';
 import { loadRequests, loadRequestsFailure, loadRequestsSuccess, openRequestInFS, openRequestInFSFailure, openRequestInFSSuccess } from "../actions/requests.actions";
-import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, tap, } from "rxjs/operators";
-import { HttpRequestModel } from "../../../../shared/models/requests/http-request-model";
+import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, } from "rxjs/operators";
 import { from, of,map } from "rxjs";
 import { RequestElectronService } from "../../../../services/request-electron-service";
 import { Store } from "@ngrx/store";
@@ -28,7 +27,7 @@ export class RequestEffects {
                         {
                             this.dispatchModalSuccess(actionData.modalOverlayRef);
                             console.log(`addHttpRequestSuccess логирование объекта ${JSON.stringify(createRequestResult)}`);
-                            return createRequestSuccess({request: createRequestResult.body as HttpRequestModel});
+                            return createRequestSuccess({request: createRequestResult.body!});
                         }
                         else{
                             console.log(`addHttpRequestFailure логирование объекта ${JSON.stringify(createRequestResult)}`);

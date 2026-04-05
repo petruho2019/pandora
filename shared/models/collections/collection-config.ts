@@ -1,5 +1,5 @@
 export interface CollectionYmlConfig {
-    collectionInfo: CollectionConfig
+  collectionInfo: CollectionConfig
 }
 
 export interface CollectionConfig {

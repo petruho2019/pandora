@@ -17,6 +17,8 @@ import { RenameDto } from '../../../../../../shared/models/dto/shared-dtos';
 import { CloneRequestDto, DeleteRequestDto, RenameRequestDto } from '../../../../../../shared/models/requests/dto/request-dtos';
 import { cloneRequest, deleteRequest, renameRequest } from '../../../../store/actions/modal-actions/request-modal.actions';
 import { DeleteRequestModal } from "../modals/delete-request-modal/delete-request-modal";
+import { TabItemService } from '../../../../../../services/tab-item-service';
+import { WorkspaceFacadeService } from '../../../../../../services/workspace-facade-service';
 
 @Component({
   selector: 'request-item',
@@ -31,6 +33,8 @@ export class RequestCollectionItem implements OnInit {
   private overlay = inject(Overlay)
   private viewContainerRef = inject(ViewContainerRef);
   private store = inject(Store);
+  private tabItemService = inject(TabItemService);
+  private workspaceFacadeService = inject(WorkspaceFacadeService);
 
   renameHeader: string = "Переименовать запрос";
 
@@ -75,6 +79,15 @@ export class RequestCollectionItem implements OnInit {
     });
   }
 
+  addRequestTabItem(){
+    console.log(`Id запроса из компонента ${this.request.id}`);
+
+    this.workspaceFacadeService.addTabItem(this.request, this.collection);
+  }
+
+  setRequestTabItemIsNotReplaceable(){
+    this.tabItemService.setRequestTabItemNotReplaceable(this.request, this.collection);
+  }
 
   showRenameModal(){
     this.actionsMenuService.close();
@@ -159,7 +172,6 @@ export class RequestCollectionItem implements OnInit {
   }
 
   onRightClick($event: MouseEvent) {
-    console.log(`on right click`);
     this.toggleActions($event);
   }
 

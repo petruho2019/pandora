@@ -73,11 +73,11 @@
 }
 
 .modal-close-button {
-  background: #202020;
+  background: var(--modal-background-color);
 }
 
 .modal-close-button:hover {
-  background-color: rgba(155, 155, 155, 0.150);
+  background-color: var(--action-background-color);
 }
 
 .url-row {

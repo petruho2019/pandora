@@ -15,9 +15,9 @@ import { spawn } from 'child_process';
 import { platform } from 'os';
 import { RequestModel } from '../shared/models/requests/request';
 import { ZodError } from 'zod';
-import { HttpRequestSchema } from '../shared/models/requests/http-request-model';
 import { RequestsStoreSchema } from '../shared/store/schemes/request-store-schema';
 import { COLLECTIONS_KEY, REQUESTS_KEY } from './main';
+import { HttpRequestSchema } from '../shared/models/requests/http/http-request-model';
 
 
 export function initializeCollection(collectionStore: ElectronStore<CollectionsStoreSchema>, requestStore: ElectronStore<RequestsStoreSchema>, ipcMain: IpcMain){
@@ -95,7 +95,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         var createCollectionConfigFileResult = await createCollectionConfigFile(fullCollectionPath, collectionName);
 
         if(createCollectionConfigFileResult.isSuccess){
-            const newCollection = mapCollection(fullCollectionPath, createCollectionConfigFileResult.body);
+            const newCollection = mapCollection(fullCollectionPath, createCollectionConfigFileResult.body!);
 
             collections.push(newCollection);
             collectionStore.set(COLLECTIONS_KEY, collections);
@@ -103,7 +103,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildSuccessResultT(newCollection);
         }
 
-        return buildFailureResultT(createCollectionConfigFileResult.error);
+        return buildFailureResultT(createCollectionConfigFileResult.error!);
     });
 
     //#region remove-collection
@@ -152,7 +152,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         }
 
         const isValidCollectionConfigResult = validationCollectionYmlConfig(collectionConfig);
-        if(isValidCollectionConfigResult.isFailure) return buildFailureResultT(isValidCollectionConfigResult.errorMessage);
+        if(isValidCollectionConfigResult.isFailure) return buildFailureResultT(isValidCollectionConfigResult.errorMessage!);
 
         const collections = collectionStore.get(COLLECTIONS_KEY, []);
         const existsInStore = collections.some(
@@ -172,10 +172,10 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
 
         const getRequestsResult = await getRequestsByPath(openedCollection.path);
 
-        if(getRequestsResult.isFailure) return buildFailureResultT(getRequestsResult.error); 
+        if(getRequestsResult.isFailure) return buildFailureResultT(getRequestsResult.error!); 
 
         const requestsFromStore = requestStore.get(REQUESTS_KEY, []);
-        requestsFromStore.push(...getRequestsResult.body);
+        requestsFromStore.push(...getRequestsResult.body!);
         requestStore.set(REQUESTS_KEY, requestsFromStore);
 
         return buildSuccessResultT(openedCollection);
@@ -186,7 +186,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
     ipcMain.handle('clone-collection',  async (event, collectionInfo: CloneCollectionDto): Promise<ResultT<Collection, string>> => {
 
         const validationResult = validateCloneCollectionDto(collectionInfo);
-        if(validationResult.isFailure) return buildFailureResultT(validationResult.errorMessage);
+        if(validationResult.isFailure) return buildFailureResultT(validationResult.errorMessage!);
 
         const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
         const collectionFromStore = collectionsFromStore.find(c => c.id === collectionInfo.sourceCollectionId);
@@ -203,7 +203,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         try {
             await fs.promises.mkdir(newCollectionPath);
         }
-        catch(err){
+        catch(err: any){
             console.log(`${err}`);
 
             if(err.code === 'ERR_FS_CP_EINVAL'){
@@ -224,19 +224,19 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildFailureResultT(`Builder collection ${createCollectionConfigFileResult.error}`);
         }
 
-        const newCollection = mapCollection(newCollectionPath, createCollectionConfigFileResult.body);
+        const newCollection = mapCollection(newCollectionPath, createCollectionConfigFileResult.body!);
 
         const copiedRequestsResult = await copyRequests(collectionFromStore.path, newCollection.path, newCollection.id)
 
         if(copiedRequestsResult.isFailure) {
             await deleteFolder(newCollectionPath);
-            return buildFailureResultT(copiedRequestsResult.error);
+            return buildFailureResultT(copiedRequestsResult.error!);
         }
 
         console.log(`copiedRequestsResult: ${JSON.stringify(copiedRequestsResult)}`);
 
         const requestsFromStore = requestStore.get(REQUESTS_KEY, []);
-        requestsFromStore.push(...copiedRequestsResult.body);
+        requestsFromStore.push(...copiedRequestsResult.body!);
 
         collectionsFromStore.push(newCollection);
         collectionStore.set(COLLECTIONS_KEY, collectionsFromStore);

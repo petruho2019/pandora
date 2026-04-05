@@ -3,6 +3,8 @@
   tabindex="0"
   [ngClass]="{ 'blur-item': blurService.currentBlurId === request.id }"
   (click)="this.blurService.clearBlur()"
+  (click)="addRequestTabItem()"
+  (dblclick)="setRequestTabItemIsNotReplaceable()"
   (contextmenu)="onRightClick($event)"
   (blur)="onBlurRequest()"
   cdkDrag
@@ -257,7 +259,7 @@ Z"
   >
     <div class="request-file-name">
       <div class="justify-space-between flex items-center" style="margin-bottom: 6px">
-        <label for="folder-name" class="modal-label">Название файла в файловой системе</label>
+        <label for="folder-name" class="pandora-text">Название файла в файловой системе</label>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class=""

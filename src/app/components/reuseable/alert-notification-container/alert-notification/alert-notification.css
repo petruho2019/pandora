@@ -1,7 +1,7 @@
 .alert-notification {
   display: flex;
   background-color: #424244;
-  max-width: 370px;
+  max-width: 380px;
   padding: 8px 10px 8px 8px;
   border-radius: 8px;
   pointer-events: all;

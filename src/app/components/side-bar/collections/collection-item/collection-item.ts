@@ -15,6 +15,9 @@ import { CreateRequestInfo } from '../../../../../../shared/models/event-models/
 import { CloneCollectionDto, RemoveCollectionInfo } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
 import { RenameDto } from '../../../../../../shared/models/dto/shared-dtos';
 import { openCollectionInFS } from '../../../../store/actions/collections.actions';
+import { WorkspaceInfoService } from '../../../../../../services/workspace-info-service';
+import { TabItemService } from '../../../../../../services/tab-item-service';
+import { WorkspaceFacadeService } from '../../../../../../services/workspace-facade-service';
 
 
 @Component({
@@ -24,24 +27,22 @@ import { openCollectionInFS } from '../../../../store/actions/collections.action
   styleUrl: './collection-item.css',
   standalone: true
 })
-export class CollectionItem implements OnInit{
-  ngOnInit(): void {
-      this.overlay
-  }
+export class CollectionItem {
 
   private store = inject(Store);
   public blurService = inject(BlurService);
   private actionsMenuService = inject(ActionsMenuService);
   private overlay = inject(Overlay)
   private viewContainerRef = inject(ViewContainerRef);
+  private workspaceFacadeService = inject(WorkspaceFacadeService);
 
   public renameCollectionHeader: string = "Переименовать коллекцию";
 
   isOpen: boolean = false;
 
   @Input() collection: Collection;
-  @Output() handleOpenCollection = new EventEmitter<{collectionId: string, isOpen: boolean} >();
 
+  @Output() handleOpenCollection = new EventEmitter<{collectionId: string, isOpen: boolean} >();
   @Output() handleAddRequest = new EventEmitter<{overlay: OverlayRef, addRequestInfo: CreateRequestInfo}>();
   @Output() handleCloneCollection = new EventEmitter<{overlay: OverlayRef,cloneCollectionDto: CloneCollectionDto}>();
   @Output() handleRenameCollection = new EventEmitter<{overlay: OverlayRef, renameDto: RenameDto}>();
@@ -74,7 +75,7 @@ export class CollectionItem implements OnInit{
 
   toggleCollectionActions(event: MouseEvent, id: string) {
     console.log(`toggleCollectionActions collectionId: ${id}`);
-    event.stopPropagation();
+    this.stopPropagation(event);
     this.actionsMenuService.openedId$.pipe(take(1)).subscribe(current => {
       console.log(`Current: ${current}`);
         current === id ? this.actionsMenuService.close() : this.actionsMenuService.open(id);
@@ -83,7 +84,8 @@ export class CollectionItem implements OnInit{
 
 
   openCollectionIfNotOpen(event: MouseEvent, id: string) {
-    event.stopPropagation();
+
+    this.stopPropagation(event);
 
     if(!this.isOpen){
       this.handleOpenCollection.emit({collectionId: id, isOpen: true});
@@ -93,8 +95,15 @@ export class CollectionItem implements OnInit{
     this.blurService.clearBlur();
   }
 
-  openCollection($event:MouseEvent){
-    $event.stopPropagation();
+  setCollectionWorkspace(event: MouseEvent) {
+    this.stopPropagation(event);
+    console.log(`setCollectionWorkspace из компонента`);
+
+    this.workspaceFacadeService.openCollection(this.collection);
+  }
+
+  openCollection(event:MouseEvent){
+    this.stopPropagation(event);
 
     this.isOpen = !this.isOpen;
     this.handleOpenCollection.emit({collectionId: this.collection.id, isOpen: this.isOpen});
@@ -171,8 +180,6 @@ export class CollectionItem implements OnInit{
     this.handleRemoveCollection.emit({overlay: this.removeCollectionOverlayRef, collectionId: collectionId});
   }
 
-
-
   onRightClick($event: MouseEvent, collectionId: string) {
     this.toggleCollectionActions($event, collectionId);
   }
@@ -197,6 +204,10 @@ export class CollectionItem implements OnInit{
     });
 
     return overlayRef;
+  }
+
+  stopPropagation(event: MouseEvent){
+    event.stopPropagation();
   }
 
 }

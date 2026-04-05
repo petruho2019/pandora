@@ -9,9 +9,8 @@ side-bar {
   flex: 0 0 auto;
 }
 
-main {
+main-content {
   flex: 1;
-  min-width: 0;
 }
 
 .action-item {

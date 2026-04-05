@@ -1,3 +1,8 @@
 .requests{
   width: 100%;
 }
+
+.no-collections {
+  margin-top: 10px;
+  margin-left: 15px;
+}

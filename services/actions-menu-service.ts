@@ -7,7 +7,6 @@ export class ActionsMenuService {
   openedId$ = this._openedId.asObservable();
 
   open(id: string) {
-    console.log(`Open: ${id}`);
     this._openedId.next(id);
   }
 

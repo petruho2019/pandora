@@ -1,4 +1,4 @@
-import { HttpRequestModel } from "./http-request-model";
+import { HttpRequestModel } from "./http/http-request-model";
 
 export type RequestModel = HttpRequestModel;
 

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ResizableBar } from './resizable-bar';
+import { MainContentTabItems } from './main-content-tab-items';
 
-describe('ResizableBar', () => {
-  let component: ResizableBar;
-  let fixture: ComponentFixture<ResizableBar>;
+describe('MainContentTabItems', () => {
+  let component: MainContentTabItems;
+  let fixture: ComponentFixture<MainContentTabItems>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResizableBar]
+      imports: [MainContentTabItems]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ResizableBar);
+    fixture = TestBed.createComponent(MainContentTabItems);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

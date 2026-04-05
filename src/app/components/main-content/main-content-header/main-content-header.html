@@ -1,0 +1,65 @@
+<div class="main-content-header">
+  <div class="current-workspace pointer" (click)="showSelectItem($event)">
+    <span class="current-workspace-text text-ellipsis">{{
+      activeWorkspace()?.type === workspaceTypes.GeneralInfo
+        ? 'Общая информация'
+        : activeWorkspace()?.item?.name
+    }}</span>
+    <svg class="dropdown-icon" viewBox="0 -5 12 12">
+      <polyline points="0,0 6,6 12,0" fill="none" />
+    </svg>
+  </div>
+
+  @if (selectItemId === (isOpenSelectItemMenu | async)) {
+    <div class="select-workspace-con" (click)="$event.stopPropagation()">
+      <span class="workspaces-header">Главное меню</span>
+
+      <span
+        class="select-workspace pointer"
+        [ngClass]="{ selected: activeWorkspace()?.type === workspaceTypes.GeneralInfo }"
+        (click)="setWorkspace(workspaceTypes.GeneralInfo, null)"
+        >Общая информация</span
+      >
+
+      <div class="delimiter-line"></div>
+
+      <span class="workspaces-header">Коллекции</span>
+      @for (coll of allCollections$ | async; track coll.id) {
+        <span
+          class="select-workspace pointer text-ellipsis"
+          (click)="setWorkspace(workspaceTypes.Collection, coll)"
+          >{{ coll.name }}</span
+        >
+      }
+
+      <span
+        class="select-workspace pointer text-ellipsis"
+        [ngClass]="{
+          selected: activeWorkspace()?.item?.id === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b',
+        }"
+        (click)="
+          setWorkspace(workspaceTypes.Collection, {
+            id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b',
+            name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg',
+            path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1',
+          })
+        "
+        >TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg</span
+      >
+      <span
+        class="select-workspace pointer text-ellipsis"
+        [ngClass]="{
+          selected: activeWorkspace()?.item?.id === '33abfac2-d678-481c-aa9a-39ac8361bd3e',
+        }"
+        (click)="
+          setWorkspace(workspaceTypes.Collection, {
+            id: '33abfac2-d678-481c-aa9a-39ac8361bd3e',
+            name: 'TEST 2',
+            path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2',
+          })
+        "
+        >TEST 2</span
+      >
+    </div>
+  }
+</div>

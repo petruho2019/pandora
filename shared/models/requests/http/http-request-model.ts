@@ -3,7 +3,7 @@ import { FormUrlEncodedBody } from './bodies/form-url-encoded-body';
 import { MultipartBody } from './bodies/multipart-body';
 import { NoBody } from './bodies/no-body'
 import { RawBody } from './bodies/raw-body';
-import { BaseRequestModel } from './request';
+import { BaseRequestModel } from '../request';
 import { z } from "zod";
 
 export interface HttpRequestModel extends BaseRequestModel{
@@ -19,17 +19,17 @@ export type RequestBody =
     | MultipartBody
     | FileBody;
 
-export const HttpMethods = [
-  'GET',
-  'POST',
-  'PUT',
-  'PATCH',
-  'DELETE',
-  'HEAD',
-  'OPTIONS',
-] as const;
+export const HttpMethods = {
+  GET: 'GET',
+  POST: 'POST',
+  PUT: 'PUT',
+  PATCH: 'PATCH',
+  DELETE: 'DELETE',
+  HEAD: 'HEAD',
+  OPTIONS: 'OPTIONS',
+ } as const;
 
-export type HttpMethod = typeof HttpMethods[number];
+export type HttpMethod = keyof typeof HttpMethods;
 
 export interface Header {
     key: string;

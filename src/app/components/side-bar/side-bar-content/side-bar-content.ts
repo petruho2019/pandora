@@ -1,5 +1,5 @@
-import { Component, inject, signal, WritableSignal } from '@angular/core';
-import { SideBarHeader } from "../side-bar-header/side-bar-header";
+import { SideBarHeader } from './../side-bar-header/side-bar-header';
+import { Component, EventEmitter, inject, Output, signal, ViewChild, WritableSignal } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { PortalModule } from '@angular/cdk/portal';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
@@ -34,6 +34,8 @@ export class SideBarContent {
 
   public blurService = inject(BlurService);
   private actionsMenuService = inject(ActionsMenuService);
+
+  @ViewChild(SideBarHeader) sideBarHeaderChild: SideBarHeader;
 
   public renameCollectionHeader: string = "Переименовать коллекцию";
 
@@ -148,6 +150,13 @@ export class SideBarContent {
     };
   }
 
+  showAddCollectionModal(){
+    this.sideBarHeaderChild.showAddCollectionModal();
+  }
+
+  openCollection() {
+    this.sideBarHeaderChild.openCollection();
+  }
   
   dropCollection($event: CdkDragDrop<string[]>){
     this.store.dispatch(moveCollection({fromIndex: $event.previousIndex, toIndex: $event.currentIndex}));

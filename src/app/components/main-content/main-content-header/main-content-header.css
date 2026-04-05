@@ -1,0 +1,81 @@
+
+.main-content-header {
+    position: relative;
+    display: flex;
+    padding: 12px 16px;
+}
+
+.current-workspace {
+    display: flex;
+    position: relative;
+    align-items: center;
+    padding: 6px;
+    transition: background-color 0.2s;
+    border-radius: 4px;
+}
+
+.current-workspace:hover {
+    background-color: var(--background-color-opacity);
+}
+
+.current-workspace-text {
+    font-weight: 500;
+    font-size: 18px;
+    margin-right: 10px;
+    max-width: 200px;
+}
+
+.dropdown-icon {
+    height: 12px;
+    flex: 0 0 16px;
+    display: block;
+    margin-right: 6px;
+    stroke: rgb(129, 129, 129);
+    stroke-width: 1px;
+}
+
+.select-workspace-con {
+    display: flex;
+    flex-direction: column;
+    background: #313131;
+    position: absolute;
+    top: 90%;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: var(--border-style);
+    z-index: 10;
+}
+
+.workspaces-header {
+    color: inherit;
+    opacity: 60%;
+    font-weight: 600;
+    padding: 6px 8px;
+}
+
+.select-workspace {
+    margin-top: 2px;
+    padding: 6px 12px;
+    font-weight: 500;
+    margin: 1px 0;
+    border-radius: 4px;
+    max-width: 200px;
+}
+
+.select-workspace:not(.selected):hover {
+    background-color: var(--action-background-color);
+}
+
+.selected {
+    background-color: rgba(59,176,143, 0.10);
+    color: rgb(59,176,143);
+}
+
+.delimiter-line {
+    opacity: 10%;
+    height: 0.1px;
+    padding-right: 4px;
+    background-color: var(--action-icon-color);
+    margin: 6px 0;
+    pointer-events: none;
+}

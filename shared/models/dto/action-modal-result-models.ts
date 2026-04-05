@@ -5,13 +5,6 @@ export interface ModalActionSuccessResult<T> {
     body: T;
 }
 
-export function buildModalActionSuccessResult<T>(modalOverlay: OverlayRef, body: T) : ModalActionSuccessResult<T> {
-    return {
-        modalOverlayRef: modalOverlay,
-        body: body
-    }
-}
-
 export interface ModalActionDataT<T> {
     modalOverlayRef: OverlayRef;
     body: T;
