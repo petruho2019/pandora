@@ -4,7 +4,7 @@ import { RequestTabItem, TabItem, TabItemTypes } from '../shared/models/utils';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestModel, RequestTypes } from '../shared/models/requests/request';
 import { HttpMethods } from "../shared/models/requests/http/http-request-model";
-import { REQUEST_TAB_ITEM_DEFAULT_NAME } from "../shared/models/constants";
+import { GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID, REQUEST_TAB_ITEM_DEFAULT_NAME } from "../shared/models/constants";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 
 @Injectable({ providedIn: 'root' })
@@ -14,15 +14,8 @@ export class TabItemService {
         'general': 
         [
             {
-                id: 'description',
+                id: GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID,
                 name: "Описание",
-                tabType: TabItemTypes.GeneralInfo,
-                request: null,
-                collection: null
-            },
-            {
-                id: 'environment',
-                name: "Переменные",
                 tabType: TabItemTypes.GeneralInfo,
                 request: null,
                 collection: null

@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable({ providedIn: 'root' })
-export class ActionsMenuService {
+export class ActionMenuService {
   private _openedId = new BehaviorSubject<string | null>(null);
   openedId$ = this._openedId.asObservable();
 

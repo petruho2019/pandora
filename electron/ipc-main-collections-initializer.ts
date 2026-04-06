@@ -141,17 +141,11 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildFailureResultT('Некорректный путь');
         }
         
-        let collectionConfig: CollectionYmlConfig;
-        try{
-            
-            collectionConfig = yaml.load(await fs.promises.readFile(path.join(collectionPath, COLLECTION_CONFIG_FILE_NAME), 'utf-8')) as CollectionYmlConfig;
-            console.log(`Config file found: ${JSON.stringify(collectionConfig)}`);
-        }
-        catch{
-            return buildFailureResultT(COLLECTION_CONFIG_FILE_FORMAT_ERROR) 
-        }
+        let collectionConfigResult = await getCollectionConfigFile(collectionPath);
 
-        const isValidCollectionConfigResult = validationCollectionYmlConfig(collectionConfig);
+        if(collectionConfigResult.isFailure) return buildFailureResultT(collectionConfigResult.error!);
+
+        const isValidCollectionConfigResult = validationCollectionYmlConfig(collectionConfigResult.body!);
         if(isValidCollectionConfigResult.isFailure) return buildFailureResultT(isValidCollectionConfigResult.errorMessage!);
 
         const collections = collectionStore.get(COLLECTIONS_KEY, []);
@@ -163,7 +157,7 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
             return buildFailureResultT('Коллекция уже добавлена');
         }
 
-        var openedCollection = mapCollection(collectionPath, collectionConfig);
+        var openedCollection = mapCollection(collectionPath, collectionConfigResult.body!);
 
         console.log(`Opened collection: ${openedCollection.path}`);
 
@@ -308,9 +302,53 @@ export function initializeCollection(collectionStore: ElectronStore<CollectionsS
         
         return true; 
     });
+
+    //region delete-collection
+
+    ipcMain.handle('delete-collection', async (event, collectionId: string) : Promise<ResultT<Collection[], string>> => {
+
+        if(!collectionId) return buildFailureResultT('Непредвиденная ошибка при удалении коллекции');
+
+        const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
+        const collectionFromStore = collectionsFromStore.find(c => c.id === collectionId);
+
+        if(!collectionFromStore) return buildFailureResultT(`Коллекция не найдена`);
+
+        let collectionConfigResult = await getCollectionConfigFile(collectionFromStore.path);
+
+        if(collectionConfigResult.isFailure) return buildFailureResultT(collectionConfigResult.error!);
+
+        try {
+            fs.promises.rm(collectionFromStore.path, { recursive: true });
+        } catch (error: any) {
+            console.log(`Error code: ${error.code}`);
+            console.log(`Error: ${error}`);
+            return buildFailureResultT('Ошибка при удалении коллекции');
+        }
+
+        const newCollections = collectionsFromStore.filter(c => c.id !== collectionId);
+
+        collectionStore.set(COLLECTIONS_KEY, newCollections);
+
+        return buildSuccessResultT(newCollections);
+    });
+
 }
 
 //region functions
+
+async function getCollectionConfigFile(collPath: string): Promise<ResultT<CollectionYmlConfig, string>>{
+    let collectionConfig;
+    try {
+        collectionConfig = yaml.load(await fs.promises.readFile(path.join(collPath, COLLECTION_CONFIG_FILE_NAME), 'utf-8')) as CollectionYmlConfig;
+        console.log(`Config file found: ${JSON.stringify(collectionConfig)}`);
+    }
+    catch{
+        return buildFailureResultT(COLLECTION_CONFIG_FILE_FORMAT_ERROR) 
+    }
+
+    return buildSuccessResultT(collectionConfig);
+}
 
 async function getRequestsByPath(collectionPath: string): Promise<ResultT<RequestModel[], string>>{
 
@@ -468,19 +506,6 @@ function createCollectionConfigByCollection(collectionName: string) : Collection
             name: collectionName
         }
     };
-}
-
-function getCollectionConfig<CollectionYmlConfig>(configPath: string): ResultT<CollectionYmlConfig, string> {
-    if (fs.existsSync(configPath)) {
-        const collectionConfig = yaml.load(
-            fs.readFileSync(configPath, 'utf-8')
-        ) as CollectionYmlConfig;
-
-        console.log(`Config loaded: ${JSON.stringify(collectionConfig)}`);
-        return buildSuccessResultT(collectionConfig);
-
-    }
-    return buildFailureResultT(COLLECTION_CONFIG_FILE_FORMAT_ERROR);
 }
 
 function validationCollectionYmlConfig(config: CollectionYmlConfig) : Result{

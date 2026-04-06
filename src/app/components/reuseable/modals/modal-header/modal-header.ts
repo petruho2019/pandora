@@ -9,7 +9,9 @@ import { CloseModalIcon } from '../../close-modal-icon/close-modal-icon';
 })
 export class ModalHeader {
 
-  @Input() canShowWarningIcon: boolean;
+  @Input() showYellowWarningIcon: boolean;
+  @Input() showRewWarningIcon: boolean;
+
   @Input() title: string;
   @Output() onClose = new EventEmitter();
 

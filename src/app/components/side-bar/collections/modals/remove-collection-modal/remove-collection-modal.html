@@ -1,12 +1,12 @@
 <div class="close-collection-modal">
   <modal-header
-    [canShowWarningIcon]="true"
+    [showYellowWarningIcon]="true"
     [title]="headerTitle"
     (onClose)="close()"
   ></modal-header>
 
   <div class="close-collection-content">
-    <p style="margin-bottom: 18px">Вы уверены что хотите удалить коллекцию?</p>
+    <p style="margin-bottom: 18px">Вы уверены что хотите закрыть коллекцию?</p>
 
     <div class="collection-info">
       <p class="collection-name">{{ collectionInfo.collectionName }}</p>
@@ -19,9 +19,9 @@
     </p>
 
     <div class="modal-actions">
-      <button (click)="close()" class="modal-close-button action-button">Закрыть</button>
-      <button (click)="removeCollection()" class="modal-create-button action-button">
-        Удалить
+      <button (click)="close()" class="modal-close-button action-button pointer">Закрыть окно</button>
+      <button (click)="removeCollection()" class="modal-create-button action-button pointer">
+        Закрыть коллекцию
       </button>
     </div>
   </div>

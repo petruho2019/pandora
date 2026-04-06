@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   renameCollection: (collectionInfo: RenameDto) => ipcRenderer.invoke('rename-collection', collectionInfo),
   openCollection: (collectionPath: string) => ipcRenderer.invoke('open-collection', collectionPath),
   openCollectionInFS: (collectionId: string) => ipcRenderer.invoke('open-collection-in-fs', collectionId),
+  deleteCollection: (collectionId: string) => ipcRenderer.invoke('delete-collection', collectionId),
 
   addRequest: (collectionPath: string, requestInfo: CreateRequestInfo) => ipcRenderer.invoke('add-request', collectionPath, requestInfo),
   renameRequest: (requestInfo: RenameRequestDto) => ipcRenderer.invoke('rename-request', requestInfo),

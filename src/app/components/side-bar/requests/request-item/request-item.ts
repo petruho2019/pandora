@@ -9,7 +9,7 @@ import { AsyncPipe, NgClass } from '@angular/common';
 import { CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { RenameModal } from '../../../reuseable/modals/rename-modal/rename-modal';
 import { BlurService } from '../../../../../../services/blur-service';
-import { ActionsMenuService } from '../../../../../../services/actions-menu-service';
+import { ActionMenuService } from '../../../../../../services/actions-menu-service';
 import { RequestModel, RequestTypes } from '../../../../../../shared/models/requests/request';
 import { Collection } from '../../../../../../shared/models/collections/collection';
 import { openRequestInFS } from '../../../../store/actions/requests.actions';
@@ -29,7 +29,7 @@ import { WorkspaceFacadeService } from '../../../../../../services/workspace-fac
 export class RequestCollectionItem implements OnInit {
 
   public blurService = inject(BlurService);
-  private actionsMenuService = inject(ActionsMenuService)
+  private actionsMenuService = inject(ActionMenuService)
   private overlay = inject(Overlay)
   private viewContainerRef = inject(ViewContainerRef);
   private store = inject(Store);

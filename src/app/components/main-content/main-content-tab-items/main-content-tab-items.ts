@@ -6,6 +6,7 @@ import { WorkspaceInfoService } from '../../../../../services/workspace-info-ser
 import { NgClass } from '@angular/common';
 import { WorkspaceFacadeService } from '../../../../../services/workspace-facade-service';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID } from '../../../../../shared/models/constants';
 
 @Component({
   selector: 'main-content-tab-items',
@@ -26,7 +27,7 @@ export class MainContentTabItems implements AfterViewInit, OnDestroy{
 
     ngOnInit(): void {
       if(!this.getTabItemsByWorkspaceId())
-        this.tabItemService.setActiveTabItemId('description');
+        this.tabItemService.setActiveTabItemId(GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID);
     }  
 
     activeTabItem = computed(() => {

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostListener, inject, Input, Output } from '@angular/core';
 import { ModalHeader } from '../../../../reuseable/modals/modal-header/modal-header';
-import { RemoveCollectionInfo } from '../../../../../../../shared/models/collections/dto/collection-action-dtos';
+import { CloseCollectionInfo } from '../../../../../../../shared/models/collections/dto/collection-action-dtos';
 
 @Component({
   selector: 'remove-collection-modal',
@@ -10,13 +10,13 @@ import { RemoveCollectionInfo } from '../../../../../../../shared/models/collect
 })
 export class RemoveCollectionModal {
 
-  headerTitle: string = "Удалить коллекцию";
+  headerTitle: string = "Закрыть коллекцию";
   fileInputLabel: string = "Путь"
   fileInputPlaceholder: string = "Путь к коллекции"
 
   canBeEdit: boolean = false;
   
-  @Input() collectionInfo: RemoveCollectionInfo;
+  @Input() collectionInfo: CloseCollectionInfo;
   @Output() onClose = new EventEmitter();
   @Output() onRemove = new EventEmitter();
 

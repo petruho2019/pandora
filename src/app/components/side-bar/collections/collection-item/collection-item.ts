@@ -9,10 +9,10 @@ import { CloneCollectionModal } from "../modals/clone-collection-modal/clone-col
 import { RemoveCollectionModal } from "../modals/remove-collection-modal/remove-collection-modal";
 import { RenameModal } from '../../../reuseable/modals/rename-modal/rename-modal';
 import { BlurService } from '../../../../../../services/blur-service';
-import { ActionsMenuService } from '../../../../../../services/actions-menu-service';
+import { ActionMenuService } from '../../../../../../services/actions-menu-service';
 import { Collection } from '../../../../../../shared/models/collections/collection';
 import { CreateRequestInfo } from '../../../../../../shared/models/event-models/add-request-info';
-import { CloneCollectionDto, RemoveCollectionInfo } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
+import { CloneCollectionDto, CloseCollectionInfo } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
 import { RenameDto } from '../../../../../../shared/models/dto/shared-dtos';
 import { openCollectionInFS } from '../../../../store/actions/collections.actions';
 import { WorkspaceInfoService } from '../../../../../../services/workspace-info-service';
@@ -31,7 +31,7 @@ export class CollectionItem {
 
   private store = inject(Store);
   public blurService = inject(BlurService);
-  private actionsMenuService = inject(ActionsMenuService);
+  private actionsMenuService = inject(ActionMenuService);
   private overlay = inject(Overlay)
   private viewContainerRef = inject(ViewContainerRef);
   private workspaceFacadeService = inject(WorkspaceFacadeService);
@@ -46,7 +46,7 @@ export class CollectionItem {
   @Output() handleAddRequest = new EventEmitter<{overlay: OverlayRef, addRequestInfo: CreateRequestInfo}>();
   @Output() handleCloneCollection = new EventEmitter<{overlay: OverlayRef,cloneCollectionDto: CloneCollectionDto}>();
   @Output() handleRenameCollection = new EventEmitter<{overlay: OverlayRef, renameDto: RenameDto}>();
-  @Output() handleRemoveCollection = new EventEmitter<{overlay: OverlayRef, collectionId: string}>();
+  @Output() handleCloseCollection = new EventEmitter<{overlay: OverlayRef, collectionId: string}>();
 
   public currentOpenedCollectionId$ = this.actionsMenuService.openedId$;
 
@@ -70,7 +70,7 @@ export class CollectionItem {
 
   removeCollectionPortal = viewChild.required<TemplateRef<any>>('closeCollection');
   removeCollectionOverlayRef: OverlayRef;
-  removeCollectionInfo: RemoveCollectionInfo;
+  removeCollectionInfo: CloseCollectionInfo;
 
 
   toggleCollectionActions(event: MouseEvent, id: string) {
@@ -177,7 +177,7 @@ export class CollectionItem {
   }
 
   removeCollection(collectionId: string) {
-    this.handleRemoveCollection.emit({overlay: this.removeCollectionOverlayRef, collectionId: collectionId});
+    this.handleCloseCollection.emit({overlay: this.removeCollectionOverlayRef, collectionId: collectionId});
   }
 
   onRightClick($event: MouseEvent, collectionId: string) {

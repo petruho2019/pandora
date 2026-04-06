@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { Component, inject, viewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ActionsMenuService } from '../../../../../services/actions-menu-service';
+import { ActionMenuService } from '../../../../../services/actions-menu-service';
 import { CdkPortal, PortalModule } from '@angular/cdk/portal';
 import { take } from 'rxjs';
 import { openCollection } from '../../../store/actions/collections.actions';
@@ -20,7 +20,7 @@ export class SideBarHeader {
   
   readonly store = inject(Store);
   private overlay = inject(Overlay)
-  private actionsMenuService = inject(ActionsMenuService);
+  private actionsMenuService = inject(ActionMenuService);
 
   readonly HEADER_MENU_ID = '__header__';
   openedActionsCollectionId: string | null = null;

@@ -28,6 +28,9 @@ export class CollectionElectronService {
     openCollectionInFS({collectionId}: {collectionId: string}) {
         (window as any).electronAPI?.openCollectionInFS(collectionId);
     };
+    deleteCollection(collId: string) : Promise<ResultT<Collection[], string>>{
+        return (window as any).electronAPI.deleteCollection(collId);
+    }
 
     selectFolder(): Promise<string | null> {
         return (window as any).electronAPI?.selectFolder();

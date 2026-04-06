@@ -4,7 +4,13 @@
 
 <div class="main">
   <side-bar></side-bar>
-  <main-content></main-content>
+  <main-content
+    (addCollection)="handleAddCollection()"
+    (openCollection)="handleOpenCollection()"
+    (renameCollection)="handleRenameCollection($event)"
+    (openCollectionInFS)="handleOpenInFS($event.collId)"
+    (closeCollection)="handleCloseCollection($event)"
+  ></main-content>
 </div>
 
 <div

@@ -1,0 +1,96 @@
+.delete-collection-modal {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 34.6%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  border-radius: 8px;
+  min-width: 550px;
+  max-width: 550px;
+  z-index: 1001;
+  border: var(--modal-border-style);
+  background-color: var(--modal-background-color);
+}
+
+.collection-info {
+  padding: 12px;
+  background-color: #181818;
+  border-radius: 6px;
+}
+
+.delete-collection-content {
+  padding: 14px;
+}
+
+.collection-name {
+  font-weight: 600;
+}
+
+.collection-path {
+  margin-top: 4px;
+  color: #bbb;
+  font-size: 13px;
+}
+
+.delimiter-line {
+  opacity: 10%;
+  height: 0.1px;
+  background-color: var(--action-icon-color);
+  pointer-events: none;
+}
+
+.delete-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.delete-label {
+  margin-bottom: 10px;
+}
+
+.delete-text {
+  padding: 2px 4px;
+  background-color: rgba(255, 0, 0, 0.1); 
+  color: rgb(255, 55, 55);
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.confirm-delete-con {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.delete-input:focus{
+  border: 1px solid rgb(255, 55, 55);   
+  box-shadow: 0 0 2px rgb(255, 55, 55);
+}
+
+
+.modal-delete-button {
+  transition: background-color 0.15s;
+  background-color: rgb(218, 40, 40);
+}
+
+.modal-close-button {
+  background-color: var(--modal-background-color);
+}
+
+.modal-close-button:hover {
+  background-color: var(--action-background-color);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.disabled-action {
+  background-color: rgb(175, 55, 55);
+}

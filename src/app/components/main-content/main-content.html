@@ -1,4 +1,14 @@
 <div class="main-content">
   <main-content-header></main-content-header>
   <main-content-tab-items></main-content-tab-items>
+
+  @if (isGeneralInfoDescriptionActiveTabItem()) {
+    <description-content
+      (addCollection)="handleAddCollection()"
+      (openCollection)="handleOpenCollection()"
+      (renameCollection)="handleRenameCollection($event)"
+      (openCollectionInFS)="handleOpenInFS($event.collId)"
+      (closeCollection)="handleCloseCollection($event)"
+    ></description-content>
+  }
 </div>

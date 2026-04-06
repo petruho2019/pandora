@@ -22,11 +22,7 @@
 
   margin: 0 16px 16px 16px;
 }
-
-.modal-close-button {
-  background-color: var(--modal-background-color);
-}
-
-.modal-close-button:hover {
-  background-color: var(--action-background-color);
+.modal-delete-button {
+  background-color: var(--delete-color);
+  color: #d1d1d1;
 }

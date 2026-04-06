@@ -67,8 +67,8 @@
 }
 
 .selected {
-    background-color: rgba(59,176,143, 0.10);
-    color: rgb(59,176,143);
+    background-color: var(--background-color-contrasting);
+    color: var(--contrasting-color);
 }
 
 .delimiter-line {

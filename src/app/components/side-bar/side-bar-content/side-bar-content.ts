@@ -6,7 +6,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { Store } from '@ngrx/store';
 import { OverlayRef } from '@angular/cdk/overlay';
 import { BlurService } from '../../../../../services/blur-service';
-import { ActionsMenuService } from '../../../../../services/actions-menu-service';
+import { ActionMenuService } from '../../../../../services/actions-menu-service';
 import { Observable, of } from 'rxjs';
 import { Collection } from '../../../../../shared/models/collections/collection';
 import { CloneCollectionDto } from '../../../../../shared/models/collections/dto/collection-action-dtos';
@@ -20,7 +20,7 @@ import { selectAll } from '../../../store/selectors/collections.selector';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import { CollectionItem } from '../collections/collection-item/collection-item';
 import { RequestCollectionItem } from '../requests/request-item/request-item';
-import { cloneCollectionModal, removeCollectionModal, renameCollectionModal } from '../../../store/actions/modal-actions/collections-modal.actions';
+import { cloneCollectionModal, closeCollectionModal, renameCollectionModal } from '../../../store/actions/modal-actions/collections-modal.actions';
 import { createHttpRequest } from '../../../store/actions/modal-actions/request-modal.actions';
 
 @Component({
@@ -33,16 +33,17 @@ export class SideBarContent {
   private store = inject(Store);
 
   public blurService = inject(BlurService);
-  private actionsMenuService = inject(ActionsMenuService);
+  private actionsMenuService = inject(ActionMenuService);
 
   @ViewChild(SideBarHeader) sideBarHeaderChild: SideBarHeader;
+  @ViewChild(CollectionItem) collectionItem: CollectionItem;
 
   public renameCollectionHeader: string = "Переименовать коллекцию";
 
   public collections = toSignal(this.store.select(selectAll));
   public collections$ = toObservable(this.collections);
 
- public requests = signal<Record<string, { isLoaded: boolean; requests: RequestModel[] }>>({});
+  public requests = signal<Record<string, { isLoaded: boolean; requests: RequestModel[] }>>({});
   public requests$: Observable<Record<string, { isLoaded: boolean; requests: RequestModel[] }>> = toObservable(this.requests);
 
   public openCollections: WritableSignal<Record<string, boolean>> = signal({});
@@ -103,8 +104,8 @@ export class SideBarContent {
     console.log(`Данный по коллекции ${collectionId} уже получены`);
   }
 
-  handleRemoveCollection(overlay: OverlayRef, collectionId: string) {
-    this.store.dispatch(removeCollectionModal({ actionData: { modalOverlayRef: overlay, body: {collectionId: collectionId}} }));
+  handleCloseCollection(overlay: OverlayRef, collectionId: string) {
+    this.store.dispatch(closeCollectionModal({ actionData: { modalOverlayRef: overlay, body: {collectionId: collectionId}} }));
   }
 
   loadRequestsByCollectionId(collectionId: string, collectionPath: string){
@@ -150,12 +151,24 @@ export class SideBarContent {
     };
   }
 
-  showAddCollectionModal(){
+  showAddCollectionModalRef(){
     this.sideBarHeaderChild.showAddCollectionModal();
   }
 
-  openCollection() {
+  openCollectionRef() {
     this.sideBarHeaderChild.openCollection();
+  }
+
+  renameCollectionRef(collInfo: RenameDto) {
+    this.collectionItem.showRenameCollectionModal(collInfo.id, collInfo.name);
+  }
+
+  openCollectionInFSRef(collId: string){
+    this.collectionItem.showFolderCollection(collId);
+  }
+
+  closeCollectionRef(collInfo: {collectionId: string, collectionName: string, collectionPath: string}){
+    this.collectionItem.showCloseCollectionModal(collInfo.collectionId, collInfo.collectionName, collInfo.collectionPath);
   }
   
   dropCollection($event: CdkDragDrop<string[]>){

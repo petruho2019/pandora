@@ -1,22 +1,26 @@
 import { Collection } from './../../shared/models/collections/collection';
-import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
-import { SideBarResizeComponent } from "./components/side-bar/side-bar";
-import { ActionsMenuService } from '../../services/actions-menu-service';
+import { Component, EventEmitter, HostListener, inject, OnInit, Output, signal, ViewChild } from '@angular/core';
+import { SideBarComponent } from "./components/side-bar/side-bar";
+import { ActionMenuService } from '../../services/actions-menu-service';
 import { AlertNotificationService } from '../../services/alert-notification-service';
 import { AlertNotificationContainer } from "./components/reuseable/alert-notification-container/alert-notification-container";
 import { CdkPortal } from "@angular/cdk/portal";
 import { MainContent } from "./components/main-content/main-content";
+import { RenameDto } from '../../shared/models/dto/shared-dtos';
+import { CloseCollectionInfo } from '../../shared/models/collections/dto/collection-action-dtos';
 
 @Component({
   selector: 'app-root',
-  imports: [SideBarResizeComponent, AlertNotificationContainer, CdkPortal, MainContent],
+  imports: [SideBarComponent, AlertNotificationContainer, CdkPortal, MainContent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
   
-  private actionsMenuService = inject(ActionsMenuService);
+  private actionsMenuService = inject(ActionMenuService);
   private alertNotificationService = inject(AlertNotificationService);
+
+  @ViewChild(SideBarComponent) sideBarComponent: SideBarComponent;
 
   private i: number = 0;
 
@@ -25,6 +29,31 @@ export class App implements OnInit {
   }
 
   protected readonly title = signal('pandora');
+
+  @Output() addCollection = new EventEmitter();
+  @Output() openCollection = new EventEmitter();
+  @Output() renameCollection = new EventEmitter();
+  @Output() openInFSCollection = new EventEmitter();
+  @Output() closeCollection = new EventEmitter();
+
+  handleRenameCollection(collInfo: RenameDto) {
+    this.sideBarComponent.renameCollection(collInfo);
+  }
+
+  handleOpenInFS(collId: string) {
+    this.sideBarComponent.openCollectionInFS(collId);
+  }
+  
+  handleCloseCollection(collInfo: CloseCollectionInfo) {
+    this.sideBarComponent.closeCollection(collInfo);
+  }
+  handleAddCollection() {
+    this.sideBarComponent.showAddCollectionModal();
+  }
+
+  handleOpenCollection() {
+    this.sideBarComponent.openCollection();
+  }
 
   @HostListener('document:click')
   closeActions() {

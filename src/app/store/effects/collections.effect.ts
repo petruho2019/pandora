@@ -3,7 +3,7 @@ import { catchError, debounceTime, distinctUntilChanged, exhaustMap, from, map, 
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {  loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionInFS, openCollectionSuccess} from '../actions/collections.actions';
-import { addCollectionModal, addCollectionModalFailure, addCollectionModalSuccess, cloneCollectionModal, cloneCollectionModalFailure, cloneCollectionModalSuccess, removeCollectionModal, removeCollectionModalFailure, removeCollectionModalSuccess, renameCollectionModal, renameCollectionModalFailure, renameCollectionModalSuccess } from "../actions/modal-actions/collections-modal.actions";
+import { addCollectionModal, addCollectionModalFailure, addCollectionModalSuccess, cloneCollectionModal, cloneCollectionModalFailure, cloneCollectionModalSuccess, closeCollectionModal, closeCollectionModalFailure, closeCollectionModalSuccess, deleteCollectionModal, deleteCollectionModalFailure, deleteCollectionModalSuccess, renameCollectionModal, renameCollectionModalFailure, renameCollectionModalSuccess } from "../actions/modal-actions/collections-modal.actions";
 import { modalSuccess } from "../actions/modal-actions/modal.actions";
 import { Store } from "@ngrx/store";
 import { OverlayRef } from "@angular/cdk/overlay";
@@ -99,17 +99,17 @@ export class CollectionEffects {
     );
 
   removeCollection$ = createEffect(() => this.actions$.pipe(
-      ofType(removeCollectionModal),
+      ofType(closeCollectionModal),
       switchMap(({ actionData }) => 
         from(this.electronService.removeCollection(actionData.body.collectionId)).pipe(
           map(collections => {
             this.dispatchModalSuccess(actionData.modalOverlayRef);
-            return removeCollectionModalSuccess({ newCollections: collections })
+            return closeCollectionModalSuccess({ newCollections: collections })
           }),
           catchError(() => {
             const errorMessage = "Непредвиденная ошибка при удалении коллекций";
             this.store.dispatch(addAlertNotificationMessage({message: errorMessage}))
-            return of(removeCollectionModalFailure({ errorMessage: errorMessage }));
+            return of(closeCollectionModalFailure({ errorMessage: errorMessage }));
           }) // Скорее всего невозможна
         )
       )
@@ -175,6 +175,30 @@ export class CollectionEffects {
       this.electronService.openCollectionInFS({collectionId: collectionId})
     )
   ));
+
+  deleteCollection$ = createEffect(() => this.actions$.pipe(
+    ofType(deleteCollectionModal),
+    switchMap(({actionData}) => from(this.electronService.deleteCollection(actionData.body)).pipe(
+        map(deleteCollectionResult => {
+          console.log(`Effect из удаление коллекции: ${JSON.stringify(deleteCollectionResult, null , 2)}`);
+
+              if(deleteCollectionResult.isSuccess){
+                this.dispatchModalSuccess(actionData.modalOverlayRef);
+                return deleteCollectionModalSuccess({newCollections: deleteCollectionResult.body!});
+              } 
+              else {
+                this.dispatchModalFailure(deleteCollectionResult.error!);
+                return deleteCollectionModalFailure({errorMessage: deleteCollectionResult.error!})
+              }
+          }),
+        catchError((err) => {
+            const errorMessage = "Непредвиденная ошибка при удалении коллекции";
+            this.dispatchModalFailure(errorMessage);
+            return of(deleteCollectionModalFailure({ errorMessage: errorMessage }));
+          })
+      )
+    )
+  )); //
 
   dispatchModalSuccess(modalOverlayRef: OverlayRef) {
     this.store.dispatch( modalSuccess({ modalOverlay: modalOverlayRef }) );

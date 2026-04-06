@@ -2,7 +2,7 @@ import { WorkspaceFacadeService } from './../../../../../services/workspace-faca
 import { AsyncPipe, NgClass } from '@angular/common';
 import { Collection } from './../../../../../shared/models/collections/collection';
 import { WorkspaceType, WorkspaceTypes } from './../../../../../shared/models/utils';
-import { ActionsMenuService } from './../../../../../services/actions-menu-service';
+import { ActionMenuService } from './../../../../../services/actions-menu-service';
 import { WorkspaceInfoService } from '../../../../../services/workspace-info-service';
 import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -18,7 +18,7 @@ export class MainContentHeader {
     private workspaceFacadeService = inject(WorkspaceFacadeService);
     private workspaceInfoService = inject(WorkspaceInfoService);
     
-    private actionsMenuService = inject(ActionsMenuService);
+    private actionsMenuService = inject(ActionMenuService);
     private store = inject(Store);
 
     public selectItemId = '__SELECT_ITEM__';

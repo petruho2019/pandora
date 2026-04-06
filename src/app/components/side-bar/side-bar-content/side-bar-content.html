@@ -7,11 +7,16 @@
         <span>No collections found </span>
         <br />
         <span
-          ><a style="text-decoration: underline" class="pointer" (click)="showAddCollectionModal()"
+          ><a
+            style="text-decoration: underline"
+            class="pointer"
+            (click)="showAddCollectionModalRef()"
             >Create</a
           >
           or
-          <a style="text-decoration: underline" class="pointer" (click)="openCollection()">open</a>
+          <a style="text-decoration: underline" class="pointer" (click)="openCollectionRef()"
+            >open</a
+          >
           collection</span
         >
       </div>
@@ -26,7 +31,7 @@
               handleCloneCollection($event.overlay, $event.cloneCollectionDto)
             "
             (handleRenameCollection)="handleRenameCollection($event.overlay, $event.renameDto)"
-            (handleRemoveCollection)="handleRemoveCollection($event.overlay, $event.collectionId)"
+            (handleCloseCollection)="handleCloseCollection($event.overlay, $event.collectionId)"
             (handleOpenCollection)="handleOpenCollection($event.collectionId, $event.isOpen)"
           ></collection-item>
 

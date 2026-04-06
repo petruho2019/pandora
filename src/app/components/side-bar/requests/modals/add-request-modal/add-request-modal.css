@@ -72,14 +72,6 @@
   margin-top: 32px;
 }
 
-.modal-close-button {
-  background: var(--modal-background-color);
-}
-
-.modal-close-button:hover {
-  background-color: var(--action-background-color);
-}
-
 .url-row {
   display: flex;
   align-items: stretch;
