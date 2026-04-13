@@ -1,22 +1,11 @@
-.tabs-scroll {
-  position: relative;
-}
-
-.tabs-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.tab-items {
+.tab-items-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  padding-left: 16px;
-  margin: 0;
-  list-style: none;
-  white-space: nowrap;
+  overflow: hidden;
 }
 
-.tab-items::after {
+.tab-items-wrapper::after {
   content: "";
   position: absolute;
   left: 1px;
@@ -27,40 +16,68 @@
   z-index: 0;
 }
 
+.tabs-scroll {
+  flex: 0 1 auto;  
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  margin-right: 12px;
+}
+
+.tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-items {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.tab-items-margin {
+  margin-left: 16px;
+}
+
 
 .tab-item-wrapper {
   display: flex;
   justify-content: center;
   position: relative;
   z-index: 1;
-}
-
-.tab-item-wrapper:hover .tab-item-deleteable {
-  padding-right: 18px; /* место под крестик */
-}
-.tab-item-wrapper:hover .close-icon-con {
-  opacity: 1; /* место под крестик */
+  margin-right: 8px;
+  margin-left: 2px;
+  flex: 0 0 auto;
 }
 
 .tab-item-content {
   position: relative;
-
+  
   z-index: 1;
 
-  margin-right: 8px;
-  margin-left: 2px;
-  padding: 4px 10px 6px;
+  padding: 4px 10px 4px 10px;
 
   font-weight: 500;
 
   max-width: 150px;
-  min-width: 50px;
+
+  min-width: 0px;
   min-height: 20px;
 
   border: 1px solid transparent;
   border-bottom: 0;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+}
+
+.tab-item-content:hover .tab-item-deleteable {
+  padding-right: 26px;
+}
+.tab-item-content:hover .close-icon-con {
+  opacity: 1; 
 }
 
 .tab-item-not-selected {
@@ -90,14 +107,14 @@
   text-overflow: clip;
   align-items: center;
   position: relative;
+  min-width: 0px;
 
   transition: padding-right 0.15s;
 }
 
 .request-name {
-  white-space: nowrap;        
+  white-space: nowrap;
   overflow: hidden;
-
 }
 
 .text-overflow-mask {
@@ -115,7 +132,7 @@
   align-items: center;
 
   position: absolute;
-  padding: 4px;
+  padding: 6px;
   right: 0px;
 
   border-radius: 2px;
@@ -143,4 +160,32 @@
 
 .add-request-con:hover {
   background-color: var(--action-background-color);
+}
+
+
+.scroll-btn {
+  position: relative;
+  border: 0;
+  border-radius: 6px;
+  background: var(--background-color-opacity);
+  color: var(--action-icon-color);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px;
+}
+
+.scroll-btn:hover {
+  background: var(--action-background-color);
+}
+
+.scroll-btn-left {
+  margin-right: 6px;
+}
+
+.scroll-btn-right {
+  margin-right: 10px;
 }

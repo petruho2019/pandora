@@ -1,0 +1,156 @@
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+   flex: 1
+}
+
+thead > tr > td { padding: 5px 10px; }
+tbody > tr > td { padding: 1px 10px; }
+
+tr {
+    height: 30px;
+    align-items: center;
+}
+
+td {
+  padding: 0;
+  box-sizing: border-box;
+  vertical-align: middle;
+  align-items: center;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+td:last-child {
+    width: 30px;
+    border-left: var(--border-style);
+    padding: 5px 8px !important; 
+}
+
+tbody > tr:not(:last-child) {
+    border-bottom: var(--border-style);
+}
+
+.param-name-input-wrapper {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.param-input {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  background: none;
+  line-height: 30px;
+  box-sizing: border-box;
+}
+
+.value-con {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  max-width: 100%;
+}
+
+
+.param-name-resizable {
+  position: relative;
+  height: 30px;
+  border-bottom: var(--border-style);
+  overflow: visible;
+}
+
+
+.resizer {
+  display: flex;
+  justify-content: center;
+  
+  position: absolute;
+  right: -1px;     
+  padding-left: 2px;     
+  cursor: col-resize;
+  top: 0px;
+  z-index: 100;
+}
+
+.drag-line {
+  width: 1px;
+  height: 100%;
+  background-color: rgba(155, 155, 155, 0.315); 
+  transition: background-color 0.2s;
+}
+
+.resizer:hover .drag-line {
+  background-color: rgba(255, 255, 255, 0.315); 
+}
+
+input[type="checkbox"] {
+    top: 1px;
+    accent-color: var(--contrasting-color);
+    color: white;
+}
+
+.delete-icon {
+    height: 18px;
+    flex: 0 0 18px;
+    display: block;
+}
+
+
+.add-file-con {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 70px;
+  width: 12px;
+  height: 12px;
+
+  padding: 2px;
+}
+
+.add-file-con:hover .add-file-icon {
+  fill: var(--contrasting-color);
+  stroke: var(--contrasting-color);
+}
+
+.add-file-icon {
+  stroke-width: 0.4px;
+  stroke: var(--action-icon-color);
+
+  transition: fill 0.15s;
+  transition: stroke 0.15s;
+}
+
+
+.file-name {
+  padding-right: 8px;
+}
+
+.file-con {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.delete-file-icon {
+  transition: fill 0.15s;
+}
+
+.delete-file {
+  display: flex;
+  align-items: center;
+  min-width: 12px;
+  height: 12px;
+
+}
+
+.delete-file:hover .delete-file-icon {
+  fill: var(--delete-color);
+}

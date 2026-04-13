@@ -312,7 +312,6 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
 // region functions
 
 function mapCloneDtoToRequestModel(baseRequest: RequestModel, cloneRequestDto: CloneRequestDto) : RequestModel {
-
   switch(baseRequest.type){
     case RequestTypes.HTTP:{
       return {
@@ -322,12 +321,15 @@ function mapCloneDtoToRequestModel(baseRequest: RequestModel, cloneRequestDto: C
         method: baseRequest.method,
         url: baseRequest.url,
         type: RequestTypes.HTTP,
+        params: [],
         headers: baseRequest.headers,
         body: baseRequest.body,
         collectionId: baseRequest.collectionId
       }
     }
   }
+
+  return undefined!;
 }
 
 
@@ -361,8 +363,9 @@ function validateRenameRequestDto(requestInfo: RenameRequestDto){
           url: requestInfo.url,
           collectionId: requestInfo.collectionId, 
           fileName: requestInfo.name, 
-          headers: null,
-          body: null,
+          headers: [],
+          body: {},
+          params: []
         };
 
       // case RequestTypes.GRPC:

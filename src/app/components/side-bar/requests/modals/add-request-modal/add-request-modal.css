@@ -83,11 +83,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px;
-  background: none;
   border: 0px;
-  min-width: 60px;
+  min-width: 50px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .arrow {
@@ -111,7 +110,7 @@
 .methods-dropdown{
   display: block;
   position: absolute;
-  top: 81.25%;
+  top: 77%;
   left: 3.5%;
   min-width: 80px;
   background: #1e1e1e;
@@ -137,26 +136,5 @@
   border: 1px solid #444;
 }
 
-.method-button:hover {
-  background-color: rgba(180, 180, 180, 0.1);
-}
 
-.get-hover:hover {
-  background-color: rgba(133, 235, 106, 0.1);
-}
 
-.post-hover:hover {
-  background-color: rgba(133, 235, 235, 0.1);
-}
-
-.put-hover:hover {
-  background-color: rgba(235, 133, 192, 0.1);
-}
-
-.patch-hover:hover {
-  background-color: rgba(175, 133, 192, 0.1);
-}
-
-.delete-hover:hover {
-  background-color: rgba(255, 67, 67, 0.1);
-}

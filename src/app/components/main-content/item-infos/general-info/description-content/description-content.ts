@@ -1,18 +1,18 @@
-import { RenameDto } from './../../../../../../shared/models/dto/shared-dtos';
+import { RenameDto } from '../../../../../../../shared/models/dto/shared-dtos';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Component, computed, EventEmitter, inject, OnInit, Output, signal, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectAll } from '../../../../store/selectors/collections.selector';
+import { selectAll } from '../../../../../store/selectors/collections.selector';
 import { of, take } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { Collection } from '../../../../../../shared/models/collections/collection';
-import { ActionMenuService } from '../../../../../../services/actions-menu-service';
-import { CloseCollectionInfo as CloseCollectionInfo, DeleteCollectionDto } from '../../../../../../shared/models/collections/dto/collection-action-dtos';
+import { Collection } from '../../../../../../../shared/models/collections/collection';
+import { ActionMenuService } from '../../../../../../../services/actions-menu-service';
+import { CloseCollectionInfo as CloseCollectionInfo, DeleteCollectionDto } from '../../../../../../../shared/models/collections/dto/collection-action-dtos';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { DeleteCollection } from "../modals/delete-collection/delete-collection-modal";
-import { deleteCollectionModal } from '../../../../store/actions/modal-actions/collections-modal.actions';
-import { WorkspaceFacadeService } from '../../../../../../services/workspace-facade-service';
+import { deleteCollectionModal } from '../../../../../store/actions/modal-actions/collections-modal.actions';
+import { WorkspaceFacadeService } from '../../../../../../../services/workspace-facade-service';
 
 @Component({
   selector: 'description-content',

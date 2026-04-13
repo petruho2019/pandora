@@ -1,0 +1,10 @@
+<ngx-monaco-editor
+  [options]="editorOptions"
+  [(ngModel)]="localValue"
+  (ngModelChange)="onCodeChange($event)"
+  #monacoEditor
+></ngx-monaco-editor>
+
+@if (!isValid) {
+  <div class="json-error">JSON некорректный: {{ errorMessage }}</div>
+}

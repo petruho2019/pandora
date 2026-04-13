@@ -16,6 +16,7 @@
       "architect": {
         "build": {
           "builder": "@angular/build:application",
+          
           "options": {
             "baseHref": "./",
             "browser": "src/main.ts",
@@ -24,6 +25,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor/min",
+                "output": "assets/monaco/min"
               }
             ],
             "styles": [

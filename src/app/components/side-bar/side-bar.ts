@@ -12,10 +12,12 @@ import { CloseCollectionInfo } from '../../../../shared/models/collections/dto/c
   styleUrl: './side-bar.css',
 })
 export class SideBarComponent {
-    protected defaultWidth = 300;
-    protected currentWidth = signal(this.defaultWidth);
+    
 
     @ViewChild(SideBarContent) sidebarContent: SideBarContent;
+
+    protected defaultWidth = 300;
+    protected currentWidth = signal(this.defaultWidth);
 
     updateCurrentWidth(newWidth: any){
       this.currentWidth.set(newWidth);

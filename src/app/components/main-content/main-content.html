@@ -11,4 +11,14 @@
       (closeCollection)="handleCloseCollection($event)"
     ></description-content>
   }
+
+  @if (isRequestActiveTabItem()) {
+    <request-info
+      [initialRequests]="initialRequests()"
+      [req]="currentRequest()!"
+      [selectedTabItem]="selectedSettingRequestTabItems()"
+      [selectedBody]="selectedRequestBody()"
+      (selectedRequestSettingTabItemChanged)="handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)"
+    ></request-info>
+  }
 </div>

@@ -49,15 +49,15 @@
       <div class="url-row">
         <div class="method-select-con" (click)="$event.stopPropagation()">
           <div class="method-select">
-            <button
+            <div
               type="button"
-              class="method-button"
-              [ngClass]="[selectedMethod.toLowerCase() + `-hover`, selectedMethod.toLowerCase()]"
-              (click)="toggleMethods()"
+              class="method-button pointer"
+              [ngClass]="[selectedMethod.toLowerCase()]"
+              (click)="toggleMethods(); $event.stopPropagation()"
             >
               {{ selectedMethod }}
               <span class="arrow" [ngClass]="[selectedMethod.toLowerCase() + `-arrow`]">▼</span>
-            </button>
+            </div>
           </div>
         </div>
         <input placeholder="Путь запроса" class="url-input" type="text" [(ngModel)]="url" />
@@ -82,7 +82,9 @@
 
     <div class="actions">
       <button class="modal-close-button action-button pointer" (click)="onClose()">Закрыть</button>
-      <button class="modal-create-button action-button pointer" (click)="onCreate()">Создать</button>
+      <button class="modal-create-button action-button pointer" (click)="onCreate()">
+        Создать
+      </button>
     </div>
   </div>
 </div>

@@ -1,0 +1,131 @@
+.url-con {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: var(--border-style);
+    border-radius: 6px;
+}
+
+.request-type-method-info {
+    margin-right: 2px;
+    padding: 2px;
+}
+
+.http-request-method {
+    padding: 6px 8px;
+    border-radius: 4px;
+
+    font-size: 13px;
+    font-weight: 500;
+}
+
+
+.methods-dropdown{
+  display: block;
+  position: absolute;
+  top: 120%;
+  left: 0%;
+  min-width: 80px;
+  background: #2c2c2c;
+  border: 1px solid #444;
+  border-radius: 4px;
+  z-index: 10;
+  padding: 4px;
+}
+
+.method-item-con {
+  border-radius: 4px;
+  font-size: 10px;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  padding: 2px 2px 2px 6px;
+}
+
+.method-item-con:hover {
+  background-color: #353535;
+}
+
+.active-method {
+  border: 1px solid #444;
+}
+
+.url-input {
+    padding: 6px 8px;
+    background: none;
+    border: none;
+    color: rgb(212, 212, 212);
+    border-radius: 4px;
+    outline: none;
+    height: 21px;
+    width: 100%;
+}
+
+[contenteditable]:focus {
+    outline: 0px solid transparent;
+}
+
+[contentEditable=true]:empty:before {
+  content: attr(placeholder);
+  color: #616060;
+  font-weight: 600;
+  position: absolute;
+  left: 0.5%;
+}
+
+.url-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin: 0 12px;
+}
+
+.url-action {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.save {
+    stroke: #9b9b9b;
+    fill: #9b9b9b;
+    stroke-width: 0.2px;
+}
+
+.url-action.save {
+    position: relative;
+}
+
+.url-action.save::after {
+    content: "Сохранить (Ctrl + S)";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    margin-bottom: 10px;
+
+    background: rgb(80, 80, 80);
+    color: #bbb;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.url-action.save:hover::after {
+    opacity: 1;
+}
+
+.yellow-save-action {
+    fill: #d6932d;
+    stroke: #d6932d;
+}
+
+.send {
+    fill: #9b9b9b;
+}

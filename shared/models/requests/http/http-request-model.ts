@@ -1,23 +1,29 @@
-import { FileBody } from './bodies/file-body';
-import { FormUrlEncodedBody } from './bodies/form-url-encoded-body';
-import { MultipartBody } from './bodies/multipart-body';
-import { NoBody } from './bodies/no-body'
-import { RawBody } from './bodies/raw-body';
-import { BaseRequestModel } from '../request';
+import { BaseRequestModel, TableRow } from '../request';
 import { z } from "zod";
+import { FileBody, FormUrlEncodedBody, JsonBody, MultipartBody, NoBody, TextBody, XmlBody } from '../http/bodies/body'
 
 export interface HttpRequestModel extends BaseRequestModel{
     method: HttpMethod,
-    headers: Header | null,
-    body: RequestBody | null
+    headers: TableRow[],
+    params: TableRow[],
+    body: Record<string, BodyItem>
 }
 
-export type RequestBody =
-    | NoBody
-    | RawBody
-    | FormUrlEncodedBody
-    | MultipartBody
-    | FileBody;
+export type BodyItem =
+  | JsonBody
+  | XmlBody
+  | TextBody
+  | FileBody
+  | NoBody
+  | FormUrlEncodedBody
+  | MultipartBody;
+
+export type BodyGroup = {
+  name: string;
+  key: BodyItem['group'];
+  items: BodyItem[];
+};
+
 
 export const HttpMethods = {
   GET: 'GET',
@@ -31,12 +37,6 @@ export const HttpMethods = {
 
 export type HttpMethod = keyof typeof HttpMethods;
 
-export interface Header {
-    key: string;
-    value: string;
-    enabled: boolean;
-}
-
 export const HttpRequestSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -48,3 +48,11 @@ export const HttpRequestSchema = z.object({
   body: z.any().nullable(),
   fileName: z.string()
 });
+
+
+
+export function buildDefaultBody() : Record<string, BodyItem> {
+  return { 
+    'none': { 'kind': 'none', 'group': 'Other', 'name': 'Без тела' } 
+  };
+}

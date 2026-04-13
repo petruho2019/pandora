@@ -1,0 +1,11 @@
+.query-table-con {
+    margin-top: 12px;
+    border: var(--border-style);
+    border-radius: 4px;
+}
+
+
+.query-header {
+    color: #bbb;
+    font-size: 13px;
+}

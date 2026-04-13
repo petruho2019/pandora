@@ -1,0 +1,24 @@
+@if (isNoBody()) {
+  <div class="no-body-form-con">Нет тела</div>
+} @else if (isJson()) {
+  <div class="editor-wrapper" #editorWrapper>
+    <pandora-json-editor
+      [req]="req"
+      (valueChanged)="handleJsonBodyChanged($event)"
+    ></pandora-json-editor>
+  </div>
+} @else {
+  <div class="body-type-con">
+    @if (isMultipartForm()) {
+      <multipart-form-body
+        [req]="req"
+        (multipartChanged)="handleMultipartChanged($event)"
+      ></multipart-form-body>
+    } @else if (isFormURLEncoded()) {
+      <url-form-encoded-body
+        [req]="req"
+        (urlEncodedChanged)="handleURLEncodedChanged($event)"
+      ></url-form-encoded-body>
+    }
+  </div>
+}

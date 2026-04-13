@@ -10,7 +10,7 @@ html, body {
   width: 100%;
   overflow: hidden; 
   background-color: var(--background-color);
-  font-family: 'Open Sans', 'Raleway';
+  font-family: 'Nunito Sans', 'Open Sans', 'Raleway';
 }
 
 :root {
@@ -21,7 +21,7 @@ html, body {
   --background-color: #222222;
   --background-color-opacity: rgba(155, 155, 155, 0.1);
   --action-icon-color: #d1d1d1; 
-  --delete-color: rgb(173, 30, 30);
+  --delete-color: rgb(255, 98, 98);
   --action-background-color: rgba(155, 155, 155, 0.150);
   --background-color-contrasting: rgba(59,176,143, 0.10);
 }
@@ -35,9 +35,17 @@ html, body {
   color: rgb(133, 235, 106);
 }
 
+.get-hover:hover {
+  background-color: rgba(133, 235, 106, 0.1);
+}
+
 .post,
 .post-arrow {
   color: rgb(133, 235, 235);
+}
+
+.post-hover:hover {
+  background-color: rgba(133, 235, 235, 0.1);
 }
 
 .put,
@@ -45,14 +53,46 @@ html, body {
   color: rgb(235, 133, 192);
 }
 
+.put-hover:hover {
+  background-color: rgba(235, 133, 192, 0.1);
+}
+
 .patch,
 .patch-arrow {
   color: rgb(175, 133, 192);
 }
 
+.patch-hover:hover {
+  background-color: rgba(175, 133, 192, 0.1);
+}
+
 .delete,
 .delete-arrow {
   color: var(--delete-color);
+}
+
+.method-button.get:hover {
+  background-color: rgba(133, 235, 106, 0.1);
+}
+
+.method-button.post:hover {
+  background-color: rgba(133, 235, 235, 0.1);
+}
+
+.method-button.put:hover {
+  background-color: rgba(235, 133, 192, 0.1);
+}
+
+.method-button.patch:hover {
+  background-color: rgba(175, 133, 192, 0.1);
+}
+
+.method-button.delete:hover {
+  background-color: rgba(255, 67, 67, 0.1);
+}
+
+.method-button:hover {
+  background-color: rgba(171, 171, 171, 0.1);
 }
 
 .text-ellipsis {
@@ -63,7 +103,7 @@ html, body {
 
 .pandora-input {
   font-family: 'Open Sans', 'Raleway';
-  padding: 8px 8px;
+  padding: 6px 8px;
   background: none;
   border: 1px solid #444;
   color: rgb(212, 212, 212);
@@ -104,8 +144,6 @@ html, body {
   background-color: var(--contrasting-color);
   color: #ffffff;
 }
-
-
 
 .action-button {
   padding: 8px 14px;

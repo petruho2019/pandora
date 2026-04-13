@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
-import { ModalHeader } from "../../../../reuseable/modals/modal-header/modal-header";
-import { DeleteCollectionDto } from '../../../../../../../shared/models/collections/dto/collection-action-dtos';
+import { ModalHeader } from "../../../../../reuseable/modals/modal-header/modal-header";
+import { DeleteCollectionDto } from '../../../../../../../../shared/models/collections/dto/collection-action-dtos';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 

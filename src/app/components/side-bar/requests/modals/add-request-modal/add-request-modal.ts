@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { ModalHeader } from '../../../../reuseable/modals/modal-header/modal-header';
 import { CreateRequestInfo } from '../../../../../../../shared/models/event-models/add-request-info';
 import { HttpMethod } from '../../../../../../../shared/models/requests/http/http-request-model';
+import { NgClass } from '@angular/common';
 import { RequestType, RequestTypes } from '../../../../../../../shared/models/requests/request';
 
 @Component({
   selector: 'add-request-modal',
-  imports: [CommonModule, FormsModule, ModalHeader],
+  imports: [CommonModule, FormsModule, ModalHeader, NgClass],
   templateUrl: './add-request-modal.html',
   styleUrl: './add-request-modal.css',
 })

@@ -12,7 +12,6 @@ export class ResizableBar {
 
   @Output() onWidthChanged = new EventEmitter<any>();
 
-
   protected onDragMoved(event: CdkDragMove){
     const resizerEl = event.source.element.nativeElement;
     
@@ -23,7 +22,6 @@ export class ResizableBar {
     
     this.onWidthChanged.emit(newWidth);
 
-    const element = event.source.element.nativeElement;
     resizerEl.style.transform = 'none';
   }
 }

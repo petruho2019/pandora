@@ -10,3 +10,15 @@ export const REQUEST_TAB_ITEM_DEFAULT_NAME =  'Без названия';
 
 export const MIN_SIDEBAR_WIDTH_PX = 200;
 export const MAX_SIDEBAR_WIDTH_PX = 500;
+
+export const MIN_NAME_COLUMN_WIDTH_PX = 100;
+
+export const BODY_KIND = {
+  NONE: "none" as const,
+  FILE: "file" as const,
+  FORM_URL_ENCODED: "form-url-encoded" as const,
+  MULTIPART_FORM: "multipart-form" as const,
+  JSON: "json" as const,
+  XML: "xml" as const,
+  TEXT: "text" as const,
+} satisfies Record<string, string>;

@@ -1,0 +1,78 @@
+<div class="request-info-content">
+  @if (req) {
+    <request-url
+      [isReqChanged]="requestChanged()"
+      [req]="req"
+      (methodChanged)="handleMethodChanged($event)"
+      (urlChanged)="handleUrlChanged($event)"
+    ></request-url>
+  }
+
+  <div class="request-setting">
+    <div class="tab-items-con">
+      <div class="tab-items">
+        @for (tabItem of tabItems; track $index) {
+          <div
+            class="tab-item pointer"
+            [ngClass]="{ selected: selectedTabItem()![req.id] === tabItem }"
+            (click)="selectTabItem(tabItem)"
+          >
+            {{ tabItem }}
+          </div>
+        }
+      </div>
+
+      @if (isBodyTabItem()) {
+        <div class="selectd-body-con" (click)="showBodyTypes(); $event.stopPropagation()">
+          <span class="selected-body pointer">{{ selectedBody()![req.id].name }}</span>
+        </div>
+
+        @if (isShowBodyTypes) {
+          <div class="body-types" (click)="$event.stopPropagation()">
+            @for (group of bodyGroups; track group.key) {
+              <div class="body-types-group">
+                <span class="body-type-group-text group-header-text">
+                  {{ group.name }}
+                </span>
+
+                @for (item of group.items; track item.kind) {
+                  <span
+                    class="body-type"
+                    [ngClass]="{ 'active-body': selectedBody()![req.id].kind === item.kind }"
+                    (click)="setBodyType(item)"
+                  >
+                    {{ item.name }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    @if (req) {
+      <div class="tab-item-content">
+        @if (isParamsTabItem()) {
+          <request-params
+            [req]="req"
+            (urlParamsChanged)="handleUrlParamsChanged($event)"
+          ></request-params>
+        } @else if (isBodyTabItem()) {
+          <request-body
+            [req]="req"
+            [selectedBody]="selectedBody()![req.id]"
+            (multipartChanged)="handleMultipartBodyChanged($event)"
+            (urlEncodedChanged)="handleUrlEndodedBodyChanged($event)"
+            (jsonChanged)="handleJsonBodyChanged($event)"
+          ></request-body>
+        } @else if (isHeadersTabItem()) {
+          <request-headers
+            [req]="req"
+            (headersChanged)="handleHeadersChanged($event)"
+          ></request-headers>
+        } @else if (isAuthTabItem()) {}
+      </div>
+    }
+  </div>
+</div>

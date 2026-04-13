@@ -1,0 +1,21 @@
+
+
+.body-type-con {
+    display: flex;
+    border: var(--border-style);
+    border-radius: 4px;
+    max-width: 100%;
+    margin-top: 20px;
+}
+
+
+.editor-wrapper {
+    margin-top: 20px;
+}
+
+pandora-json-editor {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    flex: 1;
+}

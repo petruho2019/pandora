@@ -1,3 +1,4 @@
+import { id } from "zod/v4/locales";
 import { HttpRequestModel } from "./http/http-request-model";
 
 export type RequestModel = HttpRequestModel;
@@ -15,6 +16,38 @@ export interface BaseRequestModel {
   name: string,
   url: string,
   type: RequestType,
-  collectionId: string,
+  collectionId: string | null,
   fileName: string
+}
+
+export const RequestSettingsTabItems = {
+  PARAMS: 'Параметры',
+  BODY: 'Тело',
+  HEADERS: 'Заголовки',
+  AUTH: 'Аутентификация' 
+} as const;
+
+export type RequestSettingsTabItemsType = typeof RequestSettingsTabItems[keyof typeof RequestSettingsTabItems];
+
+export interface MultipartBodyInfo {
+  fileValue: File | null,
+  contentType: string
+}
+
+export interface TableRow  {
+  id: string,
+  isActive: boolean
+  name: string,
+  value: string,
+  multipartInfo: MultipartBodyInfo | null
+}
+
+export function buildHeader(tableRow: TableRow) : TableRow {
+  return {
+    id: tableRow.id,
+    name: tableRow.name,
+    isActive: tableRow.isActive,
+    value: tableRow.value,
+    multipartInfo: null
+  }
 }

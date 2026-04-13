@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, ElementRef, inject, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, ElementRef, HostListener, inject, OnChanges, OnDestroy, OnInit, QueryList, signal, ViewChild, ViewChildren } from '@angular/core';
 import { TabItem, TabItemTypes } from '../../../../../shared/models/utils';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { TabItemService } from '../../../../../services/tab-item-service';
@@ -14,56 +14,47 @@ import { GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID } from '../../../../../shar
   templateUrl: './main-content-tab-items.html',
   styleUrl: './main-content-tab-items.css',
 })
-export class MainContentTabItems implements AfterViewInit, OnDestroy{
-  
-    private workspaceInfoService = inject(WorkspaceInfoService);
+export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
+
+
+  private workspaceInfoService = inject(WorkspaceInfoService);
     private workspaceFacadeService = inject(WorkspaceFacadeService);
     private tabItemService = inject(TabItemService);
     private changeDetector = inject(ChangeDetectorRef);
 
-    @ViewChild('tabsScroll') tabsScroll!: ElementRef<HTMLElement>;
-    @ViewChildren('requestName') requestNames!: QueryList<ElementRef<HTMLElement>>;
+    private readonly THRESHOLD = 16;
 
+    @ViewChildren('requestName') requestNames!: QueryList<ElementRef<HTMLElement>>;
+    @ViewChild('tabsScroll') tabsScroll: ElementRef<HTMLElement>;// tabItems
+    @ViewChild('tabItems') tabItems: ElementRef<HTMLElement>;
+
+    public showScrollButtons = signal(false);
+    public tabsScrollMaxWidth = signal(window.innerWidth - 500);
+
+    ngDoCheck(): void {
+      this.checkRequestNameOverflow();
+    }
 
     ngOnInit(): void {
       if(!this.getTabItemsByWorkspaceId())
         this.tabItemService.setActiveTabItemId(GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID);
     }  
 
+    ngAfterViewInit(): void {
+      this.updateWidth();
+    }
+
     activeTabItem = computed(() => {
       const workspaceId = this.workspaceInfoService.activeWorkspaceId();
       const items = this.tabItemService.tabItemsByWorkspaceId();
       const activeId = this.tabItemService.activeTabItemId();
-
-      console.log(`activeTabItem computed , текущий таб айтем ${items[workspaceId]?.find(ti => ti.id === activeId)} , текущий воркспейс ${workspaceId} , текущей таб айтем id: ${activeId}`);
 
       return items[workspaceId]?.find(ti => ti.id === activeId);
     });
     
     selectTabItem(id: string){
       this.tabItemService.setActiveTabItemId(id);
-    }
-
-    private wheelHandler = (event: WheelEvent) => {
-      const el = this.tabsScroll?.nativeElement;
-      if (!el) return;
-
-      if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-        event.preventDefault();
-        el.scrollLeft += event.deltaY;
-      }
-    };
-
-    ngAfterViewInit(): void {
-      this.tabsScroll.nativeElement.addEventListener('wheel', this.wheelHandler, {
-        passive: false,
-      });
-
-      this.checkRequestNameOverflow();
-    }
-
-    ngOnDestroy(): void {
-      this.tabsScroll?.nativeElement.removeEventListener('wheel', this.wheelHandler);
+      this.changeDetector.detectChanges();
     }
 
     getActiveWorkspace() {
@@ -75,11 +66,11 @@ export class MainContentTabItems implements AfterViewInit, OnDestroy{
     }
 
     checkRequestNameOverflow() {
-      this.requestNames.forEach((ref: any) => {
+      this.requestNames?.forEach((ref: any) => {
         this.applyOverflow(ref.nativeElement);
       });
 
-      this.requestNames.changes.subscribe(names => {
+      this.requestNames?.changes.subscribe(names => {
         names.forEach((ref: ElementRef<HTMLElement>) => {
           this.applyOverflow(ref.nativeElement);
         });
@@ -93,19 +84,12 @@ export class MainContentTabItems implements AfterViewInit, OnDestroy{
       console.log(`Текущий выбранный таб айте ${JSON.stringify(this.activeTabItem())}`);
 
       this.changeDetector.detectChanges();
+      this.updateWidth();
     }
 
-    addReqeuestTabItem() {
+    addRequestTabItem() {
       this.tabItemService.addDefaultRequestTabItem(this.workspaceInfoService.activeWorkspace()!.id);
-    }
-
-    onHover(event: MouseEvent) {
-      const wrapper = event.currentTarget as HTMLElement;
-      const name = wrapper.querySelector('.request-name') as HTMLElement;
-
-      if (!name) return;
-
-      this.applyOverflow(name);
+      this.updateWidth();
     }
 
     private applyOverflow(element: HTMLElement) {
@@ -119,8 +103,6 @@ export class MainContentTabItems implements AfterViewInit, OnDestroy{
     }
 
     dropTabItem($event: CdkDragDrop<string[]>){
-
-
       console.log(`Информация из ивента, previousIndes: ${$event.previousIndex} , currentIndex: ${$event.currentIndex}`);
 
       this.tabItemService.moveTabItem($event.previousIndex, $event.currentIndex, this.workspaceInfoService.activeWorkspaceId());
@@ -140,6 +122,39 @@ export class MainContentTabItems implements AfterViewInit, OnDestroy{
 
     isRequestType(tabItem: TabItem){
       return tabItem.tabType === TabItemTypes.Request;
+    }
+
+    scrollTabs(delta: number){
+      const el = this.tabsScroll?.nativeElement;
+      if(!el) return;
+
+      el.scrollBy({
+        left: delta,
+        behavior: 'smooth'
+      });
+    }
+
+    updateScrollButtons() {
+      const el = this.tabsScroll?.nativeElement;
+      if(!el) return;
+
+      this.showScrollButtons.set(
+        this.tabsScrollMaxWidth() - el.clientWidth < this.THRESHOLD
+      );
+    }
+
+    @HostListener('window:resize')
+    onResize() {
+      this.updateWidth();
+      this.checkRequestNameOverflow();
+    }
+
+    private updateWidth() {
+      this.tabsScrollMaxWidth.set(window.innerWidth - 500);
+
+      requestAnimationFrame(() => {
+        this.updateScrollButtons();
+      });
     }
 
 }

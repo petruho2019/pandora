@@ -1,9 +1,9 @@
-import { Collection } from "../shared/models/collections/collection";
+import { Collection } from './../shared/models/collections/collection';
 import { Injectable, signal } from "@angular/core";
 import { RequestTabItem, TabItem, TabItemTypes } from '../shared/models/utils';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestModel, RequestTypes } from '../shared/models/requests/request';
-import { HttpMethods } from "../shared/models/requests/http/http-request-model";
+import { buildDefaultBody, HttpMethods } from "../shared/models/requests/http/http-request-model";
 import { GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID, REQUEST_TAB_ITEM_DEFAULT_NAME } from "../shared/models/constants";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 
@@ -133,11 +133,12 @@ export class TabItemService {
   }
 
   addDefaultRequestTabItem(workspaceId: string) {
+    const requestName = this.buildDefaultName(workspaceId);
     const tabItem: TabItem = {
       id: uuidv4(),
       tabType: TabItemTypes.Request,
-      name: REQUEST_TAB_ITEM_DEFAULT_NAME,
-      request: this.buildDefaultRequestModel(workspaceId),
+      name: requestName,
+      request: this.buildDefaultRequestModel(requestName),
       collection: null
     } 
 
@@ -157,20 +158,65 @@ export class TabItemService {
     });
   }
 
-  buildDefaultRequestModel(workspaceId: string): RequestTabItem{
+  buildDefaultRequestModel(name: string): RequestTabItem{
     return {
       request: {
         id: uuidv4(),
         method: HttpMethods.GET,
-        headers: null,
-        body: null,
-        name: REQUEST_TAB_ITEM_DEFAULT_NAME,
+        headers: [],
+        body: buildDefaultBody(),
+        name: name,
+        params: [],
         url: '',
         type: RequestTypes.HTTP,
-        collectionId: workspaceId,
+        collectionId: null, // Далее будет установлено в модалке сохранения запроса
         fileName: REQUEST_TAB_ITEM_DEFAULT_NAME
       },
       isReplaceable: false
     }
+  }
+
+  buildDefaultName(workspaceId: string) : string {
+    const requestTabItems = this.tabItemsByWorkspaceId()[workspaceId];
+
+    let requestNumber: number = 1;
+    let name: string | null = REQUEST_TAB_ITEM_DEFAULT_NAME;
+
+    while(true) {
+      if(!requestTabItems.find(rti => rti.name === `${name} ${String(requestNumber)}`)){
+        break;
+      };
+      requestNumber++;
+    }
+
+    return `${name} ${String(requestNumber)}`;
+  }
+
+  updateRequest(reqId: string, patch: Partial<RequestModel>) {
+    this._tabItemsByWorkspaceId.update(state => {
+      const newState: Record<string, TabItem[]> = {};
+
+      for (const workspaceId in state) {
+        newState[workspaceId] = state[workspaceId].map(tab => {
+
+          if (!tab.request?.request) return tab;
+
+          if (tab.request!.request!.id !== reqId) return tab;
+
+          return {
+            ...tab,
+            request: {
+              ...tab.request,
+              request: {
+                ...tab.request.request,
+                ...patch
+              }
+            }
+          };
+        });
+      }
+
+      return newState;
+    });
   }
 }
