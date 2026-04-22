@@ -1,7 +1,7 @@
 import { Component, computed, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { RequestModel, TableRow } from '../../../../../../../../../../shared/models/requests/request';
 import { BODY_KIND } from '../../../../../../../../../../shared/models/constants';
-import { FormUrlEncodedBody } from '../../../../../../../../../../shared/models/requests/http/bodies/body';
+import { FormUrlEncodedBody } from '../../../../../../../../../../shared/models/requests/http/body';
 import { PandoraTable } from "../../../../../../../reuseable/pandora-table/pandora-table";
 
 @Component({

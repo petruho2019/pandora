@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, model, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, model, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RequestModel, TableRow } from '../../../../../../../../shared/models/requests/request';
 import { PandoraTable } from "../../../../../reuseable/pandora-table/pandora-table";
@@ -9,20 +9,21 @@ import { PandoraTable } from "../../../../../reuseable/pandora-table/pandora-tab
   templateUrl: './request-params.html',
   styleUrl: './request-params.css',
 })
-export class RequestParams implements OnInit {
+export class RequestParams implements OnChanges {
 
   @Output() urlParamsChanged = new EventEmitter<string>();
   @Input() req: RequestModel;
 
-  ngOnInit(): void {
-    this.tableInitialData = { [this.req.id]: this.getTableInitialData() };
-    console.log(`Создается request params компонент! Значение в таблицу: ${JSON.stringify(this.tableInitialData, null , 2)}`);
-  }
+  tableInitialData: TableRow[] = [];
 
-  tableInitialData: Record<string , TableRow[]> = {};
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['req']) {
+      const params = this.req.params;
 
-  getTableInitialData() {
-    return this.req.params;
+      this.tableInitialData = params
+        ? params
+        : [];
+    }
   }
 
   handleParamsTableChanged(tableRows: TableRow[]) {

@@ -2,7 +2,7 @@ import { Component, computed, EventEmitter, Input, OnChanges, Output, SimpleChan
 import { RequestModel, TableRow } from '../../../../../../../../../../shared/models/requests/request';
 import { PandoraTable } from "../../../../../../../reuseable/pandora-table/pandora-table";
 import { BODY_KIND } from '../../../../../../../../../../shared/models/constants';
-import { MultipartBody } from '../../../../../../../../../../shared/models/requests/http/bodies/body';
+import { MultipartBody } from '../../../../../../../../../../shared/models/requests/http/body';
 
 @Component({
   selector: 'multipart-form-body',
@@ -27,7 +27,7 @@ export class MultipartFormBody implements OnChanges{
             isActive: f.isActive,
             name: f.key,
             value: f.type === 'text' ? f.value : '',
-            multipartInfo: {
+            fileInfo: {
               fileValue: f.type === 'file' ? f.file : null,
               contentType: f.contentType ?? ''
             }

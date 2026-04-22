@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { PandoraTable } from "../../../../../reuseable/pandora-table/pandora-table";
 import { buildHeader, RequestModel, TableRow } from '../../../../../../../../shared/models/requests/request';
 
@@ -8,21 +8,21 @@ import { buildHeader, RequestModel, TableRow } from '../../../../../../../../sha
   templateUrl: './request-headers.html',
   styleUrl: './request-headers.css',
 })
-export class RequestHeaders implements OnInit{
+export class RequestHeaders implements OnChanges{
 
   @Output() headersChanged = new EventEmitter<TableRow[]>();
   @Input() req: RequestModel;
 
-  ngOnInit(): void {
-    this.tableInitialData = { [this.req.id]: this.getTableInitialData() };
-    console.log(`Создается request params компонент! Значение в таблицу: ${JSON.stringify(this.tableInitialData, null , 2)}`);
-  }
+  tableInitialData: TableRow[] = [];
 
-  tableInitialData: Record<string , TableRow[]> = {};
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['req']) {
+      const headers = this.req.headers;
 
-  getTableInitialData() {
-    console.log(`Получаем хедеры по запросу с id: ${this.req.id}, вот они: ${JSON.stringify(this.tableInitialData[this.req.id], null , 2)}`);
-    return this.tableInitialData[this.req.id];
+      this.tableInitialData = headers
+        ? headers
+        : [];
+    }
   }
 
   handleHeadersChanged(tableRows: TableRow[]) {

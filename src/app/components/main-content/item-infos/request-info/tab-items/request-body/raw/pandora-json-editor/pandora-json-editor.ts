@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, computed, effect, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MonacoEditorModule } from 'ngx-monaco-editor-v2'
-import { RequestModel } from '../../../../../../../../../../shared/models/requests/request';
-import { JsonBody } from '../../../../../../../../../../shared/models/requests/http/bodies/body';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import * as monaco from 'monaco-editor';
 import { BODY_KIND } from '../../../../../../../../../../shared/models/constants';
+import { RequestModel } from '../../../../../../../../../../shared/models/requests/request';
+import { JsonBody } from '../../../../../../../../../../shared/models/requests/http/body';
 
 @Component({
   selector: 'pandora-json-editor',
@@ -11,53 +12,30 @@ import { BODY_KIND } from '../../../../../../../../../../shared/models/constants
   templateUrl: './pandora-json-editor.html',
   styleUrl: './pandora-json-editor.css',
 })
-export class PandoraJsonEditor {
-
-  constructor() {
-    effect(() => {
-      this.localValue = this.jsonValue();
-    });
-  };
-  
+export class PandoraJsonEditor implements OnChanges {
   isValid = true;
   errorMessage = '';
   localValue = '';
 
-  @Input() req: RequestModel;
+  @Input() req!: RequestModel;
   @Output() valueChanged = new EventEmitter<string>();
 
-  jsonValue = computed(() => {
-    const body = this.req.body?.[BODY_KIND.JSON] as JsonBody;
-
-    if (!body) return '';
-
-    return body.value ?? '';
-  });
-
-  editorOptions = {
-    theme: 'vs-dark',
-    language: 'json',
-    automaticLayout: true,
-    minimap: { enabled: false },
-    fontSize: 13,
-    lineNumbers: 'on',
-    scrollBeyondLastLine: false
-  };
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['req']) {
+      const body = this.req.body[BODY_KIND.JSON] as JsonBody;
+      this.localValue = body ? body.value : '';
+      console.log(`Изменился запрос в JSON ngOnChanges, установим значение: ${this.localValue}`);
+    }
+  }
 
   onCodeChange(value: string) {
     this.localValue = value;
 
     try {
       JSON.parse(value);
-
-      this.isValid = true;
-      this.errorMessage = '';
-
       this.valueChanged.emit(value);
     } catch (e: any) {
-      this.isValid = false;
-      this.errorMessage = e.message;
+      this.valueChanged.emit(value);
     }
   }
 }
-

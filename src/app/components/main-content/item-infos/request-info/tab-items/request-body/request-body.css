@@ -1,5 +1,9 @@
 
 
+.no-body-con {
+    margin-top: 20px;
+}
+
 .body-type-con {
     display: flex;
     border: var(--border-style);
@@ -19,3 +23,5 @@ pandora-json-editor {
     min-width: 0;
     flex: 1;
 }
+
+

@@ -1,13 +1,25 @@
 @if (isNoBody()) {
-  <div class="no-body-form-con">Нет тела</div>
-} @else if (isJson()) {
+  <div class="no-body-con">Без тела</div>
+} @else if (isRaw()) {
   <div class="editor-wrapper" #editorWrapper>
-    <pandora-json-editor
-      [req]="req"
-      (valueChanged)="handleJsonBodyChanged($event)"
-    ></pandora-json-editor>
+    @if (isJson()) {
+      <pandora-json-editor
+        [req]="req"
+        (valueChanged)="handleJsonBodyChanged($event)"
+      ></pandora-json-editor>
+    } @else if (isText()) {
+      <pandora-text-editor
+        [req]="req"
+        (valueChanged)="handleTextBodyChanged($event)"
+      ></pandora-text-editor>
+    } @else if (isXml()) {
+      <pandora-xml-editor
+        [req]="req"
+        (valueChanged)="handleXmlBodyChanged($event)"
+      ></pandora-xml-editor>
+    }
   </div>
-} @else {
+} @else if (isFormBodyType()) {
   <div class="body-type-con">
     @if (isMultipartForm()) {
       <multipart-form-body
@@ -21,4 +33,6 @@
       ></url-form-encoded-body>
     }
   </div>
+} @else {
+  <file-body [req]="req" (fileChanged)="handleFileBodyChanged($event)"></file-body>
 }

@@ -1,0 +1,8 @@
+<div class="auth-info-con">
+  @if (isNoAuth()) {
+    Без аутентификации
+  } @else if (isBasic()) {
+    <basic-auth [req]="req" (authChanged)="handleBasicAuthChanged($event)"></basic-auth>
+  } @else if (isBearer()) {
+  } @else if (isInherit()) {}
+</div>
