@@ -2,12 +2,13 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RequestModel } from '../../../../../../../../shared/models/requests/request';
 import { AuthItem } from '../../../../../../../../shared/models/requests/http/http-request-model';
 import { AUTH_KIND } from '../../../../../../../../shared/models/requests/http/auth';
-import { BasicAuth } from "../basic-auth/basic-auth";
+import { BasicAuth } from "./basic-auth/basic-auth";
 import { BasicAuthInfoDto } from '../../../../../../../../shared/models/requests/dto/request-dtos';
+import { BearerAuth } from "./bearer-auth/bearer-auth";
 
 @Component({
   selector: 'request-auth',
-  imports: [BasicAuth],
+  imports: [BasicAuth, BearerAuth],
   templateUrl: './request-auth.html',
   styleUrl: './request-auth.css',
 })
@@ -17,10 +18,14 @@ export class RequestAuth {
   @Input() selectedAuth: AuthItem;
 
   @Output() basicAuthChanged = new EventEmitter<BasicAuthInfoDto>();
-  @Output() urlEncodedChanged = new EventEmitter();
+  @Output() bearerAuthChanged = new EventEmitter<string | null>();
 
   handleBasicAuthChanged(credInfo: BasicAuthInfoDto) {
     this.basicAuthChanged.emit(credInfo);
+  }
+
+  handleBearerAuthChaned(token: string | null) {
+    this.bearerAuthChanged.emit(token);
   }
 
   isNoAuth() {

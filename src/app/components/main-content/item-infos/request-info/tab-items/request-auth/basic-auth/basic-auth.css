@@ -1,0 +1,17 @@
+.credentials {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.credentials > div {
+    display: flex;
+    width: 60%;
+    flex-direction: column;
+}
+
+.password-view {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+}

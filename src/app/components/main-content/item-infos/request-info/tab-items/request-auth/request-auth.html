@@ -4,5 +4,6 @@
   } @else if (isBasic()) {
     <basic-auth [req]="req" (authChanged)="handleBasicAuthChanged($event)"></basic-auth>
   } @else if (isBearer()) {
+    <bearer-auth [req]="req" (authChanged)="handleBearerAuthChaned($event)" ></bearer-auth>
   } @else if (isInherit()) {}
 </div>
