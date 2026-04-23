@@ -8,6 +8,7 @@ import { CdkPortal } from "@angular/cdk/portal";
 import { MainContent } from "./components/main-content/main-content";
 import { RenameDto } from '../../shared/models/dto/shared-dtos';
 import { CloseCollectionInfo } from '../../shared/models/collections/dto/collection-action-dtos';
+import { editor } from 'monaco-editor';
 
 @Component({
   selector: 'app-root',
@@ -16,8 +17,20 @@ import { CloseCollectionInfo } from '../../shared/models/collections/dto/collect
   styleUrl: './app.css'
 })
 export class App implements OnInit {
+
+  constructor() {
+    console.log(`определяем кастомную тему monaco editor`);
+    editor.defineTheme('pandoraTheme', {
+      base: 'vs-dark',
+      inherit: true,
+      colors: {
+        "editor.background": '#222222'
+      },
+      rules: []
+    });    
+  }
   
-  private actionsMenuService = inject(ActionMenuService);
+  private actionMenuService = inject(ActionMenuService);
   private alertNotificationService = inject(AlertNotificationService);
 
   @ViewChild(SideBarComponent) sideBarComponent: SideBarComponent;
@@ -55,9 +68,10 @@ export class App implements OnInit {
     this.sideBarComponent.openCollection();
   }
 
-  @HostListener('document:click')
+  @HostListener('click')
   closeActions() {
-    this.actionsMenuService.close();
+    console.log(`closeActions`);
+    this.actionMenuService.close();
   }
 
   test() {

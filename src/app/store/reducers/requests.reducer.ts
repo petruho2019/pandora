@@ -5,8 +5,62 @@ import { loadRequestsSuccess, moveRequest } from "../actions/requests.actions";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 import { RequestModel } from "../../../../shared/models/requests/request";
 import { cloneRequestSuccess, createRequestSuccess, deleteRequestSuccess, renameRequestSuccess } from "../actions/modal-actions/request-modal.actions";
+import { buildDefaultAuth, buildDefaultBody } from "../../../../shared/models/requests/http/http-request-model";
 
 export const requestFeatureKey = 'requests';
+export const INITIAL_REQUESTS_STATE: Record<string, {isLoaded: boolean, requests: RequestModel[]}> = {
+  'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b': {
+    isLoaded: true,
+    requests: [
+      { id: '10000000-0000-4000-8000-000000000001', name: 'Get users', type: 'HTTP', method: 'GET', url: '/api/users', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'get-users' },
+      { id: '10000000-0000-4000-8000-000000000002', name: 'Get user by id', type: 'HTTP', method: 'GET', url: '/api/users/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'get-user-by-id' },
+      { id: '10000000-0000-4000-8000-000000000003', name: 'Get posts', type: 'HTTP', method: 'GET', url: '/api/posts', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'get-posts' },
+      { id: '10000000-0000-4000-8000-000000000004', name: 'Create user', type: 'HTTP', method: 'POST', url: '/api/users', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'create-user' },
+      { id: '10000000-0000-4000-8000-000000000005', name: 'Create post', type: 'HTTP', method: 'POST', url: '/api/posts', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'create-post' },
+      { id: '10000000-0000-4000-8000-000000000006', name: 'Create comment', type: 'HTTP', method: 'POST', url: '/api/comments', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'create-comment' },
+      { id: '10000000-0000-4000-8000-000000000007', name: 'Update user', type: 'HTTP', method: 'PUT', url: '/api/users/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'update-user' },
+      { id: '10000000-0000-4000-8000-000000000008', name: 'Update post', type: 'HTTP', method: 'PUT', url: '/api/posts/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'update-post' },
+      { id: '10000000-0000-4000-8000-000000000009', name: 'Patch user', type: 'HTTP', method: 'PATCH', url: '/api/users/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'patch-user' },
+      { id: '10000000-0000-4000-8000-000000000010', name: 'Patch post', type: 'HTTP', method: 'PATCH', url: '/api/posts/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'patch-post' },
+      { id: '10000000-0000-4000-8000-000000000011', name: 'Delete user', type: 'HTTP', method: 'DELETE', url: '/api/users/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'delete-user' },
+      { id: '10000000-0000-4000-8000-000000000012', name: 'Delete post', type: 'HTTP', method: 'DELETE', url: '/api/posts/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'delete-post' },
+      { id: '10000000-0000-4000-8000-000000000013', name: 'Search users', type: 'HTTP', method: 'GET', url: '/api/users/search', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'search-users' },
+      { id: '10000000-0000-4000-8000-000000000014', name: 'Search posts', type: 'HTTP', method: 'GET', url: '/api/posts/search', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'search-posts' },
+      { id: '10000000-0000-4000-8000-000000000015', name: 'Login', type: 'HTTP', method: 'POST', url: '/api/auth/login', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'login' },
+      { id: '10000000-0000-4000-8000-000000000016', name: 'Register', type: 'HTTP', method: 'POST', url: '/api/auth/register', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'register' },
+      { id: '10000000-0000-4000-8000-000000000017', name: 'Refresh token', type: 'HTTP', method: 'POST', url: '/api/auth/refresh', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'refresh-token' },
+      { id: '10000000-0000-4000-8000-000000000018', name: 'Get profile', type: 'HTTP', method: 'GET', url: '/api/profile', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'get-profile' },
+      { id: '10000000-0000-4000-8000-000000000019', name: 'Update profile', type: 'HTTP', method: 'PUT', url: '/api/profile', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'update-profile' },
+      { id: '10000000-0000-4000-8000-000000000020', name: 'Delete account', type: 'HTTP', method: 'DELETE', url: '/api/account', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', fileName: 'delete-account' }
+    ]
+  },
+
+  '33abfac2-d678-481c-aa9a-39ac8361bd3e': {
+    isLoaded: true,
+    requests: [
+      { id: '20000000-0000-4000-8000-000000000021', name: 'Get products', type: 'HTTP', method: 'GET', url: '/api/products', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'get-products' },
+      { id: '20000000-0000-4000-8000-000000000022', name: 'Get product by id', type: 'HTTP', method: 'GET', url: '/api/products/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'get-product-by-id' },
+      { id: '20000000-0000-4000-8000-000000000023', name: 'Get categories', type: 'HTTP', method: 'GET', url: '/api/categories', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'get-categories' },
+      { id: '20000000-0000-4000-8000-000000000024', name: 'Create product', type: 'HTTP', method: 'POST', url: '/api/products', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'create-product' },
+      { id: '20000000-0000-4000-8000-000000000025', name: 'Create category', type: 'HTTP', method: 'POST', url: '/api/categories', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'create-category' },
+      { id: '20000000-0000-4000-8000-000000000026', name: 'Create order', type: 'HTTP', method: 'POST', url: '/api/orders', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'create-order' },
+      { id: '20000000-0000-4000-8000-000000000027', name: 'Update product', type: 'HTTP', method: 'PUT', url: '/api/products/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'update-product' },
+      { id: '20000000-0000-4000-8000-000000000028', name: 'Update category', type: 'HTTP', method: 'PUT', url: '/api/categories/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'update-category' },
+      { id: '20000000-0000-4000-8000-000000000029', name: 'Patch product', type: 'HTTP', method: 'PATCH', url: '/api/products/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'patch-product' },
+      { id: '20000000-0000-4000-8000-000000000030', name: 'Patch category', type: 'HTTP', method: 'PATCH', url: '/api/categories/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'patch-category' },
+      { id: '20000000-0000-4000-8000-000000000031', name: 'Delete product', type: 'HTTP', method: 'DELETE', url: '/api/products/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'delete-product' },
+      { id: '20000000-0000-4000-8000-000000000032', name: 'Delete category', type: 'HTTP', method: 'DELETE', url: '/api/categories/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'delete-category' },
+      { id: '20000000-0000-4000-8000-000000000033', name: 'Get orders', type: 'HTTP', method: 'GET', url: '/api/orders', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'get-orders' },
+      { id: '20000000-0000-4000-8000-000000000034', name: 'Get order by id', type: 'HTTP', method: 'GET', url: '/api/orders/1', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'get-order-by-id' },
+      { id: '20000000-0000-4000-8000-000000000035', name: 'Create invoice', type: 'HTTP', method: 'POST', url: '/api/invoices', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'create-invoice' },
+      { id: '20000000-0000-4000-8000-000000000036', name: 'Send invoice', type: 'HTTP', method: 'POST', url: '/api/invoices/send', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'send-invoice' },
+      { id: '20000000-0000-4000-8000-000000000037', name: 'Get stats', type: 'HTTP', method: 'GET', url: '/api/stats', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'get-stats' },
+      { id: '20000000-0000-4000-8000-000000000038', name: 'Sync catalog', type: 'HTTP', method: 'POST', url: '/api/catalog/sync', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'sync-catalog' },
+      { id: '20000000-0000-4000-8000-000000000039', name: 'Import products', type: 'HTTP', method: 'POST', url: '/api/products/import', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'import-products' },
+      { id: '20000000-0000-4000-8000-000000000040', name: 'Export products', type: 'HTTP', method: 'GET', url: '/api/products/export', headers: [], params: [], auth: buildDefaultAuth(), body: buildDefaultBody(), collectionId: '33abfac2-d678-481c-aa9a-39ac8361bd3e', fileName: 'export-products' }
+    ]
+  }
+};
 
 export const initialState: RequestState = {
     ...requestAdapter.getInitialState(),

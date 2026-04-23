@@ -1,9 +1,9 @@
 import { Collection } from './../shared/models/collections/collection';
 import { Injectable, signal } from "@angular/core";
-import { RequestTabItem, TabItem, TabItemTypes } from '../shared/models/utils';
+import { RequestTabItem, TabItem, TabItemTypes, Workspace, WorkspaceTypes } from '../shared/models/utils';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestModel, RequestTypes } from '../shared/models/requests/request';
-import { buildDefaultBody, HttpMethods } from "../shared/models/requests/http/http-request-model";
+import { buildDefaultAuth, buildDefaultBody, HttpMethods } from "../shared/models/requests/http/http-request-model";
 import { GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID, REQUEST_TAB_ITEM_DEFAULT_NAME } from "../shared/models/constants";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 
@@ -132,8 +132,9 @@ export class TabItemService {
     return newActiveId;
   }
 
-  addDefaultRequestTabItem(workspaceId: string) {
-    const requestName = this.buildDefaultName(workspaceId);
+  addDefaultRequestTabItem(workspace: Workspace) {
+    const requestName = this.buildDefaultName(workspace.id);
+
     const tabItem: TabItem = {
       id: uuidv4(),
       tabType: TabItemTypes.Request,
@@ -142,8 +143,13 @@ export class TabItemService {
       collection: null
     } 
 
+    if(workspace.type === WorkspaceTypes.Collection){
+      tabItem.collection = workspace.item;
+      tabItem.request!.request!.collectionId = workspace.id;
+    }
+
     this._tabItemsByWorkspaceId.update(items => {
-      items[workspaceId].push(tabItem);
+      items[workspace.id].push(tabItem);
       return items;
     })
   }
@@ -165,11 +171,12 @@ export class TabItemService {
         method: HttpMethods.GET,
         headers: [],
         body: buildDefaultBody(),
+        auth: buildDefaultAuth(), 
         name: name,
         params: [],
         url: '',
         type: RequestTypes.HTTP,
-        collectionId: null, // Далее будет установлено в модалке сохранения запроса
+        collectionId: null, 
         fileName: REQUEST_TAB_ITEM_DEFAULT_NAME
       },
       isReplaceable: false
@@ -180,7 +187,7 @@ export class TabItemService {
     const requestTabItems = this.tabItemsByWorkspaceId()[workspaceId];
 
     let requestNumber: number = 1;
-    let name: string | null = REQUEST_TAB_ITEM_DEFAULT_NAME;
+    let name: string = REQUEST_TAB_ITEM_DEFAULT_NAME;
 
     while(true) {
       if(!requestTabItems.find(rti => rti.name === `${name} ${String(requestNumber)}`)){

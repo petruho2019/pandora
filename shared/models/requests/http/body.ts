@@ -1,10 +1,9 @@
-import { TableRow } from "../../request";
+import { TableRow } from '../request'
 
 export interface FileBody {
   kind: 'file';
   name: 'Файл';
-  fileId: string;
-  contentType: string,
+  files: TableRow[];
   group: 'Other',
 }
 
@@ -74,5 +73,11 @@ export interface TextBody {
 
 
 export function buildJsonBody(jsonValue: string) : JsonBody {
-    return { kind: 'json', 'contentType': 'application/json', 'group': 'Raw', 'name': 'Json', value: jsonValue };
+  return { kind: 'json', 'contentType': 'application/json', 'group': 'Raw', 'name': 'Json', value: jsonValue };
+}
+export function buildTextBody(textValue: string) : TextBody {
+  return { kind: 'text', 'contentType': 'text/plain', 'group': 'Raw', 'name': 'Text', value: textValue };
+}
+export function buildXmlBody(xmlValue: string) : XmlBody {
+  return { kind: 'xml', 'contentType': 'application/xml', 'group': 'Raw', 'name': 'Xml', value: xmlValue };
 }

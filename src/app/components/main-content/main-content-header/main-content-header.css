@@ -15,7 +15,7 @@
 }
 
 .current-workspace:hover {
-    background-color: var(--background-color-opacity);
+    background-color: var(--background-color);
 }
 
 .current-workspace-text {
@@ -39,7 +39,6 @@
     flex-direction: column;
     background: #313131;
     position: absolute;
-    top: 90%;
     padding: 6px 8px;
     border-radius: 4px;
     border: var(--border-style);

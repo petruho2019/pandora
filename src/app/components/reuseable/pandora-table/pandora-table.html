@@ -137,13 +137,13 @@ z"
             @if (isFileValueSet(tableRow)) {
               <div class="file-con">
                 <span class="text-ellipsis file-name">{{
-                  tableRow!.multipartInfo?.fileValue?.name
+                  tableRow!.fileInfo?.fileValue?.name
                 }}</span>
                 <div class="delete-file pointer" (click)="deleteFile(tableRow)">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 14 14"
+                    viewBox="-2 -2 15 15"
                     class="delete-file-icon action-icon-color"
                   >
                     <path
@@ -182,7 +182,7 @@ z"
             "
           >
             <input
-              [(ngModel)]="tableRow.multipartInfo!.contentType"
+              [(ngModel)]="tableRow.fileInfo!.contentType"
               class="param-input"
               placeholder="Автоматически"
               (input)="onRowInput(tableRow.id)"

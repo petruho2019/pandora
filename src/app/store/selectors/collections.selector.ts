@@ -13,6 +13,11 @@ export const {
   selectTotal
 } = collectionsAdapter.getSelectors(selectCollectionsState);
 
+export const selectCollection = (id: string) => createSelector(
+  selectEntities,
+  entities => entities[id]
+);
+
 export const selectCollectionError = () => createSelector(
   selectCollectionsState,
   (state) => state.error

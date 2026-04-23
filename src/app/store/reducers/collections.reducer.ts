@@ -8,6 +8,16 @@ import { addCollectionModalSuccess, cloneCollectionModalSuccess, closeCollection
 
 export const collectionFeatureKey = 'collections';
 
+const INITIAL_TEST_STATE: CollectionState = {
+    loading: false,
+    error: null,
+    ids: ['dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', '33abfac2-d678-481c-aa9a-39ac8361bd3e'],
+    entities: {
+        'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b': { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' } as Collection,
+        '33abfac2-d678-481c-aa9a-39ac8361bd3e': { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' } as Collection
+    }
+}
+
 export const initialState: CollectionState = 
     collectionsAdapter.getInitialState({
         loading: false,
@@ -18,7 +28,8 @@ export const initialState: CollectionState =
 export const collectionsReducer = createReducer(
     initialState,
 
-    on(loadCollections, state => ({...state})),
+    //on(loadCollections, state => ({...state })),
+    on(loadCollections, state => ({...INITIAL_TEST_STATE })),
     on(loadCollectionsSuccess, (state, { collections }) =>
         collectionsAdapter.setAll(collections, { ...state, loading: false })
     ),

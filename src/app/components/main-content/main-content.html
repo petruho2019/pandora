@@ -17,8 +17,13 @@
       [initialRequests]="initialRequests()"
       [req]="currentRequest()!"
       [selectedTabItem]="selectedSettingRequestTabItems()"
+      [selectedAuthType]="selectedAuthType()"
       [selectedBody]="selectedRequestBody()"
-      (selectedRequestSettingTabItemChanged)="handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)"
+      (selectedRequestSettingTabItemChanged)="
+        handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)
+      "
+      (selectedBodyItemChanged)="handleSelectedBodyItemChanged($event.bodyItem, $event.reqId)"
+      (selectedAuthItemChanged)="handleSelectedAuthItemChanged($event.authItem, $event.reqId)"
     ></request-info>
   }
 </div>

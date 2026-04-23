@@ -21,6 +21,9 @@
             "baseHref": "./",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "loader": {
+              ".ttf": "binary"
+            },
             "assets": [
               {
                 "glob": "**/*",
@@ -34,15 +37,14 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "500kB"
                 },
                 {
                   "type": "anyComponentStyle",

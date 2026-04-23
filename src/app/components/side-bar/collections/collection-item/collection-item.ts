@@ -1,9 +1,9 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
+import { Component, EventEmitter, HostListener, inject, Input, OnInit, Output, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { take } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
+import { TemplatePortal, CdkPortal } from '@angular/cdk/portal';
 import { AddRequestModal } from "../../requests/modals/add-request-modal/add-request-modal";
 import { CloneCollectionModal } from "../modals/clone-collection-modal/clone-collection-modal";
 import { RemoveCollectionModal } from "../modals/remove-collection-modal/remove-collection-modal";
@@ -22,7 +22,7 @@ import { WorkspaceFacadeService } from '../../../../../../services/workspace-fac
 
 @Component({
   selector: 'collection-item',
-  imports: [CommonModule, AddRequestModal, CloneCollectionModal, RenameModal, RemoveCollectionModal],
+  imports: [CommonModule, AddRequestModal, CloneCollectionModal, RenameModal, RemoveCollectionModal, CdkPortal],
   templateUrl: './collection-item.html',
   styleUrl: './collection-item.css',
   standalone: true
@@ -72,20 +72,29 @@ export class CollectionItem {
   removeCollectionOverlayRef: OverlayRef;
   removeCollectionInfo: CloseCollectionInfo;
 
+  collectionActionMenuPortal = viewChild.required<TemplateRef<any>>('actionsMenu');
 
-  toggleCollectionActions(event: MouseEvent, id: string) {
+  toggleCollectionActions(event: MouseEvent, id: string, actionsTrigger: HTMLDivElement) {
     console.log(`toggleCollectionActions collectionId: ${id}`);
+
     this.stopPropagation(event);
+
     this.actionsMenuService.openedId$.pipe(take(1)).subscribe(current => {
       console.log(`Current: ${current}`);
-        current === id ? this.actionsMenuService.close() : this.actionsMenuService.open(id);
+        current === id ? this.actionsMenuService.close() : this.actionsMenuService.open(id, actionsTrigger, this.collectionActionMenuPortal(), this.viewContainerRef, [
+        {
+          originX: 'end',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top',
+          offsetX: 8,
+          offsetY: 4
+        }
+      ]);
     });
   }
 
-
   openCollectionIfNotOpen(event: MouseEvent, id: string) {
-
-    this.stopPropagation(event);
 
     if(!this.isOpen){
       this.handleOpenCollection.emit({collectionId: id, isOpen: true});
@@ -96,10 +105,14 @@ export class CollectionItem {
   }
 
   setCollectionWorkspace(event: MouseEvent) {
-    this.stopPropagation(event);
     console.log(`setCollectionWorkspace из компонента`);
 
     this.workspaceFacadeService.openCollection(this.collection);
+  }
+
+  handleClick(event: MouseEvent) {
+    this.openCollectionIfNotOpen(event, this.collection.id);
+    this.setCollectionWorkspace(event);
   }
 
   openCollection(event:MouseEvent){
@@ -117,7 +130,7 @@ export class CollectionItem {
     
     this.actionsMenuService.close();
 
-    this.addRequestOverlayRef = this.buildOverlayRef(this.overlay);
+    this.addRequestOverlayRef = this.buildModalOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.addRequestPortal(), this.viewContainerRef);
     this.addRequestOverlayRef.attach(portal);
   }
@@ -128,7 +141,7 @@ export class CollectionItem {
 
     this.actionsMenuService.close();
 
-    this.cloneCollectionOverlayRef = this.buildOverlayRef(this.overlay);
+    this.cloneCollectionOverlayRef = this.buildModalOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.cloneCollectionPortal(), this.viewContainerRef);
     this.cloneCollectionOverlayRef.attach(portal);
   }
@@ -139,7 +152,8 @@ export class CollectionItem {
 
     this.actionsMenuService.close();
 
-    this.renameCollectionOverlayRef = this.buildOverlayRef(this.overlay);
+
+    this.renameCollectionOverlayRef = this.buildModalOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.renameCollectionPortal(), this.viewContainerRef);
     this.renameCollectionOverlayRef.attach(portal);
   }
@@ -152,14 +166,14 @@ export class CollectionItem {
     }
 
     this.actionsMenuService.close();
-
-    this.removeCollectionOverlayRef = this.buildOverlayRef(this.overlay);
+    this.removeCollectionOverlayRef = this.buildModalOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.removeCollectionPortal(), this.viewContainerRef);
     this.removeCollectionOverlayRef.attach(portal);
   }
 
   showFolderCollection(collectionId: string){
     this.store.dispatch(openCollectionInFS({collectionId: collectionId}));
+
     this.actionsMenuService.close();
   }
 
@@ -180,16 +194,17 @@ export class CollectionItem {
     this.handleCloseCollection.emit({overlay: this.removeCollectionOverlayRef, collectionId: collectionId});
   }
 
-  onRightClick($event: MouseEvent, collectionId: string) {
-    this.toggleCollectionActions($event, collectionId);
+  onRightClick(event: MouseEvent, collectionId: string, actionsTrigger: HTMLDivElement ) {
+    event.preventDefault();
+
+    this.toggleCollectionActions(event, collectionId, actionsTrigger);
   }
 
   onBlurItem(id: string){
-    console.log(`Blur collection`);
     this.blurService.setCurrentBlurId(id as string);
   }
 
-  buildOverlayRef(overlay: Overlay) : OverlayRef{
+  buildModalOverlayRef(overlay: Overlay) : OverlayRef{
      const overlayRef = overlay.create({
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-dark-backdrop',
@@ -205,7 +220,6 @@ export class CollectionItem {
 
     return overlayRef;
   }
-
   stopPropagation(event: MouseEvent){
     event.stopPropagation();
   }

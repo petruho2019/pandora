@@ -6,7 +6,7 @@ export interface ModalActionSuccessResult<T> {
 }
 
 export interface ModalActionDataT<T> {
-    modalOverlayRef: OverlayRef;
+    modalOverlayRef: OverlayRef | null;
     body: T;
 }
 

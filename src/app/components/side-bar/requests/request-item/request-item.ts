@@ -52,6 +52,7 @@ export class RequestCollectionItem implements OnInit {
   deletePortal = viewChild.required<TemplateRef<any>>('delete');
   deleteOverlayRef: OverlayRef;
 
+  actionsPortal = viewChild.required<TemplateRef<any>>('actions');
 
   canBeEdit: boolean = false;
   newRequestFolderName: string;
@@ -70,12 +71,21 @@ export class RequestCollectionItem implements OnInit {
     this.blurService.setCurrentBlurId(this.request.id);
   }
 
-  toggleActions($event: MouseEvent){
+  toggleActions($event: MouseEvent, trigger: HTMLElement){
     console.log(`toggleActions reqId: ${this.request.id}`);
     $event.stopPropagation();
     this.actionsMenuService.openedId$.pipe(take(1)).subscribe(current => {
       console.log(`Current: ${current}`);
-        current === this.request.id ? this.actionsMenuService.close() : this.actionsMenuService.open(this.request.id);
+        current === this.request.id ? this.actionsMenuService.close() : this.actionsMenuService.open(this.request.id, trigger, this.actionsPortal(), this.viewContainerRef, [
+        {
+          originX: 'end',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top',
+          offsetX: 8,
+          offsetY: 4
+        }
+      ]);
     });
   }
 
@@ -171,8 +181,8 @@ export class RequestCollectionItem implements OnInit {
     this.canBeEdit = !this.canBeEdit;
   }
 
-  onRightClick($event: MouseEvent) {
-    this.toggleActions($event);
+  onRightClick($event: MouseEvent, trigger: HTMLElement) {
+    this.toggleActions($event, trigger);
   }
 
 }

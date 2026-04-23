@@ -1,54 +1,66 @@
 import { RequestModel, RequestSettingsTabItems, RequestSettingsTabItemsType, TableRow } from './../../../../../../shared/models/requests/request';
-import { ChangeDetectorRef, Component, computed, EventEmitter, HostListener, inject, input, Input, model, OnInit, Output, signal } from '@angular/core';
+import { Component, computed, EventEmitter, HostListener, inject, input, Input, model, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
 import { RequestUrl } from "./request-url/request-url";
 import { NgClass } from '@angular/common';
 import { RequestParams } from './tab-items/request-params/request-params';
 import { RequestHeaders } from "./tab-items/request-headers/request-headers";
-import { BodyGroup, BodyItem, HttpMethod } from '../../../../../../shared/models/requests/http/http-request-model';
+import { AuthItem, BodyGroup, BodyItem, HttpMethod } from '../../../../../../shared/models/requests/http/http-request-model';
 import { RequestBody as  RequestBodyComponent} from "./tab-items/request-body/request-body";
-import axios from 'axios';
-import  { isEqual }  from 'lodash'
-import { buildJsonBody, FormUrlEncodedBody, JsonBody, MultipartBody, MultipartField } from '../../../../../../shared/models/requests/http/bodies/body';
+import { isEqual }  from 'lodash'
+import { buildJsonBody, buildTextBody, buildXmlBody, FormUrlEncodedBody, FileBody ,MultipartBody, MultipartField } from '../../../../../../shared/models/requests/http/body';
 import { TabItemService } from '../../../../../../services/tab-item-service';
 import { BODY_KIND } from '../../../../../../shared/models/constants';
+import { SendRequestService } from '../../../../../../services/send-request-service';
+import { RequestStateService } from '../../../../../../services/request-state-service';
+import { RequestAuth } from "./tab-items/request-auth/request-auth";
+import { BasicAuthInfoDto } from '../../../../../../shared/models/requests/dto/request-dtos';
+import { AUTH_KIND, BasicAuth, BearerAuth } from '../../../../../../shared/models/requests/http/auth';
+
+
 
 @Component({
   selector: 'request-info',
-  imports: [RequestUrl, NgClass, RequestParams, RequestHeaders, RequestBodyComponent],
+  imports: [RequestUrl, NgClass, RequestParams, RequestHeaders, RequestBodyComponent, RequestAuth],
   templateUrl: './request-info.html',
   styleUrl: './request-info.css',
 })
-export class RequestInfo implements OnInit {
+export class RequestInfo implements OnInit, OnChanges {
+  
   private tabItemService = inject(TabItemService);
+  private sendRequestService = inject(SendRequestService);
+  private requestStateService = inject(RequestStateService);
 
   initialRequests = input<Record<string, RequestModel>>();
+
   @Input() req: RequestModel;
+
   selectedTabItem = model<Record<string, RequestSettingsTabItemsType>>();
   selectedBody = model<Record<string, BodyItem>>();
-
+  selectedAuthType = model<Record<string, AuthItem>>();
+  
   @Output() selectedRequestSettingTabItemChanged = new EventEmitter<{ tabType: RequestSettingsTabItemsType , reqId: string }>();
+  @Output() selectedBodyItemChanged = new EventEmitter<{ bodyItem: BodyItem , reqId: string }>();
+  @Output() selectedAuthItemChanged = new EventEmitter<{ authItem: AuthItem , reqId: string }>();
 
-  requestChanged = computed(() => {
-    console.log(`Computed на то изменен ли запрос`);
+  public isShowBodyTypes: boolean = false;
+  public isShowAuthTypes: boolean = false;
 
-    const req = this.req;
-
-    if(!req) return false;
-
-    const initial = this.initialRequests()![req!.id];
-
-    if (!initial) return false;
-
-    return !isEqual(initial, req);
-  });
+  public requestChanged = computed(() => {
+    return this.requestStateService._requestChanged()[this.req.id].isChanged;
+  })
 
   public tabItems = Object.values(RequestSettingsTabItems);
   public requestSettingsTabItems = RequestSettingsTabItems;
 
-
   ngOnInit(): void {
     console.log(`OnInit requestInfo`);
     this.selectedBody()![this.req.id] = this.req.body[BODY_KIND.NONE];
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if(changes['req']) {
+      this.checkIsReqChanged();
+    }
   }
 
   public bodyGroups: BodyGroup[] = [
@@ -104,8 +116,7 @@ export class RequestInfo implements OnInit {
       {
         kind: 'file',
         name: 'Файл',
-        fileId: '',
-        contentType: '',
+        files: [],
         group: 'Other',
       },
       {
@@ -117,10 +128,35 @@ export class RequestInfo implements OnInit {
   },
   ];
 
-  public isShowBodyTypes: boolean = false;
+  public authItems: AuthItem[] = [
+  {
+    name: 'Базовая',
+    kind: 'basic',
+    username: null,
+    password: null
+  },
+  {
+    name: 'Bearer токен',
+    kind: 'bearer',
+    token: null
+  },
+  {
+    name: 'Наследовать из коллекции',
+    kind: 'inherit',
+    authTypeFromColl: 'none'
+  },
+  {
+    name: 'Без аутентификации',
+    kind: 'none',
+  },
+  ];
+
 
   showBodyTypes() {
     this.isShowBodyTypes = !this.isShowBodyTypes;
+  }
+  showAuthTypes() {
+    this.isShowAuthTypes = !this.isShowAuthTypes;
   }
 
   selectTabItem(tabItem: RequestSettingsTabItemsType){
@@ -132,7 +168,7 @@ export class RequestInfo implements OnInit {
     this.selectedRequestSettingTabItemChanged.emit({ tabType: tabItem, reqId: this.req.id });
   }
 
-  setBodyType(body: BodyItem) {
+  selectBodyType(body: BodyItem) {
     const newBody = structuredClone(body);
 
     console.log(`Устанавливаем новый боди у запроса`);
@@ -143,6 +179,26 @@ export class RequestInfo implements OnInit {
     }));
 
     this.isShowBodyTypes = false;
+
+    this.selectedBodyItemChanged.emit({ bodyItem: newBody, reqId: this.req.id });
+
+    this.checkIsReqChanged();
+  }
+  selectAuthType(auth: AuthItem) {
+    const newAuth = structuredClone(auth);
+
+    console.log(`Устанавливаем новый auth у запроса`);
+
+    this.selectedAuthType.update(ais => ({
+      ...ais,
+      [this.req.id]: newAuth
+    }));
+
+    this.isShowAuthTypes = false;
+
+    this.selectedAuthItemChanged.emit({ authItem: newAuth, reqId: this.req.id });
+
+    this.checkIsReqChanged();
   }
 
   isParamsTabItem(){
@@ -158,7 +214,6 @@ export class RequestInfo implements OnInit {
   isAuthTabItem(){
     return this.selectedTabItem()![this.req.id] === RequestSettingsTabItems.AUTH;
   }
-
 
   handleMethodChanged(newHttpMethod: HttpMethod){
     this.req.method = newHttpMethod;
@@ -218,16 +273,56 @@ export class RequestInfo implements OnInit {
       [this.req.id]: newBody
     }));
   }
-  handleJsonBodyChanged(newJsonValue: string) {
-    const jsonBody = buildJsonBody(newJsonValue);
-    this.req.body[BODY_KIND.JSON] = jsonBody;
+
+  handleTextBodyChanged(value: string) {
+    console.log(`Обрабатываем text body value changed`);
+    const body = buildTextBody(value);
+    this.req.body[BODY_KIND.TEXT] = body;
     this.tabItemService.updateRequest(this.req.id, {
       body: {
         ...this.req.body,
-        [BODY_KIND.JSON]: jsonBody,
+        [BODY_KIND.TEXT]: body,
       },
     });
+  }
 
+  handleJsonBodyChanged(value: string) {
+    const body = buildJsonBody(value);
+    this.req.body[BODY_KIND.JSON] = body;
+    this.tabItemService.updateRequest(this.req.id, {   // todo зарефакторить, здесь можно просто передать kind и по нему менять
+      body: {
+        ...this.req.body,
+        [BODY_KIND.JSON]: body,
+      },
+    });
+  }
+
+  handleXmlBodyChanged(value: string) {
+    const body = buildXmlBody(value);
+    this.req.body[BODY_KIND.XML] = body;
+    this.tabItemService.updateRequest(this.req.id, {
+      body: {
+        ...this.req.body,
+        [BODY_KIND.XML]: body,
+      },
+    });
+  }
+
+  handleFileBodyChanged(files: TableRow[]) {
+    const body : FileBody = {
+      kind: BODY_KIND.FILE,
+      name: 'Файл',
+      files: files,
+      group: 'Other'
+    };
+
+    this.req.body[BODY_KIND.FILE] = body;
+    this.tabItemService.updateRequest(this.req.id, {
+      body: {
+        ...this.req.body,
+        [BODY_KIND.FILE]: body,
+      },
+    });
   }
 
   handleUrlParamsChanged(urlParams: string) {
@@ -244,7 +339,6 @@ export class RequestInfo implements OnInit {
     
     this.req.url = newUrlWithParameters;
     this.tabItemService.updateRequest(this.req.id, { url: newUrlWithParameters });
-
   }
 
   handleHeadersChanged(headers: TableRow[]){
@@ -252,9 +346,47 @@ export class RequestInfo implements OnInit {
     this.tabItemService.updateRequest(this.req.id, { headers: headers });
   }
 
-  @HostListener('click')
+  async handleSendRequest() {
+    const response = await this.sendRequestService.sendRequest(this.req, this.selectedBody()![this.req.id], this.selectedAuthType()![this.req.id]);
+
+    console.log(`Статус ответа: ${response.status} , текст ответа: ${response.statusText}`);
+  }
+
+  handleBasicAuthChanged(credInfo: BasicAuthInfoDto) {
+    const auth: BasicAuth = {
+      kind: 'basic',
+      name: 'Базовая',
+      username: credInfo.username,
+      password: credInfo.password
+    };
+
+    this.req.auth[AUTH_KIND.BASIC] = auth
+
+    this.tabItemService.updateRequest(this.req.id, { auth: {
+      ...this.req.auth,
+      [AUTH_KIND.BASIC]: auth
+    } });
+  }
+
+  handleBearerAuthChaned(token: string | null) {
+    const auth: BearerAuth = {
+      kind: 'bearer',
+      name: 'Bearer токен',
+      token: token
+    };
+
+    this.req.auth[AUTH_KIND.BEARER] = auth
+
+    this.tabItemService.updateRequest(this.req.id, { auth: {
+      ...this.req.auth,
+      [AUTH_KIND.BEARER]: auth
+    } });
+  } 
+
+  @HostListener('document:click')
   public closeBodyTypes(){
     this.isShowBodyTypes = false;
+    this.isShowAuthTypes = false;
   }
 
   isEmptyRow(row: TableRow){
@@ -266,28 +398,26 @@ export class RequestInfo implements OnInit {
 
     for (let index = 0; index < body.length; index++) {
       const tabItem = body[index];
-      if (!tabItem.isActive) continue;
-      if(this.isEmptyRow(tabItem)) continue;
 
       if (
-        tabItem.multipartInfo?.fileValue !== null &&
-        tabItem.multipartInfo?.fileValue !== undefined
+        tabItem.fileInfo?.fileValue !== null &&
+        tabItem.fileInfo?.fileValue !== undefined
       ) {
-        const fileValue = tabItem.multipartInfo.fileValue;
+        const fileValue = tabItem.fileInfo.fileValue;
 
-        if (tabItem.multipartInfo?.contentType) {
+        if (tabItem.fileInfo?.contentType) {
           // Создаем файл с кастомным Content-Type
           const customFile = new File(
             [fileValue],
             fileValue.name,
-            { type: tabItem.multipartInfo.contentType }
+            { type: tabItem.fileInfo.contentType }
           );
          fields.push( {
             id: tabItem.id,
             type: "file",
             key: tabItem.name,
             file: customFile,
-            contentType: tabItem.multipartInfo.contentType,
+            contentType: tabItem.fileInfo.contentType,
             isActive: tabItem.isActive
           });
         } else {
@@ -319,6 +449,26 @@ export class RequestInfo implements OnInit {
     };
 
     return fields;
+  }
+
+  checkIsReqChanged() {
+    console.log(`Проверка на то изменен ли запрос`);
+    const req = this.req;
+
+    if (!req) {
+      this.requestStateService.setRequestNotChanged(req);
+      return;
+    }
+
+    const initial = this.initialRequests()![req.id];
+
+    if (!initial) {
+      this.requestStateService.setRequestNotChanged(req);
+      return;
+    }
+
+    const changed = !isEqual(initial, req);
+    this.requestStateService.setRequestChanged(req, changed);
   }
 }
 

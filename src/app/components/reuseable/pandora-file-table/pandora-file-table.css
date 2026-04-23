@@ -1,0 +1,127 @@
+.table-wrapper {
+    border: var(--border-style);
+    border-radius: 4px;
+
+    margin-top: 20px;
+    margin-bottom: 16px;
+}
+
+.table-empty thead tr td,
+.table-empty tbody tr td {
+  border-bottom: none !important;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    flex: 1;
+}
+
+thead > tr > td { padding: 5px 10px; }
+tbody > tr > td { padding: 1px 10px; }
+
+tr {
+    height: 30px;
+    align-items: center;
+    text-align: center;
+}
+
+td {
+  padding: 0;
+  box-sizing: border-box;
+  vertical-align: middle;
+  align-items: center;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+td:last-child {
+    width: 60px;
+    border-left: var(--border-style);
+    padding: 5px 8px !important; 
+}
+
+tbody > tr:not(:last-child) {
+    border-bottom: var(--border-style);
+}
+
+
+.add-file-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.add-file-wrapper:hover .select-file-text {
+    color: rgb(210, 210, 210);
+}
+
+
+.add-file-wrapper:hover .add-file-icon {
+    fill: rgb(245, 245, 245);
+    stroke: rgb(245, 245, 245);
+}
+
+.select-file-text {
+  color: rgb(170, 170, 170); 
+  font-size: 13px; 
+  font-style: italic;
+    transition: color 0.15s;
+}
+
+.file-con {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.delete-file {
+  display: flex;
+  align-items: center;
+  min-width: 12px;
+  height: 12px;
+}
+
+.delete-file-icon {
+    height: 12px;
+    width: 12px;
+}
+
+.file-name {
+  padding-right: 8px;
+  font-size: 13px;
+}
+
+.add-file-icon {
+    height: 12px;
+    width: 12px;
+  transition: fill 0.15s;
+  transition: stroke 0.15s;
+}
+
+.content-type-input {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  background: none;
+  line-height: 30px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.value-con {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  max-width: 100%;
+}
+
+.delete-icon {
+  height: 18px;
+  flex: 0 0 18px;
+  display: block;
+}

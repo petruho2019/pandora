@@ -10,8 +10,8 @@ thead > tr > td { padding: 5px 10px; }
 tbody > tr > td { padding: 1px 10px; }
 
 tr {
-    height: 30px;
-    align-items: center;
+  height: 30px;
+  align-items: center;
 }
 
 td {
@@ -97,9 +97,9 @@ input[type="checkbox"] {
 }
 
 .delete-icon {
-    height: 18px;
-    flex: 0 0 18px;
-    display: block;
+  height: 18px;
+  flex: 0 0 18px;
+  display: block;
 }
 
 
@@ -120,15 +120,6 @@ input[type="checkbox"] {
   stroke: var(--contrasting-color);
 }
 
-.add-file-icon {
-  stroke-width: 0.4px;
-  stroke: var(--action-icon-color);
-
-  transition: fill 0.15s;
-  transition: stroke 0.15s;
-}
-
-
 .file-name {
   padding-right: 8px;
 }
@@ -148,7 +139,6 @@ input[type="checkbox"] {
   align-items: center;
   min-width: 12px;
   height: 12px;
-
 }
 
 .delete-file:hover .delete-file-icon {

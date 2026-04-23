@@ -1,5 +1,5 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { ActionMenuService } from '../../../../../services/actions-menu-service';
 import { CdkPortal, PortalModule } from '@angular/cdk/portal';
@@ -19,8 +19,9 @@ import { AddCollectionDto } from '../../../../../shared/models/dto/shared-dtos';
 export class SideBarHeader {
   
   readonly store = inject(Store);
-  private overlay = inject(Overlay)
   private actionsMenuService = inject(ActionMenuService);
+  private overlay = inject(Overlay);
+  private viewContainerRef = inject(ViewContainerRef);
 
   readonly HEADER_MENU_ID = '__header__';
   openedActionsCollectionId: string | null = null;
@@ -28,15 +29,26 @@ export class SideBarHeader {
 
   public currentOpenedCollectionId$ = this.actionsMenuService.openedId$;
 
-  portal = viewChild.required<CdkPortal>(CdkPortal);
+  addCollectionPortal = viewChild.required<CdkPortal>(CdkPortal);
   overlayRef: OverlayRef;
 
-  toggleMenu(event: MouseEvent) {
+  collectionActionPortal = viewChild.required<TemplateRef<any>>('actions');
+
+  toggleMenu(event: MouseEvent, trigger: HTMLElement) {
     event.stopPropagation();
 
     this.actionsMenuService.openedId$.pipe(take(1)).subscribe(current => {
       console.log(`Current: ${current}`);
-        current === this.HEADER_MENU_ID ? this.actionsMenuService.close() : this.actionsMenuService.open(this.HEADER_MENU_ID);
+        current === this.HEADER_MENU_ID ? this.actionsMenuService.close() : this.actionsMenuService.open(this.HEADER_MENU_ID, trigger, this.collectionActionPortal(), this.viewContainerRef, [
+        {
+          originX: 'end',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top',
+          offsetX: 30,
+          offsetY: 6,
+        }
+      ]);
     });
   }
 
@@ -45,8 +57,7 @@ export class SideBarHeader {
     this.actionsMenuService.close();
 
     this.overlayRef = this.buildOverlayRef(this.overlay);
-
-    this.overlayRef.attach(this.portal());
+    this.overlayRef.attach(this.addCollectionPortal());
   }
 
   openCollection(){

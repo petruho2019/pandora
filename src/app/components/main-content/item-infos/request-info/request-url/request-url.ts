@@ -1,7 +1,6 @@
 import { NgClass } from '@angular/common';
-import { Component, ElementRef, EventEmitter, HostListener, inject, input, Input, model, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RequestChangeDetectorService } from '../../../../../../../services/request-change-detector-service';
 import { RequestModel, RequestTypes } from '../../../../../../../shared/models/requests/request';
 import { HttpMethod } from '../../../../../../../shared/models/requests/http/http-request-model';
 
@@ -19,6 +18,7 @@ export class RequestUrl {
   @Input() isReqChanged: boolean;
   @Output() urlChanged = new EventEmitter<string>();
   @Output() methodChanged = new EventEmitter<HttpMethod>();
+  @Output() sendRequest = new EventEmitter<HttpMethod>();
 
   public showMethods = false;
   public methods: HttpMethod[] = [
@@ -58,5 +58,9 @@ export class RequestUrl {
   @HostListener('document:click')
   onClick() {
     this.showMethods = false;
+  }
+
+  handleSendRequestAction() {
+    this.sendRequest.emit();
   }
 }

@@ -2,7 +2,7 @@ import { CollectionElectronService } from "../../../../services/collection-elect
 import { catchError, debounceTime, distinctUntilChanged, exhaustMap, from, map, of, switchMap, tap } from "rxjs";
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {  loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionInFS, openCollectionSuccess} from '../actions/collections.actions';
+import { loadCollections, loadCollectionsFailure, loadCollectionsSuccess, openCollection, openCollectionCancel, openCollectionFailure, openCollectionInFS, openCollectionSuccess} from '../actions/collections.actions';
 import { addCollectionModal, addCollectionModalFailure, addCollectionModalSuccess, cloneCollectionModal, cloneCollectionModalFailure, cloneCollectionModalSuccess, closeCollectionModal, closeCollectionModalFailure, closeCollectionModalSuccess, deleteCollectionModal, deleteCollectionModalFailure, deleteCollectionModalSuccess, renameCollectionModal, renameCollectionModalFailure, renameCollectionModalSuccess } from "../actions/modal-actions/collections-modal.actions";
 import { modalSuccess } from "../actions/modal-actions/modal.actions";
 import { Store } from "@ngrx/store";
@@ -42,7 +42,7 @@ export class CollectionEffects {
           map(addCollectionResult =>{
             if(addCollectionResult.isSuccess){
               console.log(`Добавление коллекции прошло успешно`);
-              this.dispatchModalSuccess(actionData.modalOverlayRef);
+              this.dispatchModalSuccess(actionData.modalOverlayRef!);
               return addCollectionModalSuccess({ addedCollection: addCollectionResult.body! });
             }  
             else {
@@ -103,7 +103,7 @@ export class CollectionEffects {
       switchMap(({ actionData }) => 
         from(this.electronService.removeCollection(actionData.body.collectionId)).pipe(
           map(collections => {
-            this.dispatchModalSuccess(actionData.modalOverlayRef);
+            this.dispatchModalSuccess(actionData.modalOverlayRef!);
             return closeCollectionModalSuccess({ newCollections: collections })
           }),
           catchError(() => {
@@ -124,7 +124,7 @@ export class CollectionEffects {
           map(clonecollectionResult => {
             console.log(`Clone result ${JSON.stringify(clonecollectionResult)}`);
               if(clonecollectionResult.isSuccess){
-                this.dispatchModalSuccess(actionData.modalOverlayRef);
+                this.dispatchModalSuccess(actionData.modalOverlayRef!);
                 return cloneCollectionModalSuccess( {clonedCollection: clonecollectionResult.body!} );
               } 
               else {
@@ -149,7 +149,7 @@ export class CollectionEffects {
       from(this.electronService.renameCollection(actionData.body)).pipe(
         map(renameCollectionResult => {
               if(renameCollectionResult.isSuccess){
-                this.dispatchModalSuccess(actionData.modalOverlayRef);
+                this.dispatchModalSuccess(actionData.modalOverlayRef!);
                 return renameCollectionModalSuccess({renamedCollection: renameCollectionResult.body!});
               } 
               else {
@@ -183,7 +183,7 @@ export class CollectionEffects {
           console.log(`Effect из удаление коллекции: ${JSON.stringify(deleteCollectionResult, null , 2)}`);
 
               if(deleteCollectionResult.isSuccess){
-                this.dispatchModalSuccess(actionData.modalOverlayRef);
+                this.dispatchModalSuccess(actionData.modalOverlayRef!);
                 return deleteCollectionModalSuccess({newCollections: deleteCollectionResult.body!});
               } 
               else {

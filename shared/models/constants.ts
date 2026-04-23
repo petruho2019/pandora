@@ -21,4 +21,5 @@ export const BODY_KIND = {
   JSON: "json" as const,
   XML: "xml" as const,
   TEXT: "text" as const,
-} satisfies Record<string, string>;
+};
+

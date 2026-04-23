@@ -8,7 +8,6 @@
 }
 
 .request-type-method-info {
-    margin-right: 2px;
     padding: 2px;
 }
 
@@ -115,6 +114,7 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease;
+    z-index: 1;
 }
 
 .url-action.save:hover::after {

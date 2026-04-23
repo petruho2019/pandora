@@ -25,7 +25,9 @@ export class RequestEffects {
                     map(createRequestResult => {
                         if(createRequestResult.isSuccess)
                         {
-                            this.dispatchModalSuccess(actionData.modalOverlayRef);
+                            if(actionData.modalOverlayRef) {
+                                this.dispatchModalSuccess(actionData.modalOverlayRef);
+                            }
                             console.log(`addHttpRequestSuccess логирование объекта ${JSON.stringify(createRequestResult)}`);
                             return createRequestSuccess({request: createRequestResult.body!});
                         }
@@ -77,7 +79,7 @@ export class RequestEffects {
                 map((renameRequestResult) => {
                     if(renameRequestResult.isSuccess) {
                         
-                        this.dispatchModalSuccess(actionData.modalOverlayRef);
+                        this.dispatchModalSuccess(actionData.modalOverlayRef!);
                         return renameRequestSuccess({renamedRequest: renameRequestResult.body as RequestModel });
                     }
                     else {
@@ -101,7 +103,7 @@ export class RequestEffects {
                 map((cloneRequestResult) => {
                     console.log(`Результат клонирования: ${JSON.stringify(cloneRequestResult)}`);
                     if(cloneRequestResult.isSuccess) {
-                        this.dispatchModalSuccess(actionData.modalOverlayRef);
+                        this.dispatchModalSuccess(actionData.modalOverlayRef!);
                         return cloneRequestSuccess({clonedRequest: cloneRequestResult.body as RequestModel});
                     }
                     else {
@@ -153,7 +155,7 @@ export class RequestEffects {
                 map((deleteRequestResult) => {
                     console.log(`deleteRequestResult ${JSON.stringify(deleteRequestResult)}`);
                     if(deleteRequestResult.isSuccess){
-                        this.dispatchModalSuccess(actionData.modalOverlayRef);
+                        this.dispatchModalSuccess(actionData.modalOverlayRef!);
                         return deleteRequestSuccess({ newRequests: deleteRequestResult.body! });
                     }
 

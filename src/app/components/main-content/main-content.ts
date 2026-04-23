@@ -1,5 +1,5 @@
 import { RequestModel, RequestSettingsTabItems, RequestSettingsTabItemsType } from './../../../../shared/models/requests/request';
-import { Component, computed, effect, EventEmitter, inject, Output, signal } from "@angular/core";
+import { Component, computed, effect, EventEmitter, HostListener, inject, Output, signal } from "@angular/core";
 import { MainContentHeader } from "./main-content-header/main-content-header";
 import { MainContentTabItems } from "./main-content-tab-items/main-content-tab-items";
 import { TabItemService } from "../../../../services/tab-item-service";
@@ -10,7 +10,9 @@ import { DescriptionContent } from "./item-infos/general-info/description-conten
 import { RenameDto } from "../../../../shared/models/dto/shared-dtos";
 import { CloseCollectionInfo } from "../../../../shared/models/collections/dto/collection-action-dtos";
 import { RequestInfo } from "./item-infos/request-info/request-info";
-import { BodyItem } from '../../../../shared/models/requests/http/http-request-model';
+import { AuthItem, BodyItem } from '../../../../shared/models/requests/http/http-request-model';
+import { AUTH_KIND, AuthKind } from '../../../../shared/models/requests/http/auth';
+import { ActionMenuService } from '../../../../services/actions-menu-service';
 
 @Component({
   selector: 'main-content',
@@ -28,6 +30,7 @@ export class MainContent {
 
   private tabItemService = inject(TabItemService);
   private workspaceInfoService = inject(WorkspaceInfoService);
+  private actionMenuService = inject(ActionMenuService);
 
   @Output() addCollection = new EventEmitter();
   @Output() openCollection = new EventEmitter();
@@ -38,6 +41,9 @@ export class MainContent {
   initialRequests = signal<Record<string, RequestModel>>({});
   selectedSettingRequestTabItems = signal<Record<string, RequestSettingsTabItemsType>>({});
   selectedRequestBody = signal<Record<string, BodyItem>>({});
+  selectedAuthType = signal<Record<string, AuthItem>>({});
+
+  public isRequestChanged = signal(false);
 
   currentRequest = computed(() => {
     const tabItem = this.tabItemService.getActiveTabItem(
@@ -77,7 +83,15 @@ export class MainContent {
           name: 'Без тела',
           group: 'Other'
         }
-      }))
+      }));
+
+      this.selectedAuthType.update(ai => ({
+        ...ai,
+        [req.id]: req.auth?.[AUTH_KIND.NONE] ?? {
+          kind: AUTH_KIND.NONE,
+          name: 'Без аутентификации',
+        }
+      }));
 
       this.initialRequests.update(map => ({
         ...map,
@@ -110,6 +124,19 @@ export class MainContent {
     this.selectedSettingRequestTabItems.update(items => ({
       ...items,
       [reqId]: newTabItem
+    }));
+  }
+  handleSelectedBodyItemChanged(newBody: BodyItem, reqId: string){
+    this.selectedRequestBody.update(items => ({
+      ...items,
+      [reqId]: newBody
+    }));
+  }
+
+  handleSelectedAuthItemChanged(newAuth: AuthItem, reqId: string){
+    this.selectedAuthType.update(items => ({
+      ...items,
+      [reqId]: newAuth
     }));
   }
 

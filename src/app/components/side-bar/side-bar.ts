@@ -1,9 +1,10 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { Component, Input, signal, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, Input, signal, Output, EventEmitter, ViewChild, HostListener, inject } from '@angular/core';
 import { SideBarContent } from "./side-bar-content/side-bar-content";
 import { ResizableBar } from './resizable-bar/resizable-bar';
 import { RenameDto } from '../../../../shared/models/dto/shared-dtos';
 import { CloseCollectionInfo } from '../../../../shared/models/collections/dto/collection-action-dtos';
+import { ActionMenuService } from '../../../../services/actions-menu-service';
 
 @Component({
   selector: 'side-bar',
@@ -12,36 +13,36 @@ import { CloseCollectionInfo } from '../../../../shared/models/collections/dto/c
   styleUrl: './side-bar.css',
 })
 export class SideBarComponent {
-    
 
-    @ViewChild(SideBarContent) sidebarContent: SideBarContent;
 
-    protected defaultWidth = 300;
-    protected currentWidth = signal(this.defaultWidth);
+  @ViewChild(SideBarContent) sidebarContent: SideBarContent;
 
-    updateCurrentWidth(newWidth: any){
-      this.currentWidth.set(newWidth);
-    }
+  protected defaultWidth = 400;
+  protected currentWidth = signal(this.defaultWidth);
 
-    openCollection() {
-      this.sidebarContent.openCollectionRef();
-    }
+  updateCurrentWidth(newWidth: any){
+    this.currentWidth.set(newWidth);
+  }
 
-    showAddCollectionModal() {
-      this.sidebarContent.showAddCollectionModalRef();
-    }
+  openCollection() {
+    this.sidebarContent.openCollectionRef();
+  }
 
-    renameCollection(collInfo: RenameDto) {
-      this.sidebarContent.renameCollectionRef(collInfo);
-    }
+  showAddCollectionModal() {
+    this.sidebarContent.showAddCollectionModalRef();
+  }
 
-    openCollectionInFS(collId: string) {
-      this.sidebarContent.openCollectionInFSRef(collId);
-    }
+  renameCollection(collInfo: RenameDto) {
+    this.sidebarContent.renameCollectionRef(collInfo);
+  }
 
-    closeCollection(collInfo: CloseCollectionInfo) {
-      this.sidebarContent.closeCollectionRef(collInfo);
-    }
+  openCollectionInFS(collId: string) {
+    this.sidebarContent.openCollectionInFSRef(collId);
+  }
+
+  closeCollection(collInfo: CloseCollectionInfo) {
+    this.sidebarContent.closeCollectionRef(collInfo);
+  }
 
 
 }

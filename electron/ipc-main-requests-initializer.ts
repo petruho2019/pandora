@@ -321,6 +321,7 @@ function mapCloneDtoToRequestModel(baseRequest: RequestModel, cloneRequestDto: C
         method: baseRequest.method,
         url: baseRequest.url,
         type: RequestTypes.HTTP,
+        auth: baseRequest.auth,
         params: [],
         headers: baseRequest.headers,
         body: baseRequest.body,
@@ -363,6 +364,7 @@ function validateRenameRequestDto(requestInfo: RenameRequestDto){
           url: requestInfo.url,
           collectionId: requestInfo.collectionId, 
           fileName: requestInfo.name, 
+          auth: {},
           headers: [],
           body: {},
           params: []

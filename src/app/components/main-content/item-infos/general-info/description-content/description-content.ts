@@ -20,7 +20,7 @@ import { WorkspaceFacadeService } from '../../../../../../../services/workspace-
   templateUrl: './description-content.html',
   styleUrl: './description-content.css',
 })
-export class DescriptionContent implements OnInit{
+export class DescriptionContent {
 
   private store = inject(Store);
   private actionMenuService = inject(ActionMenuService);
@@ -29,12 +29,8 @@ export class DescriptionContent implements OnInit{
   private workspaceFacadeService = inject(WorkspaceFacadeService);
 
   public collections$ = this.store.select(selectAll);
-  //public collections = toSignal(this.collections$);
-  public collections = signal<Collection[]>([
-          { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
-          { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
-        ]);
-
+  public collections = toSignal(this.collections$);
+  
   public currentOpenedCollectionId$ = this.actionMenuService.openedId$;
 
   @Output() addCollection = new EventEmitter();
@@ -52,20 +48,13 @@ export class DescriptionContent implements OnInit{
     return this.collections()?.length;
   })
 
-  ngOnInit(): void {
-    this.collections$ = of([
-          { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
-          { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
-        ]);
-  }
-
   toggleCollectionActions(event: MouseEvent, id: string) {
     console.log(`toggleCollectionActions collectionId: ${id}`);
     event.stopPropagation();
-    this.actionMenuService.openedId$.pipe(take(1)).subscribe(current => {
-      console.log(`Current: ${current}`);
-        current === this.getCustomCollectionId(id) ? this.actionMenuService.close() : this.actionMenuService.open(this.getCustomCollectionId(id));
-    });
+    // this.actionMenuService.openedId$.pipe(take(1)).subscribe(current => {
+    //   console.log(`Current: ${current}`);
+    //     current === this.getCustomCollectionId(id) ? this.actionMenuService.close() : this.actionMenuService.open(this.getCustomCollectionId(id));
+    // });
   }
 
   handleRenameCollection(collId: string, collName: string) {

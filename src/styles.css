@@ -9,7 +9,7 @@ html, body {
   height: 100%;  
   width: 100%;
   overflow: hidden; 
-  background-color: var(--background-color);
+  background-color: var(--main-background-color);
   font-family: 'Nunito Sans', 'Open Sans', 'Raleway';
 }
 
@@ -18,8 +18,8 @@ html, body {
   --border-style: 1px solid rgba(155, 155, 155, 0.215);
   --contrasting-color: rgb(59,176,143);   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
   --modal-background-color: #202020;
-  --background-color: #222222;
-  --background-color-opacity: rgba(155, 155, 155, 0.1);
+  --main-background-color: #222222;
+  --background-color: rgb(51, 51, 51);
   --action-icon-color: #d1d1d1; 
   --delete-color: rgb(255, 98, 98);
   --action-background-color: rgba(155, 155, 155, 0.150);
@@ -103,7 +103,7 @@ html, body {
 
 .pandora-input {
   font-family: 'Open Sans', 'Raleway';
-  padding: 6px 8px;
+  padding: 5px 8px;
   background: none;
   border: 1px solid #444;
   color: rgb(212, 212, 212);
@@ -140,7 +140,7 @@ html, body {
   fill: rgba(212, 212, 212, 0.75);
 }
 
-.modal-create-button {
+.modal-positive-action-button {
   background-color: var(--contrasting-color);
   color: #ffffff;
 }
@@ -241,6 +241,19 @@ html, body {
 
 .stroke-action-icon-color {
   stroke: var(--action-icon-color);
+}
+
+.add-file-icon {
+  stroke-width: 0.4px;
+  stroke: var(--action-icon-color);
+
+  transition: fill 0.15s;
+  transition: stroke 0.15s;
+}
+
+
+.cdk-overlay-transparent-backdrop {
+  pointer-events: none;
 }
 
 .italic {

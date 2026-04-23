@@ -27,3 +27,8 @@ export interface DeleteRequestDto {
     requestId: string,
     collectionPath: string
 }
+
+export interface BasicAuthInfoDto {
+    username: string | null, 
+    password: string | null
+}

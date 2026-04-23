@@ -78,7 +78,7 @@ z"
   </div>
 
   <div class="collection-menu">
-    <div class="collection-header-actions" (click)="toggleMenu($event)">
+    <div class="collection-header-actions" #collectionActionsTrigger (click)="toggleMenu($event, collectionActionsTrigger)">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="pointer actions-icon"
@@ -96,18 +96,29 @@ z"
         <circle cx="19" cy="12" r="1"></circle>
       </svg>
     </div>
+  </div>
 
-    @if ((currentOpenedCollectionId$ | async) === HEADER_MENU_ID) {
-      <div class="collection-actions">
-        <div class="collection-action pointer" (click)="showAddCollectionModal()">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            class="action-item-icon action-icon-color"
-          >
-            <path
-              d="M 11.50155,23.89094
+  <ng-template cdkPortal>
+    <add-collection-modal
+      (closeModal)="overlayRef.detach()"
+      (addCollecton)="addCollection($event)"
+      animate.enter="enter-animation"
+      animate.leave="leave-animation"
+    />
+  </ng-template>
+</div>
+
+<ng-template #actions>
+  <div class="collection-actions">
+    <div class="collection-action pointer" (click)="showAddCollectionModal()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="action-item-icon action-icon-color"
+      >
+        <path
+          d="M 11.50155,23.89094
 C 11.35046,23.82232 11.20144,23.69127 11.09975,23.53757
 L 10.9381,23.29325 10.92285,18.1945 10.90761,13.09575 5.81003,13.08019 0.71246,13.06463 0.47386,12.90667
 c -0.63182,-0.41829 -0.63182,-1.39022 0,-1.8085
@@ -119,20 +130,20 @@ c 0.63182,0.41828 0.63183,1.39021 0.00001,1.8085
 l -0.2386,0.15796 -5.09757,0.01556 -5.09757,0.01556 -0.01525,5.09875 -0.01525,5.09875 -0.16165,0.24431
 C 12.70827,23.82773 12.37289,24 12,24 11.85793,24 11.63363,23.95092 11.50155,23.89093
 Z"
-            ></path>
-            />
-          </svg>
-          Добавить коллекцию
-        </div>
-        <div class="collection-action pointer" (click)="openCollection()">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            class="action-item-icon action-icon-color"
-          >
-            <path
-              d="M 0.21376,23.78924
+        ></path>
+        />
+      </svg>
+      Добавить коллекцию
+    </div>
+    <div class="collection-action pointer" (click)="openCollection()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="action-item-icon action-icon-color"
+      >
+        <path
+          d="M 0.21376,23.78924
 C -0.00865,23.53072 -0.00865,23.45684 0.02853,12.76272 0.06554,0.90495 0.00994,1.69918 0.73243,0.86809 1.38089,0.11072 1.49192,0.07386 4.1968,0.03683 6.47546,-0.00003 6.73488,0.01849 7.16093,0.23997 7.43877,0.38775 8.43927,1.18198 9.38399,2.01324
 l 1.74157,1.51441 3.85325,0.05554
 c 3.70521,0.05537 3.87184,0.07389 4.29807,0.35092 0.55585,0.35092 1.05592,1.03441 1.22273,1.68069 0.07403,0.25852 0.12962,0.942 0.12962,1.51458
@@ -162,20 +173,9 @@ v 7.57272
 L 2.25159,13.94473
 C 2.77025,11.87609 3.23349,10.02911 3.30751,9.82597
 Z"
-            ></path>
-          </svg>
-          Открыть коллекцию
-        </div>
-      </div>
-    }
+        ></path>
+      </svg>
+      Открыть коллекцию
+    </div>
   </div>
-
-  <ng-template cdkPortal>
-    <add-collection-modal
-      (closeModal)="overlayRef.detach()"
-      (addCollecton)="addCollection($event)"
-      animate.enter="enter-animation"
-      animate.leave="leave-animation"
-    />
-  </ng-template>
-</div>
+</ng-template>

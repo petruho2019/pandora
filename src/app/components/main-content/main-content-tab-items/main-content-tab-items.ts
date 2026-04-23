@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, ElementRef, HostListener, inject, OnChanges, OnDestroy, OnInit, QueryList, signal, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, ElementRef, HostListener, inject, OnInit, QueryList, signal, TemplateRef, viewChild, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
 import { TabItem, TabItemTypes } from '../../../../../shared/models/utils';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { TabItemService } from '../../../../../services/tab-item-service';
@@ -7,154 +7,234 @@ import { NgClass } from '@angular/common';
 import { WorkspaceFacadeService } from '../../../../../services/workspace-facade-service';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID } from '../../../../../shared/models/constants';
+import { RequestStateService } from '../../../../../services/request-state-service';
+import { SaveRequestModal } from "./modals/save-request-modal/save-request-modal";
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
+import { Store } from '@ngrx/store';
+import { selectCollection } from '../../../store/selectors/collections.selector';
+import { map } from 'lodash';
+import { createHttpRequest } from '../../../store/actions/modal-actions/request-modal.actions';
 
 @Component({
   selector: 'main-content-tab-items',
-  imports: [NgClass, CdkDropList, CdkDrag],
+  imports: [NgClass, CdkDropList, CdkDrag, SaveRequestModal],
   templateUrl: './main-content-tab-items.html',
   styleUrl: './main-content-tab-items.css',
 })
 export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
 
-
   private workspaceInfoService = inject(WorkspaceInfoService);
-    private workspaceFacadeService = inject(WorkspaceFacadeService);
-    private tabItemService = inject(TabItemService);
-    private changeDetector = inject(ChangeDetectorRef);
+  private workspaceFacadeService = inject(WorkspaceFacadeService);
+  private tabItemService = inject(TabItemService);
+  private changeDetector = inject(ChangeDetectorRef);
+  private requestStateService = inject(RequestStateService);
+  private overlay = inject(Overlay);
+  private viewContainerRef = inject(ViewContainerRef);
+  private store = inject(Store);
 
-    private readonly THRESHOLD = 16;
+  private readonly THRESHOLD = 16;
 
-    @ViewChildren('requestName') requestNames!: QueryList<ElementRef<HTMLElement>>;
-    @ViewChild('tabsScroll') tabsScroll: ElementRef<HTMLElement>;// tabItems
-    @ViewChild('tabItems') tabItems: ElementRef<HTMLElement>;
+  @ViewChildren('requestName') requestNames!: QueryList<ElementRef<HTMLElement>>;
+  @ViewChild('tabsScroll') tabsScroll: ElementRef<HTMLElement>;
+  @ViewChild('tabItems') tabItems: ElementRef<HTMLElement>;
 
-    public showScrollButtons = signal(false);
-    public tabsScrollMaxWidth = signal(window.innerWidth - 500);
+  public showScrollButtons = signal(false);
+  public tabsScrollMaxWidth = signal(window.innerWidth - 500);
 
-    ngDoCheck(): void {
-      this.checkRequestNameOverflow();
-    }
+  savePortal = viewChild.required<TemplateRef<any>>('save');
+  saveOverlayRef: OverlayRef;
+  saveRequests: TabItem[];
 
-    ngOnInit(): void {
-      if(!this.getTabItemsByWorkspaceId())
-        this.tabItemService.setActiveTabItemId(GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID);
-    }  
+  ngDoCheck(): void {
+    this.checkRequestNameOverflow();
+  }
 
-    ngAfterViewInit(): void {
-      this.updateWidth();
-    }
+  ngOnInit(): void {
+    if(!this.getTabItemsByWorkspaceId())
+      this.tabItemService.setActiveTabItemId(GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID);
+  }  
 
-    activeTabItem = computed(() => {
-      const workspaceId = this.workspaceInfoService.activeWorkspaceId();
-      const items = this.tabItemService.tabItemsByWorkspaceId();
-      const activeId = this.tabItemService.activeTabItemId();
+  ngAfterViewInit(): void {
+    this.updateWidth();
+  }
 
-      return items[workspaceId]?.find(ti => ti.id === activeId);
+  activeTabItem = computed(() => {
+    const workspaceId = this.workspaceInfoService.activeWorkspaceId();
+    const items = this.tabItemService.tabItemsByWorkspaceId();
+    const activeId = this.tabItemService.activeTabItemId();
+
+    return items[workspaceId]?.find(ti => ti.id === activeId);
+  });
+  
+  selectTabItem(id: string){
+    this.tabItemService.setActiveTabItemId(id);
+    this.changeDetector.detectChanges();
+  }
+
+  getActiveWorkspace() {
+    return this.workspaceInfoService.activeWorkspace();
+  }
+
+  getTabItemsByWorkspaceId() {
+    return this.tabItemService.tabItemsByWorkspaceId()[this.workspaceInfoService.activeWorkspace()!.id]
+  }
+
+  checkRequestNameOverflow() {
+    this.requestNames?.forEach((ref: any) => {
+      this.applyOverflow(ref.nativeElement);
     });
-    
-    selectTabItem(id: string){
-      this.tabItemService.setActiveTabItemId(id);
-      this.changeDetector.detectChanges();
-    }
 
-    getActiveWorkspace() {
-      return this.workspaceInfoService.activeWorkspace();
-    }
-
-    getTabItemsByWorkspaceId() {
-      return this.tabItemService.tabItemsByWorkspaceId()[this.workspaceInfoService.activeWorkspace()!.id]
-    }
-
-    checkRequestNameOverflow() {
-      this.requestNames?.forEach((ref: any) => {
+    this.requestNames?.changes.subscribe(names => {
+      names.forEach((ref: ElementRef<HTMLElement>) => {
         this.applyOverflow(ref.nativeElement);
       });
+    });
+  }
 
-      this.requestNames?.changes.subscribe(names => {
-        names.forEach((ref: ElementRef<HTMLElement>) => {
-          this.applyOverflow(ref.nativeElement);
-        });
+  closeTabItemWithCondition(tabItem: TabItem) {
+    console.log(`closeRequestTabItem`);
+
+    if(tabItem.tabType === TabItemTypes.Request && this.requestStateService.isRequestChanged(tabItem.request!.request!.id)){
+
+      this.showSaveRequest(tabItem);
+
+      return;
+    }
+
+    this.closeTabItem(tabItem);
+
+    console.log(`Текущий выбранный таб айте ${JSON.stringify(this.activeTabItem())}`);
+
+    this.changeDetector.detectChanges();
+    this.updateWidth();
+  }
+
+
+  addRequestTabItem() {
+    this.tabItemService.addDefaultRequestTabItem(this.workspaceInfoService.activeWorkspace()!);
+    this.updateWidth();
+  }
+
+  dropTabItem($event: CdkDragDrop<string[]>){
+    console.log(`Информация из ивента, previousIndes: ${$event.previousIndex} , currentIndex: ${$event.currentIndex}`);
+
+    this.tabItemService.moveTabItem($event.previousIndex, $event.currentIndex, this.workspaceInfoService.activeWorkspaceId());
+  }
+
+  isHttp(req: RequestModel){
+    return req.type === RequestTypes.HTTP;
+  }
+
+  isGeneralInfoType(tabItem: TabItem){
+    return tabItem.tabType === TabItemTypes.GeneralInfo;
+  }
+
+  isCollectionSettingsType(tabItem: TabItem){
+    return tabItem.tabType === TabItemTypes.CollectionSettings;
+  }
+
+  isRequestType(tabItem: TabItem){
+    return tabItem.tabType === TabItemTypes.Request;
+  }
+
+  scrollTabs(delta: number){
+    const el = this.tabsScroll?.nativeElement;
+    if(!el) return;
+
+    el.scrollBy({
+      left: delta,
+      behavior: 'smooth'
+    });
+  }
+
+  updateScrollButtons() {
+    const el = this.tabsScroll?.nativeElement;
+    if(!el) return;
+
+    this.showScrollButtons.set(
+      this.tabsScrollMaxWidth() - el.clientWidth < this.THRESHOLD
+    );
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.updateWidth();
+    this.checkRequestNameOverflow();
+  }
+
+  private updateWidth() {
+    this.tabsScrollMaxWidth.set(window.innerWidth - 420);
+
+    requestAnimationFrame(() => {
+      this.updateScrollButtons();
+    });
+  }
+
+  private applyOverflow(element: HTMLElement) {
+    requestAnimationFrame(() => {
+      if (element.scrollWidth > element.offsetWidth) {
+        element.classList.add('text-overflow-mask');
+      } else {
+        element.classList.remove('text-overflow-mask');
+      }
+    });
+  }
+
+  private closeTabItem(tabItem: TabItem) {
+    this.workspaceFacadeService.deleteTabItem(tabItem, this.workspaceInfoService.activeWorkspaceId());
+  }
+
+  showSaveRequest(tabItem: TabItem) {
+    this.saveRequests = [tabItem];
+
+    this.saveOverlayRef = this.buildOverlayRef(this.overlay);
+    const portal = new TemplatePortal(this.savePortal(), this.viewContainerRef);
+    this.saveOverlayRef.attach(portal);
+  }
+
+  buildOverlayRef(overlay: Overlay) : OverlayRef{
+     const overlayRef = overlay.create({
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      positionStrategy: this.overlay.position()
+        .global()
+        .centerHorizontally(),
+        usePopover: false
+    })
+
+    overlayRef.backdropClick().subscribe(() => {
+      overlayRef?.detach();
+    });
+
+    return overlayRef;
+  } 
+
+  handleSaveRequest(req: RequestModel){
+    this.store.select(selectCollection(req.collectionId!))
+      .subscribe(col => {
+        this.store.dispatch(createHttpRequest({ actionData: {
+          body: {
+            collectionId: req.collectionId!,
+            method: req.method,
+            url: req.url,
+            name: req.name,
+            collectionPath: col!.path,
+            type: 'HTTP'
+          },
+          modalOverlayRef: null
+        }}))
       });
+
+    this.saveOverlayRef.dispose();
+  }
+
+  closeSaveRequestModal(withCloseTabItem: boolean, tabItem: TabItem | null) {
+
+    this.saveOverlayRef.detach()
+
+    if(withCloseTabItem) {
+      this.closeTabItem(tabItem!);
     }
-
-    closeTabItem(tabItem: TabItem) {
-      console.log(`closeRequestTabItem`);
-      this.workspaceFacadeService.deleteTabItem(tabItem, this.workspaceInfoService.activeWorkspaceId());
-
-      console.log(`Текущий выбранный таб айте ${JSON.stringify(this.activeTabItem())}`);
-
-      this.changeDetector.detectChanges();
-      this.updateWidth();
-    }
-
-    addRequestTabItem() {
-      this.tabItemService.addDefaultRequestTabItem(this.workspaceInfoService.activeWorkspace()!.id);
-      this.updateWidth();
-    }
-
-    private applyOverflow(element: HTMLElement) {
-      requestAnimationFrame(() => {
-        if (element.scrollWidth > element.offsetWidth) {
-          element.classList.add('text-overflow-mask');
-        } else {
-          element.classList.remove('text-overflow-mask');
-        }
-      });
-    }
-
-    dropTabItem($event: CdkDragDrop<string[]>){
-      console.log(`Информация из ивента, previousIndes: ${$event.previousIndex} , currentIndex: ${$event.currentIndex}`);
-
-      this.tabItemService.moveTabItem($event.previousIndex, $event.currentIndex, this.workspaceInfoService.activeWorkspaceId());
-    }
-
-    isHttp(req: RequestModel){
-      return req.type === RequestTypes.HTTP;
-    }
-
-    isGeneralInfoType(tabItem: TabItem){
-      return tabItem.tabType === TabItemTypes.GeneralInfo;
-    }
-
-    isCollectionSettingsType(tabItem: TabItem){
-      return tabItem.tabType === TabItemTypes.CollectionSettings;
-    }
-
-    isRequestType(tabItem: TabItem){
-      return tabItem.tabType === TabItemTypes.Request;
-    }
-
-    scrollTabs(delta: number){
-      const el = this.tabsScroll?.nativeElement;
-      if(!el) return;
-
-      el.scrollBy({
-        left: delta,
-        behavior: 'smooth'
-      });
-    }
-
-    updateScrollButtons() {
-      const el = this.tabsScroll?.nativeElement;
-      if(!el) return;
-
-      this.showScrollButtons.set(
-        this.tabsScrollMaxWidth() - el.clientWidth < this.THRESHOLD
-      );
-    }
-
-    @HostListener('window:resize')
-    onResize() {
-      this.updateWidth();
-      this.checkRequestNameOverflow();
-    }
-
-    private updateWidth() {
-      this.tabsScrollMaxWidth.set(window.innerWidth - 500);
-
-      requestAnimationFrame(() => {
-        this.updateScrollButtons();
-      });
-    }
-
+  }
 }

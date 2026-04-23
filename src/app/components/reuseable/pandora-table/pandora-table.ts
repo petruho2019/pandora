@@ -27,7 +27,7 @@ export class PandoraTable implements AfterViewChecked, OnChanges{
   protected nameColumnWidth = signal(this.defaultWidth);
   
   public paramsTableData: TableRow[] = [
-    { id: uuidv4(), isActive: true, name: '', value: '', multipartInfo: { fileValue: null, contentType: '' } }
+    { id: uuidv4(), isActive: true, name: '', value: '', fileInfo: { fileValue: null, contentType: '' } }
   ] ;
 
   protected onDragMoved(event: CdkDragMove) {
@@ -117,7 +117,7 @@ export class PandoraTable implements AfterViewChecked, OnChanges{
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if(file){
-      row!.multipartInfo!.fileValue = file;
+      row!.fileInfo!.fileValue = file;
     }
 
     this.manageDynamicRows(row.id);
@@ -127,11 +127,11 @@ export class PandoraTable implements AfterViewChecked, OnChanges{
   isRowEmpty(row: TableRow): boolean {
 
     if(this.canChangeContentType && this.canAddFile){
-      return row.name.trim() === '' && row.value.trim() === '' && row.multipartInfo?.contentType?.trim() === '' && !this.isFileValueSet(row)
+      return row.name.trim() === '' && row.value.trim() === '' && row.fileInfo?.contentType?.trim() === '' && !this.isFileValueSet(row)
     }
 
     if(this.canChangeContentType){
-      return row.name.trim() === '' && row.value.trim() === '' && row.multipartInfo?.contentType?.trim() === ''
+      return row.name.trim() === '' && row.value.trim() === '' && row.fileInfo?.contentType?.trim() === ''
     }
 
     return row.name.trim() === '' && row.value.trim() === '';
@@ -145,7 +145,7 @@ export class PandoraTable implements AfterViewChecked, OnChanges{
   }
 
   newEmptyRow(): TableRow {
-    return { id: uuidv4(), isActive: true, name: '', value: '', multipartInfo: { fileValue: null, contentType: '' } };
+    return { id: uuidv4(), isActive: true, name: '', value: '', fileInfo: { fileValue: null, contentType: '' } };
   }
 
   removeExtension(filename: string) {
@@ -153,7 +153,7 @@ export class PandoraTable implements AfterViewChecked, OnChanges{
   }
 
   isFileValueSet(tableRow: TableRow){
-    return (tableRow.multipartInfo?.fileValue !== null && tableRow.multipartInfo?.fileValue !== undefined); 
+    return (tableRow.fileInfo?.fileValue !== null && tableRow.fileInfo?.fileValue !== undefined); 
   }
 
 
@@ -163,7 +163,7 @@ export class PandoraTable implements AfterViewChecked, OnChanges{
 
   deleteFile(row: TableRow){
     const tr = this.paramsTableData.find(tr => tr.id === row.id);
-    tr!.multipartInfo = { fileValue: null, contentType: tr!.multipartInfo!.contentType };
+    tr!.fileInfo = { fileValue: null, contentType: tr!.fileInfo!.contentType };
 
     this.manageDynamicRows(row.id);
     this.tableChanged.emit(this.paramsTableData);

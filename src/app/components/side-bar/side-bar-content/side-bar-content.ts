@@ -22,7 +22,8 @@ import { CollectionItem } from '../collections/collection-item/collection-item';
 import { RequestCollectionItem } from '../requests/request-item/request-item';
 import { cloneCollectionModal, closeCollectionModal, renameCollectionModal } from '../../../store/actions/modal-actions/collections-modal.actions';
 import { createHttpRequest } from '../../../store/actions/modal-actions/request-modal.actions';
-import { buildDefaultBody } from '../../../../../shared/models/requests/http/http-request-model';
+import { buildDefaultAuth, buildDefaultBody } from '../../../../../shared/models/requests/http/http-request-model';
+import { INITIAL_REQUESTS_STATE } from '../../../store/reducers/requests.reducer';
 
 @Component({
   selector: 'side-bar-content',
@@ -52,16 +53,10 @@ export class SideBarContent {
   ngOnInit(): void {
     this.store.dispatch(loadCollections());
 
-    this.collections$ = of([
-      { id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b', name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1' },
-      { id: '33abfac2-d678-481c-aa9a-39ac8361bd3e', name: 'TEST 2', path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 2' }
-    ]);
-
     this.openCollections.set((this.collections() as Collection[]).reduce((acc, c) => {
       acc[c.id] = false;
       return acc;
     }, {} as Record<string, boolean>));
-
   }
 
   handleCreateRequest(overlay: OverlayRef, request: CreateRequestInfo) {
@@ -129,25 +124,14 @@ export class SideBarContent {
     if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b') {
       this.requests.update(state => ({
         ...state,
-        [collectionId]: {
-          isLoaded: true,
-          requests: [
-            { id: "085059cb-2e3e-4550-b364-aff15fe5c849", name:"asdasd", type:"HTTP", method:"GET", url:"asdasd", headers:[],  params: [], body: buildDefaultBody(), collectionId, fileName:"asdasd" },
-            { id: "531ce6c4-a7ee-4f85-9015-2e776ab38db0", name:"фывфыв", type:"HTTP", method:"GET", url:"фывфыв", headers:[], params: [], body: buildDefaultBody(), collectionId, fileName:"фывфыв" }
-          ]
-        }
+        [collectionId]: INITIAL_REQUESTS_STATE[collectionId]
       }));
     }
 
     if (collectionId === '33abfac2-d678-481c-aa9a-39ac8361bd3e') {
       this.requests.update(state => ({
         ...state,
-        [collectionId]: {
-          isLoaded: true,
-          requests: [
-            { id: "9058196d-801b-44df-9ef8-17f331c958c5", name:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", type:"HTTP", method:"GET", url:"asdasd", params: [], headers:[], body: buildDefaultBody(), collectionId, fileName:"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
-          ]
-        }
+        [collectionId]: INITIAL_REQUESTS_STATE[collectionId]
       }))
     };
   }

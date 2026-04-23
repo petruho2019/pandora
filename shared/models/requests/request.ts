@@ -29,9 +29,9 @@ export const RequestSettingsTabItems = {
 
 export type RequestSettingsTabItemsType = typeof RequestSettingsTabItems[keyof typeof RequestSettingsTabItems];
 
-export interface MultipartBodyInfo {
+export interface FileInfo {
   fileValue: File | null,
-  contentType: string
+  contentType: string | null
 }
 
 export interface TableRow  {
@@ -39,7 +39,7 @@ export interface TableRow  {
   isActive: boolean
   name: string,
   value: string,
-  multipartInfo: MultipartBodyInfo | null
+  fileInfo: FileInfo | null
 }
 
 export function buildHeader(tableRow: TableRow) : TableRow {
@@ -48,6 +48,6 @@ export function buildHeader(tableRow: TableRow) : TableRow {
     name: tableRow.name,
     isActive: tableRow.isActive,
     value: tableRow.value,
-    multipartInfo: null
+    fileInfo: null
   }
 }

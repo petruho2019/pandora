@@ -1,6 +1,7 @@
-import { RequestChangeDetectorService } from '../../services/request-change-detector-service';
 import { WorkspaceInfoService } from '../../services/workspace-info-service';
 import { AlertNotificationService } from './../../services/alert-notification-service';
+import { RequestStateService } from './../../services/request-state-service';
+import { SendRequestService } from './../../services/send-request-service';
 import { ApplicationConfig } from '@angular/core';
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
 import { collectionFeatureKey, collectionsReducer } from './store/reducers/collections.reducer';
@@ -18,7 +19,15 @@ import { MonacoEditorModule, provideMonacoEditor } from 'ngx-monaco-editor-v2';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideMonacoEditor(),
+    provideMonacoEditor({
+      defaultOptions: {
+          theme: 'vs-dark',
+          automaticLayout: true,
+          minimap: { enabled: false },
+          fontSize: 13,
+          scrollBeyondLastLine: false,
+        }
+    }),
     provideBrowserGlobalErrorListeners(),
     provideStore({
       [collectionFeatureKey]: collectionsReducer,
@@ -31,8 +40,9 @@ export const appConfig: ApplicationConfig = {
     AlertNotificationService,
     WorkspaceInfoService,
     TabItemService,
-    RequestChangeDetectorService,
-    MonacoEditorModule
+    MonacoEditorModule,
+    SendRequestService,
+    RequestStateService
   ]
 };
 
