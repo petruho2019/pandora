@@ -17,7 +17,6 @@ export class AlertNotificationService {
     private overlayRef?: OverlayRef;
 
     public alertNotificationMessages = signal<AlertMessage[]>([]);
-
     private intervalId: number | null = null;
 
     renderAlertNotificationContainer() {

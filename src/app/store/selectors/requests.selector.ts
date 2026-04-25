@@ -24,6 +24,12 @@ export const selectRequestsByCollectionId = (props: { collectionId: string }) =>
     requests.filter(r => r.collectionId === props.collectionId)
 );
 
+export const selectRequest = (props: { id: string }) => createSelector(
+  selectAll,
+  (requests: RequestModel[]) =>
+    requests.find(r => r.id === props.id)
+);
+
 export const selectRequestError = () => createSelector(
   selectRequestsState,
   (state) => state.error

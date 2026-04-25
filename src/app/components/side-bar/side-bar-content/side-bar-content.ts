@@ -136,6 +136,10 @@ export class SideBarContent {
     };
   }
 
+  showAddRequestModal(coll: Collection) {
+    this.collectionItem.showAddRequestModal(coll.id, coll.path);
+  }
+
   showAddCollectionModalRef(){
     this.sideBarHeaderChild.showAddCollectionModal();
   }

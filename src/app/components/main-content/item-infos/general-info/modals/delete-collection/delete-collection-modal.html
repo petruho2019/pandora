@@ -49,7 +49,7 @@
           pointer: deleteTemplate === 'удалить',
         }"
         class="modal-delete-button action-button"
-        (click)="deleteCollection()"
+        (click)="deleteTemplate === 'удалить' && deleteCollection()"
       >
         Удалить
       </button>

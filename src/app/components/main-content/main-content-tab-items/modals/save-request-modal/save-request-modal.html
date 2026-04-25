@@ -61,7 +61,7 @@ z"
         Закрыть
       </button>
       <button
-        (click)="showSelectCollection()"
+        (click)="handleShowSelectCollection()"
         class="modal-positive-action-button action-button pointer"
       >
         Сохранить
@@ -69,14 +69,3 @@ z"
     </div>
   </div>
 </div>
-
-<ng-template cdkPortal #selectCollection>
-  <select-collection-modal
-    (close)="selectCollectionOverlayRef.detach()"
-    (save)="handleSaveRequest($event)"
-    [req]="reqToSave"
-    animate.enter="enter-animation"
-    animate.leave="leave-animation"
-  >
-  </select-collection-modal>
-</ng-template>

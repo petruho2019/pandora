@@ -1,6 +1,10 @@
 
 .description-content {
     padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .quick-actions {
@@ -33,6 +37,7 @@
 
 .collections-info-con {
     margin-top: 20px;
+    height: 100%;
 }
 
 .no-collections-con {
@@ -55,6 +60,8 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 60%;
+    height: calc(100vh - 300px);
     margin-top: 16px;
 }
 
@@ -62,11 +69,7 @@
     display: flex;
     justify-content: space-between;
     padding: 6px 0;
-    max-width: 50%;
-}
-
-.collection-item-info {
-    min-width: 100%;
+    margin-right: 10px;
 }
 
 .collection-icon {
@@ -83,7 +86,6 @@
     align-items: center;
 
 }
-
 
 .collection-name {
     overflow-x: hidden;

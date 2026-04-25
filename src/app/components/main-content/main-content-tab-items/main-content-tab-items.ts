@@ -15,10 +15,13 @@ import { Store } from '@ngrx/store';
 import { selectCollection } from '../../../store/selectors/collections.selector';
 import { map } from 'lodash';
 import { createHttpRequest } from '../../../store/actions/modal-actions/request-modal.actions';
+import { SelectCollectionModal } from "./modals/save-request-modal/modals/select-collection-modal/select-collection-modal";
+import { selectRequest } from '../../../store/selectors/requests.selector';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'main-content-tab-items',
-  imports: [NgClass, CdkDropList, CdkDrag, SaveRequestModal],
+  imports: [NgClass, CdkDropList, CdkDrag, SaveRequestModal, SelectCollectionModal],
   templateUrl: './main-content-tab-items.html',
   styleUrl: './main-content-tab-items.css',
 })
@@ -39,12 +42,19 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   @ViewChild('tabsScroll') tabsScroll: ElementRef<HTMLElement>;
   @ViewChild('tabItems') tabItems: ElementRef<HTMLElement>;
 
+  @ViewChild(SaveRequestModal) saveReqModalComponent: SaveRequestModal;
+
   public showScrollButtons = signal(false);
   public tabsScrollMaxWidth = signal(window.innerWidth - 500);
 
   savePortal = viewChild.required<TemplateRef<any>>('save');
   saveOverlayRef: OverlayRef;
   saveRequests: TabItem[];
+
+  selectCollectionPortal = viewChild.required<TemplateRef<any>>('selectCollection');
+  selectCollectionOverlayRef: OverlayRef;
+  selectCollectionModalSubscription: Subscription;
+  protected reqToSave: TabItem;
 
   ngDoCheck(): void {
     this.checkRequestNameOverflow();
@@ -193,6 +203,23 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     this.saveOverlayRef.attach(portal);
   }
 
+  handleShowSelectCollection(tabItem: TabItem){
+
+    if(this.saveRequests?.length !== 1){
+      // тут логика когда закрывается само приложение
+    }
+
+    this.reqToSave = tabItem; 
+
+    this.selectCollectionOverlayRef = this.buildOverlayRef(this.overlay);
+    const portal = new TemplatePortal(this.selectCollectionPortal(), this.viewContainerRef);
+    this.selectCollectionOverlayRef.attach(portal);
+
+    this.selectCollectionModalSubscription = this.selectCollectionOverlayRef.detachments().subscribe(() => {
+      this.closeTabItem(this.reqToSave);
+    })
+  }
+
   buildOverlayRef(overlay: Overlay) : OverlayRef{
      const overlayRef = overlay.create({
       hasBackdrop: true,
@@ -210,23 +237,32 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     return overlayRef;
   } 
 
-  handleSaveRequest(req: RequestModel){
-    this.store.select(selectCollection(req.collectionId!))
-      .subscribe(col => {
-        this.store.dispatch(createHttpRequest({ actionData: {
-          body: {
-            collectionId: req.collectionId!,
-            method: req.method,
-            url: req.url,
-            name: req.name,
-            collectionPath: col!.path,
-            type: 'HTTP'
-          },
-          modalOverlayRef: null
-        }}))
-      });
+  handleSaveRequest(tabItem: TabItem){
+    this.store.select(selectRequest({ id: tabItem.request!.request!.id })).subscribe(r => {
 
-    this.saveOverlayRef.dispose();
+      console.log(`При сохранении запроса из store вернулся запрос: ${JSON.stringify(r, null, 2)}`);
+
+      if(r) {
+
+      }
+      else {
+        console.log(`Создаем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
+        this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
+        .subscribe(col => {
+          this.store.dispatch(createHttpRequest({ actionData: {
+            body: {
+              collectionId: tabItem.request!.request!.collectionId!,
+              method: tabItem.request!.request!.method,
+              url: tabItem.request!.request!.url,
+              name: tabItem.request!.request!.name,
+              collectionPath: col!.path,
+              type: 'HTTP'
+            },
+            modalOverlayRef: this.selectCollectionOverlayRef
+          }}))
+        });
+      }
+    })
   }
 
   closeSaveRequestModal(withCloseTabItem: boolean, tabItem: TabItem | null) {
@@ -236,5 +272,10 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     if(withCloseTabItem) {
       this.closeTabItem(tabItem!);
     }
+  }
+
+  handleCloseSelectCollection(){
+    this.selectCollectionModalSubscription.unsubscribe();
+    this.selectCollectionOverlayRef.detach();
   }
 }

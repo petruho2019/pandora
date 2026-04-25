@@ -5,8 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { selectAll } from '../../../../../../../store/selectors/collections.selector';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { of } from 'rxjs';
 import { Collection } from '../../../../../../../../../shared/models/collections/collection';
+import { TabItem } from '../../../../../../../../../shared/models/utils';
 
 @Component({
   selector: 'select-collection-modal',
@@ -21,16 +21,15 @@ export class SelectCollectionModal {
 
   public headerTitle = 'Выберете коллекцию';
 
-  @Input() req: RequestModel;
+  @Input() req: TabItem;
 
-  @Output() save = new EventEmitter<RequestModel>();
+  @Output() save = new EventEmitter<TabItem>();
   @Output() close = new EventEmitter();
 
   private collections$ = this.store.select(selectAll);
   public collections = toSignal(this.collections$);
 
   onClose(){
-    console.log(`${JSON.stringify(this.collections(), null, 2)}`);
     this.close.emit();
   }
 
@@ -39,15 +38,17 @@ export class SelectCollectionModal {
   }
 
   removeSelectedCollection() {
-    this.req.collectionId = null;
+    this.req.request!.request!.collectionId = null;
+    this.headerTitle = 'Выбрать коллекцию'; 
   }
 
   selectCollection(col: Collection) {
-    this.req.collectionId = col.id
+    this.req.request!.request!.collectionId = col.id;
+    this.headerTitle = 'Сохранить запрос'; 
   }
 
   getCollName() {
-    return this.collections()!.find(c => c.id === this.req.collectionId)!.name;
+    return this.collections()!.find(c => c.id === this.req.request!.request!.collectionId)!.name;
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -57,6 +58,6 @@ export class SelectCollectionModal {
   }
 
   setFileName() {
-    this.req.fileName = this.req.name;
+    this.req.request!.request!.fileName = this.req.request!.request!.name;
   }
 }

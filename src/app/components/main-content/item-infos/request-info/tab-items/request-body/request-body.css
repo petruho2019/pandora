@@ -15,12 +15,14 @@
 
 .editor-wrapper {
     margin-top: 20px;
+    height: 90%;
 }
 
 pandora-json-editor {
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    height: 90%;
     flex: 1;
 }
 

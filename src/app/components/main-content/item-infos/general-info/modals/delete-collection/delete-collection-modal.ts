@@ -2,7 +2,7 @@ import { Component, EventEmitter, HostListener, Input, Output } from '@angular/c
 import { ModalHeader } from "../../../../../reuseable/modals/modal-header/modal-header";
 import { DeleteCollectionDto } from '../../../../../../../../shared/models/collections/dto/collection-action-dtos';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { NgClass, NgStyle, NgIf } from '@angular/common';
 
 @Component({
   selector: 'delete-collection-modal',

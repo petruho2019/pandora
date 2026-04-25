@@ -5,11 +5,16 @@
     <div class="request-name-input-wrapper">
       <span style="font-weight: 650; margin-bottom: 10px; font-size: 13px">Название запроса</span>
 
-      <input type="text" class="pandora-input" [(ngModel)]="req.name" (change)="setFileName()" />
+      <input
+        type="text"
+        class="pandora-input"
+        [(ngModel)]="req.request?.request!.name"
+        (change)="setFileName()"
+      />
     </div>
 
     <div class="collections-info">
-      @if (req.collectionId) {
+      @if (req.request!.request!.collectionId) {
         <span style="font-weight: 650; font-size: 13px; margin-bottom: 8px"
           >Сохранить в коллекцию</span
         >
@@ -20,27 +25,40 @@
           >{{ getCollName() }}</span
         >
       } @else {
-        <span style="font-weight: 650; font-size: 13px; margin-bottom: 10px"
-          >Выберете в какую коллекцию сохранить</span
-        >
+        <div class="collections-con scroll">
+          @if (collections()?.length === 0) {
+            <div class="no-collections">
+              <span style="color: #bbb">У вас нет коллекций</span>
+              <span style="color: #929292">
+                Коллекция помогает хранить запросы. Создайте одну что бы сохранить запрос
+              </span>
+            </div>
+          } @else {
+            <span style="font-weight: 650; font-size: 13px; margin-bottom: 10px"
+              >Выберете в какую коллекцию сохранить</span
+            >
 
-        <span
-          style="color: rgb(170, 170, 170); font-weight: 650; font-size: 13px; margin-bottom: 8px"
-          >Коллекции</span
-        >
+            <span
+              style="
+                color: rgb(170, 170, 170);
+                font-weight: 650;
+                font-size: 13px;
+                margin-bottom: 8px;
+              "
+              >Коллекции</span
+            >
 
-        <div class="collections-con">
-          @for (col of collections(); track col.id) {
-            <div class="collection-item pointer" (click)="selectCollection(col)">
-              <svg
-                class="action-icon-color collection-item-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 22 24"
-              >
-                <path
-                  d="M 9.3486,23.9899
+            @for (col of collections(); track col.id) {
+              <div class="collection-item pointer" (click)="selectCollection(col)">
+                <svg
+                  class="action-icon-color collection-item-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 22 24"
+                >
+                  <path
+                    d="M 9.3486,23.9899
 C 6.9851,23.7815 5.1066,23.3525 3.4388,22.6404 1.9125,21.9887 0.737,21.0535 0.2751,20.1236
 L 0.0708,19.7123 0.027,18.783
 c -0.0241,-0.5111 -0.0339,-3.9329 -0.0218,-7.6039
@@ -72,11 +90,12 @@ c 2.909,-0.4007 5.1625,-1.2732 6.2919,-2.4361 0.4012,-0.4131 0.5496,-0.6802 0.58
 C 20.715,4.6117 20.5647,4.2607 20.1839,3.858 19.0167,2.6236 16.7589,1.7359 13.7605,1.3325 12.8032,1.2037 10.1818,1.1487 9.1929,1.2366 7.0641,1.4259 5.1371,1.8879 3.7459,2.5425 2.6972,3.036 1.712,3.8137 1.4443,4.3593 1.2823,4.6895 1.2827,5.1338 1.4452,5.4676
 c 0.5873,1.2057 3.1198,2.4407 5.9607,2.9067 1.4354,0.2355 1.8328,0.2609 3.8092,0.2439 1.5521,-0.0134 1.9602,-0.0321 2.5905,-0.1189
 z"
-                ></path>
-              </svg>
+                  ></path>
+                </svg>
 
-              <span style="font-weight: 600; font-size: 13px">{{ col.name }}</span>
-            </div>
+                <span style="font-weight: 600; font-size: 13px">{{ col.name }}</span>
+              </div>
+            }
           }
         </div>
       }
@@ -87,7 +106,7 @@ z"
       <button
         (click)="saveRequest()"
         class="modal-positive-action-button action-button pointer"
-        [hidden]="req.collectionId === null"
+        [hidden]="req.request!.request!.collectionId === null"
       >
         Сохранить
       </button>

@@ -1,5 +1,5 @@
 import { RequestModel, RequestSettingsTabItems, RequestSettingsTabItemsType } from './../../../../shared/models/requests/request';
-import { Component, computed, effect, EventEmitter, HostListener, inject, Output, signal } from "@angular/core";
+import { Component, computed, effect, EventEmitter, HostListener, inject, Output, signal, ViewChild } from "@angular/core";
 import { MainContentHeader } from "./main-content-header/main-content-header";
 import { MainContentTabItems } from "./main-content-tab-items/main-content-tab-items";
 import { TabItemService } from "../../../../services/tab-item-service";
@@ -11,8 +11,7 @@ import { RenameDto } from "../../../../shared/models/dto/shared-dtos";
 import { CloseCollectionInfo } from "../../../../shared/models/collections/dto/collection-action-dtos";
 import { RequestInfo } from "./item-infos/request-info/request-info";
 import { AuthItem, BodyItem } from '../../../../shared/models/requests/http/http-request-model';
-import { AUTH_KIND, AuthKind } from '../../../../shared/models/requests/http/auth';
-import { ActionMenuService } from '../../../../services/actions-menu-service';
+import { AUTH_KIND } from '../../../../shared/models/requests/http/auth';
 
 @Component({
   selector: 'main-content',
@@ -21,16 +20,8 @@ import { ActionMenuService } from '../../../../services/actions-menu-service';
   imports: [MainContentHeader, MainContentTabItems, DescriptionContent, RequestInfo],
 })
 export class MainContent {
-
-  constructor() {
-    effect(() => {
-      console.log(`Изменился selectedSettingRequestTabItems: ${JSON.stringify(this.selectedSettingRequestTabItems(), null, 2)}`);
-    })    
-  }
-
   private tabItemService = inject(TabItemService);
   private workspaceInfoService = inject(WorkspaceInfoService);
-  private actionMenuService = inject(ActionMenuService);
 
   @Output() addCollection = new EventEmitter();
   @Output() openCollection = new EventEmitter();
@@ -42,6 +33,8 @@ export class MainContent {
   selectedSettingRequestTabItems = signal<Record<string, RequestSettingsTabItemsType>>({});
   selectedRequestBody = signal<Record<string, BodyItem>>({});
   selectedAuthType = signal<Record<string, AuthItem>>({});
+
+  @ViewChild(MainContentTabItems) mainContentTabItems: MainContentTabItems;
 
   public isRequestChanged = signal(false);
 
@@ -64,17 +57,11 @@ export class MainContent {
     const id = req.id;
     const current = this.initialRequests()[id];
 
-    console.log(`selectedSettingRequestTabItems перед проверкой на 1 открытие: ${JSON.stringify(this.selectedSettingRequestTabItems(), null, 2)}`);
-
     if (!current) {
-      console.log(`Добавляем запрос в различные рекорды при первом открытии: ${req.id}`);
-
       this.selectedSettingRequestTabItems.update(ti => ({
         ...ti,
         [req.id]: RequestSettingsTabItems.PARAMS
       }));
-
-      console.log(`selectedSettingRequestTabItems: ${JSON.stringify(this.selectedSettingRequestTabItems(), null, 2)}`);
 
       this.selectedRequestBody.update(ti => ({
         ...ti,
@@ -118,6 +105,12 @@ export class MainContent {
 
   isGeneralInfoType(tabItem: TabItem) {
     return tabItem.tabType === TabItemTypes.GeneralInfo;
+  }
+
+  handleSaveRequest() {
+    const reqTabItem = this.tabItemService.getActiveTabItem(this.workspaceInfoService.activeWorkspaceId());
+
+    this.mainContentTabItems.handleShowSelectCollection(reqTabItem!);
   }
 
   handleSelectedRequestSettingTabItemChanged(newTabItem: RequestSettingsTabItemsType, reqId: string) {

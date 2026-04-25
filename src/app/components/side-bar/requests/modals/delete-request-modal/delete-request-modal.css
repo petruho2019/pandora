@@ -4,7 +4,7 @@
   border-radius: 8px;
   position: absolute;
   transform: translate(-50%, -50%);
-  top: 30%;
+  top: var(--modal-top);
   min-width: 500px;
   max-width: 700px;
   background: var(--modal-background-color);
@@ -23,6 +23,6 @@
   margin: 0 16px 16px 16px;
 }
 .modal-delete-button {
-  background-color: var(--delete-color);
+  background-color: rgb(197, 26, 26);
   color: #d1d1d1;
 }

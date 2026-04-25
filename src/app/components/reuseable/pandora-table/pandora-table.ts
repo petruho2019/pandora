@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, inject, Input, OnChanges, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
 import { TableRow } from '../../../../../shared/models/requests/request';
 import { v4 as uuidv4 } from 'uuid';
 import { CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
@@ -12,6 +12,8 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './pandora-table.css',
 })
 export class PandoraTable implements AfterViewChecked, OnChanges{
+
+  private changeDetector = inject(ChangeDetectorRef);
 
   @Output() tableChanged = new EventEmitter<TableRow[]>();
   @Input() canAddFile: boolean;
@@ -48,6 +50,7 @@ export class PandoraTable implements AfterViewChecked, OnChanges{
 
   ngAfterViewChecked() {
     this.calculateResizerHeight();
+    this.changeDetector.detectChanges();
   }
 
   ngOnChanges(changes: SimpleChanges) {

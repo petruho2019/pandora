@@ -1,5 +1,5 @@
 import { RequestModel, RequestSettingsTabItems, RequestSettingsTabItemsType, TableRow } from './../../../../../../shared/models/requests/request';
-import { Component, computed, EventEmitter, HostListener, inject, input, Input, model, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, computed, EventEmitter, HostListener, inject, input, Input, model, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
 import { RequestUrl } from "./request-url/request-url";
 import { NgClass } from '@angular/common';
 import { RequestParams } from './tab-items/request-params/request-params';
@@ -15,7 +15,7 @@ import { RequestStateService } from '../../../../../../services/request-state-se
 import { RequestAuth } from "./tab-items/request-auth/request-auth";
 import { BasicAuthInfoDto } from '../../../../../../shared/models/requests/dto/request-dtos';
 import { AUTH_KIND, BasicAuth, BearerAuth } from '../../../../../../shared/models/requests/http/auth';
-
+import { v4 as uuidv4 } from 'uuid';
 
 
 @Component({
@@ -41,6 +41,7 @@ export class RequestInfo implements OnInit, OnChanges {
   @Output() selectedRequestSettingTabItemChanged = new EventEmitter<{ tabType: RequestSettingsTabItemsType , reqId: string }>();
   @Output() selectedBodyItemChanged = new EventEmitter<{ bodyItem: BodyItem , reqId: string }>();
   @Output() selectedAuthItemChanged = new EventEmitter<{ authItem: AuthItem , reqId: string }>();
+  @Output() saveReq = new EventEmitter();
 
   public isShowBodyTypes: boolean = false;
   public isShowAuthTypes: boolean = false;
@@ -53,7 +54,6 @@ export class RequestInfo implements OnInit, OnChanges {
   public requestSettingsTabItems = RequestSettingsTabItems;
 
   ngOnInit(): void {
-    console.log(`OnInit requestInfo`);
     this.selectedBody()![this.req.id] = this.req.body[BODY_KIND.NONE];
   }
 
@@ -215,17 +215,54 @@ export class RequestInfo implements OnInit, OnChanges {
     return this.selectedTabItem()![this.req.id] === RequestSettingsTabItems.AUTH;
   }
 
+  handleSaveRequest(){
+    this.saveReq.emit();
+  }
+
   handleMethodChanged(newHttpMethod: HttpMethod){
     this.req.method = newHttpMethod;
 
     this.tabItemService.updateRequest(this.req.id, { method: newHttpMethod });
   }
-
   handleUrlChanged(newUrl: string) {
-    console.log(`Устанавливаем новый url: ${newUrl}`);
+
+    const startParamsIndex = newUrl.indexOf('?');
+    let newParams:TableRow[] = []; 
+
+    if(startParamsIndex !== -1) {
+      const urlParams = newUrl.slice(newUrl.indexOf('?') + 1, newUrl.length);
+
+      newParams = urlParams.split('&').reduce<TableRow[]>((params, param, index) => { 
+        let [key, value] = param.split('='); 
+
+        const sourceParam = this.req.params[index];
+
+        if(sourceParam) {
+          params[index] = {
+            ...sourceParam,
+            name: key ?? '',
+            value: value ?? ''
+          }
+        }
+        else {
+          params.push({
+            id: uuidv4(),
+            isActive: true,
+            name: key ?? '',
+            value: value ?? '',
+            fileInfo: null
+          });
+        }
+
+        return params;
+      }, []);
+    }
+
     this.req.url = newUrl;
+    this.req.params = [...newParams];
 
     this.tabItemService.updateRequest(this.req.id, { url: newUrl });
+    this.tabItemService.updateRequest(this.req.id, { params: newParams });
   }
 
   handleUrlEndodedBodyChanged(body: TableRow[]) {
@@ -452,7 +489,6 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   checkIsReqChanged() {
-    console.log(`Проверка на то изменен ли запрос`);
     const req = this.req;
 
     if (!req) {
@@ -471,5 +507,3 @@ export class RequestInfo implements OnInit, OnChanges {
     this.requestStateService.setRequestChanged(req, changed);
   }
 }
-
-

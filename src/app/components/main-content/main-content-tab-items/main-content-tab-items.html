@@ -163,10 +163,21 @@ Z"
 <ng-template cdkPortal #save>
   <save-request-modal
     (close)="closeSaveRequestModal($event.withCloseTabItem, $event.tabItem)"
-    (save)="handleSaveRequest($event)"
+    (showSelectCollection)="handleShowSelectCollection($event)"
     [requests]="saveRequests"
     animate.enter="enter-animation"
     animate.leave="leave-animation"
   >
   </save-request-modal>
+</ng-template>
+
+<ng-template cdkPortal #selectCollection>
+  <select-collection-modal
+    (close)="handleCloseSelectCollection()"
+    (save)="handleSaveRequest($event)"
+    [req]="reqToSave"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
+  >
+  </select-collection-modal>
 </ng-template>

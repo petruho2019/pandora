@@ -176,7 +176,7 @@ z"
         </div>
       </div>
     } @else {
-      <div class="collections-info">
+      <div class="collections-info scroll">
         @for (coll of collections$ | async; track $index) {
           <div class="collection-item pointer" (click)="setWorkspace(coll)">
             <div class="collection-item-info">
@@ -257,11 +257,15 @@ z"
                 </svg>
                 <span class="collection-name">{{ coll.name }}</span>
               </div>
-              <div class="collection-path">
+              <div class="collection-path text-ellipsis">
                 {{ coll.path }}
               </div>
             </div>
-            <div class="collection-actions" (click)="toggleCollectionActions($event, coll.id)">
+            <div
+              class="collection-actions"
+              #actionTrigger
+              (click)="toggleCollectionActions($event, coll, actionTrigger)"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="actions-icon stroke-action-icon-color"
@@ -272,21 +276,36 @@ z"
                 <circle cx="12" cy="12" r="1"></circle>
                 <circle cx="19" cy="12" r="1"></circle>
               </svg>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
 
-              @if ((currentOpenedCollectionId$ | async) === this.getCustomCollectionId(coll.id)) {
-                <div class="actions-menu" #actionsMenu (click)="$event.stopPropagation()">
-                  <div
-                    class="action-item pointer"
-                    (click)="handleRenameCollection(coll.id, coll.name)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="action-item-icon action-icon-color"
-                    >
-                      <path
-                        d="M 2.4826274,23.96774
+<ng-template cdkPortal #delete>
+  <delete-collection-modal
+    [collectionInfo]="deleteCollectionInfo"
+    (onClose)="deleteOverlayRef.detach()"
+    (onDelete)="handleDeleteCollection($event)"
+    animate.enter="enter-animation"
+    animate.leave="leave-animation"
+  >
+  </delete-collection-modal>
+</ng-template>
+
+<ng-template #collActions>
+  <div class="actions-menu" (click)="$event.stopPropagation()">
+    <div class="action-item pointer" (click)="handleRenameCollection()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="action-item-icon action-icon-color"
+      >
+        <path
+          d="M 2.4826274,23.96774
 C 1.6813735,23.86101 0.91409011,23.26329 0.45135297,22.38536 0.29555295,22.08976 0.18538461,21.78922 0.08525459,21.38664
 L 0.00969,21.08281 0.00186042,12.10718
 C -0.00363375,5.81757 0.0028975,3.06426 0.02353625,2.90672 0.1435846,1.99232 0.57273923,1.14642 1.1855131,0.6164 1.4078527,0.42408 1.8015723,0.19679 2.0801123,0.09996
@@ -318,20 +337,20 @@ C 15.816781,6.06085 15.909961,5.86434 15.967507,5.50294 16.006971,5.25508 15.967
 L 13.6737,4.78675 14.455067,5.77386
 c 0.429756,0.54291 0.787851,0.98711 0.795776,0.98711 0.0079,0 0.133958,-0.15176 0.280068,-0.33724
 z"
-                      />
-                    </svg>
-                    Переименовать
-                  </div>
+        />
+      </svg>
+      Переименовать
+    </div>
 
-                  <div class="action-item" (click)="handleOpenInFS(coll.id)">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="action-item-icon action-icon-color"
-                    >
-                      <path
-                        d="M 0.2129,23.7892
+    <div class="action-item" (click)="handleOpenInFS()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="action-item-icon action-icon-color"
+      >
+        <path
+          d="M 0.2129,23.7892
 C -0.0086,23.5307 -0.0086,23.4568 0.0285,12.7627 0.0653,0.905 0.0099,1.6992 0.7294,0.8681 1.3752,0.1107 1.4858,0.0739 4.1794,0.0368 6.4486,-0 6.707,0.0185 7.1313,0.24
 c 0.2767,0.1478 1.273,0.942 2.2138,1.7733
 l 1.7343,1.5144 3.8373,0.0555
@@ -361,50 +380,33 @@ v 7.5727
 L 2.2423,13.9447
 C 2.7588,11.8761 3.2201,10.0291 3.2938,9.826
 Z"
-                      />
-                    </svg>
-                    Открыть в файловой системе
-                  </div>
+        />
+      </svg>
+      Открыть в файловой системе
+    </div>
 
-                  <div
-                    class="action-item"
-                    (click)="handleCloseCollection(coll.id, coll.name, coll.path)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="action-item-icon action-icon-color"
-                    >
-                      <line
-                        x1="1"
-                        y1="24"
-                        x2="16"
-                        y2="1"
-                        class="stroke-action-icon-color"
-                        stroke-width="1.5px"
-                      />
-                      <line
-                        x1="1"
-                        y1="1"
-                        x2="16"
-                        y2="24"
-                        class="stroke-action-icon-color"
-                        stroke-width="1.5px"
-                      />
-                    </svg>
-                    Закрыть коллекцию
-                  </div>
+    <div class="action-item" (click)="handleCloseCollection()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="action-item-icon action-icon-color"
+      >
+        <line x1="1" y1="24" x2="16" y2="1" class="stroke-action-icon-color" stroke-width="1.5px" />
+        <line x1="1" y1="1" x2="16" y2="24" class="stroke-action-icon-color" stroke-width="1.5px" />
+      </svg>
+      Закрыть коллекцию
+    </div>
 
-                  <div class="action-item delete-action" (click)="showDeleteCollection(coll)">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      class="action-item-icon action-icon-color delete-icon"
-                    >
-                      <path
-                        d="M 4.2396,23.8895
+    <div class="action-item delete-action" (click)="showDeleteCollection()">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        class="action-item-icon action-icon-color delete-icon"
+      >
+        <path
+          d="M 4.2396,23.8895
 C 3.7158,23.6908 3.3946,23.4196 3.1774,22.9927
 L 2.9755,22.5959 2.7063,19.4081
 C 2.3264,14.9086 2.1232,12.526 2.0453,11.6574 1.977,10.8951 1.819,9.0397 1.5823,6.2193 1.5102,5.3599 1.4343,4.509 1.4136,4.3285
@@ -463,28 +465,10 @@ C 12.0602,0.9469 11.8362,0.9376 9.5109,0.9376 6.7033,0.9376 6.6606,0.9432 6.4002
 V 3.0628
 H 9.5 12.7326
 Z"
-                      />
-                    </svg>
+        />
+      </svg>
 
-                    Удалить коллекцию
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-        }
-      </div>
-    }
+      Удалить коллекцию
+    </div>
   </div>
-</div>
-
-<ng-template cdkPortal #delete>
-  <delete-collection-modal
-    [collectionInfo]="deleteCollectionInfo"
-    (onClose)="deleteOverlayRef.detach()"
-    (onDelete)="handleDeleteCollection($event)"
-    animate.enter="enter-animation"
-    animate.leave="leave-animation"
-  >
-  </delete-collection-modal>
 </ng-template>

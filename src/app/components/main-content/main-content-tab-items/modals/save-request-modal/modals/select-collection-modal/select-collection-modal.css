@@ -2,7 +2,7 @@
     display: flex;
   flex-direction: column;
   position: absolute;
-  top: 34.6%;
+  top: var(--modal-top);
   transform: translate(-50%, -50%);
   color: #fff;
   border-radius: 8px;
@@ -35,6 +35,8 @@
     border: var(--border-style);
     border-radius: 4px;
     padding: 8px;
+    
+    max-height: 200px;
 }
 
 .collection-item {
@@ -60,4 +62,12 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 32px;
+}
+
+.no-collections {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    text-align: center;
 }

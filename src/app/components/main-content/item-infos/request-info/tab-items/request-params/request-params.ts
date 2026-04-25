@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, model, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, inject, Input, model, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RequestModel, TableRow } from '../../../../../../../../shared/models/requests/request';
 import { PandoraTable } from "../../../../../reuseable/pandora-table/pandora-table";
@@ -11,6 +11,7 @@ import { PandoraTable } from "../../../../../reuseable/pandora-table/pandora-tab
 })
 export class RequestParams implements OnChanges {
 
+
   @Output() urlParamsChanged = new EventEmitter<string>();
   @Input() req: RequestModel;
 
@@ -20,9 +21,7 @@ export class RequestParams implements OnChanges {
     if (changes['req']) {
       const params = this.req.params;
 
-      this.tableInitialData = params
-        ? params
-        : [];
+      this.tableInitialData = params ? [...params] : [];
     }
   }
 

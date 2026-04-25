@@ -8,7 +8,6 @@ import { CdkPortal } from "@angular/cdk/portal";
 import { MainContent } from "./components/main-content/main-content";
 import { RenameDto } from '../../shared/models/dto/shared-dtos';
 import { CloseCollectionInfo } from '../../shared/models/collections/dto/collection-action-dtos';
-import { editor } from 'monaco-editor';
 
 @Component({
   selector: 'app-root',
@@ -18,24 +17,10 @@ import { editor } from 'monaco-editor';
 })
 export class App implements OnInit {
 
-  constructor() {
-    console.log(`определяем кастомную тему monaco editor`);
-    editor.defineTheme('pandoraTheme', {
-      base: 'vs-dark',
-      inherit: true,
-      colors: {
-        "editor.background": '#222222'
-      },
-      rules: []
-    });    
-  }
-  
   private actionMenuService = inject(ActionMenuService);
   private alertNotificationService = inject(AlertNotificationService);
 
   @ViewChild(SideBarComponent) sideBarComponent: SideBarComponent;
-
-  private i: number = 0;
 
   ngOnInit(): void {
     this.alertNotificationService.renderAlertNotificationContainer();

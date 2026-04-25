@@ -44,38 +44,70 @@ export class DescriptionContent {
   deleteOverlayRef: OverlayRef;
   deleteCollectionInfo: DeleteCollectionDto;
 
+  collActionsPortal = viewChild.required<TemplateRef<any>>('collActions');
+  actionsColl: Collection;
+
   public collectionsCount = computed(() => {
     return this.collections()?.length;
   })
 
-  toggleCollectionActions(event: MouseEvent, id: string) {
-    console.log(`toggleCollectionActions collectionId: ${id}`);
+  toggleCollectionActions(event: MouseEvent, coll: Collection, trigger: HTMLElement) {
+    console.log(`toggleCollectionActions collectionId: ${coll.id}`);
     event.stopPropagation();
-    // this.actionMenuService.openedId$.pipe(take(1)).subscribe(current => {
-    //   console.log(`Current: ${current}`);
-    //     current === this.getCustomCollectionId(id) ? this.actionMenuService.close() : this.actionMenuService.open(this.getCustomCollectionId(id));
-    // });
+    this.actionMenuService.openedId$.pipe(take(1)).subscribe(current => {
+      console.log(`Current: ${current}`);
+        current === this.getCustomCollectionId(coll.id) ? this.actionMenuService.close() : this.actionMenuService.open(this.getCustomCollectionId(coll.id), trigger, this.collActionsPortal(), this.viewContainerRef, [
+        {
+          originX: 'end',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top',
+          offsetX: 1,
+          offsetY: -10
+        }
+      ]);
+    });
+
+    this.actionsColl = coll;
   }
 
-  handleRenameCollection(collId: string, collName: string) {
+  handleRenameCollection() {
     const renameDto: RenameDto = {
-      id: collId,
-      name: collName
+      id: this.actionsColl.id,
+      name: this.actionsColl.name
     };
     this.renameCollection.emit(renameDto);
   }
 
-  handleOpenInFS(collId: string) {
-    this.openCollectionInFS.emit(collId);
+  handleOpenInFS() {
+    this.openCollectionInFS.emit(this.actionsColl.id);
   }
   
-  handleCloseCollection(collId: string, collName: string, collPath: string) {
+  handleCloseCollection() {
     const closeCollInfo: CloseCollectionInfo = {
-      collectionId: collId,
-      collectionName: collName,
-      collectionPath: collPath
+      collectionId: this.actionsColl.id,
+      collectionName: this.actionsColl.name,
+      collectionPath: this.actionsColl.path
     }
     this.closeCollection.emit(closeCollInfo);
+  }
+
+  showDeleteCollection() {
+    this.actionMenuService.close();
+
+    this.deleteCollectionInfo = {
+      collectionId: this.actionsColl.id,
+      collectionName: this.actionsColl.name,
+      collectionPath: this.actionsColl.path
+    }
+
+    this.deleteOverlayRef = this.buildOverlayRef(this.overlay);
+    const portal = new TemplatePortal(this.deletePortal(), this.viewContainerRef);
+    this.deleteOverlayRef.attach(portal);
+  }
+
+  handleDeleteCollection(collId: string) {
+    this.store.dispatch(deleteCollectionModal({ actionData: { modalOverlayRef: this.deleteOverlayRef, body: collId  }}))
   }
 
   handleAddCollection(){
@@ -90,23 +122,9 @@ export class DescriptionContent {
     this.workspaceFacadeService.openCollection(coll);
   }
 
-  showDeleteCollection(coll: Collection) {
-    this.actionMenuService.close();
 
-    this.deleteCollectionInfo = {
-      collectionId: coll.id,
-      collectionName: coll.name,
-      collectionPath: coll.path
-    }
 
-    this.deleteOverlayRef = this.buildOverlayRef(this.overlay);
-    const portal = new TemplatePortal(this.deletePortal(), this.viewContainerRef);
-    this.deleteOverlayRef.attach(portal);
-  }
 
-  handleDeleteCollection(collId: string) {
-    this.store.dispatch(deleteCollectionModal({ actionData: { modalOverlayRef: this.deleteOverlayRef, body: collId  }}))
-  }
 
 
 

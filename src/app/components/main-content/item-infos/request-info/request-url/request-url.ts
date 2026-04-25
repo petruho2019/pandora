@@ -16,9 +16,11 @@ export class RequestUrl {
 
   @Input() req: RequestModel;
   @Input() isReqChanged: boolean;
+
   @Output() urlChanged = new EventEmitter<string>();
   @Output() methodChanged = new EventEmitter<HttpMethod>();
-  @Output() sendRequest = new EventEmitter<HttpMethod>();
+  @Output() send = new EventEmitter<HttpMethod>();
+  @Output() save = new EventEmitter();
 
   public showMethods = false;
   public methods: HttpMethod[] = [
@@ -45,6 +47,10 @@ export class RequestUrl {
     this.urlChanged.emit(value);
   }
 
+  handleSaveRequest() {
+    this.save.emit();
+  }
+
   showPlaceholder(){
     if(!this.urlCon.nativeElement.textContent.trim().length){
       this.urlCon.nativeElement.textContent = null;
@@ -61,6 +67,6 @@ export class RequestUrl {
   }
 
   handleSendRequestAction() {
-    this.sendRequest.emit();
+    this.send.emit();
   }
 }

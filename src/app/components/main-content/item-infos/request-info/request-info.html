@@ -5,7 +5,8 @@
       [req]="req"
       (methodChanged)="handleMethodChanged($event)"
       (urlChanged)="handleUrlChanged($event)"
-      (sendRequest)="handleSendRequest()"
+      (send)="handleSendRequest()"
+      (save)="handleSaveRequest()"
     ></request-url>
   }
 
@@ -75,7 +76,7 @@
     </div>
 
     @if (req) {
-      <div class="tab-item-content">
+      <div class="tab-item-content scroll">
         @if (isParamsTabItem()) {
           <request-params
             [req]="req"

@@ -85,8 +85,10 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       const hasDuplicate = dirFiles.some(f => {
         if (path.extname(f).toLowerCase() !== '.json') return false;
         const base = path.basename(f, '.json');
+        console.log(`In dir founded file: ${base} , condition result: ${base.toLowerCase() === safeName.toLowerCase()}`);
         return base.toLowerCase() === safeName.toLowerCase();
       });
+
       if (hasDuplicate) {
         return createRequestError("Запрос с таким именем уже есть");
       }
