@@ -12,5 +12,4 @@ yarn run start:angular
 yarn run start:electron
 ```
 
-
-В компоненте side-menu-content можно указать тестовые данные
+В collections.reducer.ts можно использовать INITIAL_TEST_STATE для тестирования
