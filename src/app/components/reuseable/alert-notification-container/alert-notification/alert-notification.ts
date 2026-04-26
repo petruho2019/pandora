@@ -9,6 +9,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 export class ErrorNotification {
 
   @Input() message: string;
+  @Input() showSuccess: boolean;
 
   @Output() mouseEnter = new EventEmitter();
   @Output() mouseLeave = new EventEmitter();

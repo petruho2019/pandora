@@ -61,19 +61,14 @@ export class TabItemService {
   }
 
   addRequestTabItem(req: RequestModel, coll: Collection){
-    console.log(`Добавляем запрос ${req.name}`);
 
     this._tabItemsByWorkspaceId.update(items => {
         const requestTabItem = items[coll.id].find(ti => ti.collection?.id === coll.id && ti.request?.request?.id === req.id);
 
         if(requestTabItem){
-            console.log(`Запрос уже есть в сигнале tabItems ${req.name}`);
-
             this.setActiveTabItemId(requestTabItem.id);
             return {...items};
         }
-
-        console.log(`Запроса нет в сигнале tabItems ${req.name} , создаем его`);
 
         const newRequestTabItem: TabItem = {
             id: uuidv4(),
@@ -92,9 +87,6 @@ export class TabItemService {
   }
 
   setRequestTabItemNotReplaceable(req: RequestModel, coll: Collection){
-
-    console.log(`Request изменить Not Replaceable`);
-
     this._tabItemsByWorkspaceId.update(items => {
         items[coll.id].find(ti => ti.collection?.id === coll.id && ti.request?.request?.id === req.id)!.request!.isReplaceable = false;
 
@@ -156,9 +148,7 @@ export class TabItemService {
 
   moveTabItem(fromIndex: number, toIndex: number, workspaceId: string){
     let tabItems = this._tabItemsByWorkspaceId()[workspaceId]
-    console.log(`Массив до перемещения: ${JSON.stringify(tabItems, null, 2)}`);
     moveItemInArray(tabItems, fromIndex, toIndex);
-    console.log(`Массив после перемещения: ${JSON.stringify(tabItems, null, 2)}`);
     this._tabItemsByWorkspaceId.update(items => {
       return { ...items, [workspaceId]: tabItems}
     });

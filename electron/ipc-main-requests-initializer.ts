@@ -6,8 +6,7 @@ import * as fs from 'fs';
 import { RequestModel, RequestType, RequestTypes } from '../shared/models/requests/request'
 import { buildFailureResult, buildFailureResultT, buildSuccessResultT, ResultT } from '../shared/models/result'
 import ElectronStore = require('electron-store');
-import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
-import { CloneRequestDto, DeleteRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto } from '../shared/models/requests/dto/request-dtos';
+import { CloneRequestDto, DeleteRequestDto, LoadRequestDto, OpenRequestInFSDto, RenameRequestDto, UpdateRequestInfoDto } from '../shared/models/requests/dto/request-dtos';
 import { COLLECTION_CONFIG_FILE_NAME } from '../shared/models/constants';
 import { ZodError } from 'zod';
 import { platform } from 'os';
@@ -15,6 +14,7 @@ import { spawn } from 'child_process';
 import { IpcMain } from 'electron';
 import { REQUESTS_KEY } from './main';
 import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http/http-request-model';
+import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
 
 
 
@@ -33,7 +33,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       let collectionStat: fs.Stats;
       try {
         collectionStat = await fs.promises.stat(requestInfo.collectionPath);
-      } catch (err) {
+      } catch (err: any) {
         console.log(`Error ${err}`);
 
         if(err.code === 'ENOENT')
@@ -285,7 +285,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
 
     const request = store.get(REQUESTS_KEY, []).find(r => r.id === requestInfo.requestId);
 
-    if(!request) return buildFailureResultT("Запрос не найден");
+    if(!request) return buildFailureResultT("Ошибка при удалении запроса");
 
     const fullPath = path.join(requestInfo.collectionPath, request.fileName + '.json');
     
@@ -298,9 +298,9 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
 
     try {
       await fs.promises.unlink(fullPath);
-      console.log(`Файл успешно удален`);
+      console.log(`Request successfully deleted`);
     } catch (error) {
-      return buildFailureResultT("Ошибка при удалении запроса");
+      console.log(`Request already deleted, skip`);
     }
 
     const newRequests = store.get(REQUESTS_KEY).filter(r => r.id !== requestInfo.requestId);
@@ -309,6 +309,38 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
     return buildSuccessResultT(newRequests);
   });
 
+//region update-request
+
+  ipcMain.handle('update-request', async (event, reqInfo: UpdateRequestInfoDto) : Promise<ResultT<RequestModel, string>> => {
+
+    console.log(`Trying to update request ${reqInfo.req.id}`);
+
+    if(reqInfo.req.name.trim().length === 0) {
+      return buildFailureResultT("Название запроса не может быть пустым");
+    };
+
+    const request = store.get(REQUESTS_KEY, []).find(r => r.id === reqInfo.req.id);
+
+    if(!request) return buildFailureResultT("Ошибка при сохранении запроса");
+
+    const pathWithOldFileName = path.join(reqInfo.collPath, request.fileName.trim() + '.json');
+    
+    fs.stat(pathWithOldFileName, ((err, stat) => {
+        if (err) {
+            if (err.code === 'ENOENT') return buildFailureResultT('Запрос не найден в файловой системе');
+        }
+        if (stat.isDirectory()) return buildFailureResultT('Путь до файла запроса некорректен');
+    }));
+
+    try {
+      await fs.promises.writeFile(path.join(reqInfo.collPath, reqInfo.req.fileName.trim() + '.json'), JSON.stringify(reqInfo.req, null, 2), { encoding: 'utf8' });
+      console.log(`Request successfully updated`);
+    } catch (error) {
+      return buildFailureResultT("Ошибка при сохранении запроса");
+    }
+
+    return buildSuccessResultT(reqInfo.req);
+  });
 };
 
 // region functions

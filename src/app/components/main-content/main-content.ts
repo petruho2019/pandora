@@ -12,6 +12,11 @@ import { CloseCollectionInfo } from "../../../../shared/models/collections/dto/c
 import { RequestInfo } from "./item-infos/request-info/request-info";
 import { AuthItem, BodyItem } from '../../../../shared/models/requests/http/http-request-model';
 import { AUTH_KIND } from '../../../../shared/models/requests/http/auth';
+import { Store } from '@ngrx/store';
+import { selectRequest } from '../../store/selectors/requests.selector';
+import { selectCollection } from '../../store/selectors/collections.selector';
+import { updateRequest } from '../../store/actions/requests.actions';
+import { createHttpRequest } from '../../store/actions/modal-actions/request-modal.actions';
 
 @Component({
   selector: 'main-content',
@@ -22,6 +27,7 @@ import { AUTH_KIND } from '../../../../shared/models/requests/http/auth';
 export class MainContent {
   private tabItemService = inject(TabItemService);
   private workspaceInfoService = inject(WorkspaceInfoService);
+  private store = inject(Store);
 
   @Output() addCollection = new EventEmitter();
   @Output() openCollection = new EventEmitter();
@@ -107,10 +113,35 @@ export class MainContent {
     return tabItem.tabType === TabItemTypes.GeneralInfo;
   }
 
-  handleSaveRequest() {
-    const reqTabItem = this.tabItemService.getActiveTabItem(this.workspaceInfoService.activeWorkspaceId());
-
-    this.mainContentTabItems.handleShowSelectCollection(reqTabItem!);
+  handleSaveRequest(tabItem: TabItem, reqAlreadyInStore: boolean) {
+    if(reqAlreadyInStore) {
+      console.log(`Обновляем запрос в fs`);
+        this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
+        .subscribe(col => {
+          this.store.dispatch(updateRequest({ actionData: {
+            body: { req: tabItem.request!.request!, collPath: col!.path },
+            modalOverlayRefs: [this.mainContentTabItems.saveOverlayRef, this.mainContentTabItems.selectCollectionOverlayRef]
+          }}));
+        });
+    }
+    else {
+      console.log(`Добавляем запрос в fs`);
+      this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
+        .subscribe(col => {
+          this.store.dispatch(createHttpRequest({ actionData: {
+            body: {
+              collectionId: tabItem.request!.request!.collectionId!,
+              method: tabItem.request!.request!.method,
+              url: tabItem.request!.request!.url,
+              name: tabItem.request!.request!.name,
+              collectionPath: col!.path,
+              type: 'HTTP'
+            },
+            modalOverlayRefs: [this.mainContentTabItems.saveOverlayRef, this.mainContentTabItems.selectCollectionOverlayRef],
+            successMessage: 'Запрос успешно сохранен'
+          }}))
+        });
+    };
   }
 
   handleSelectedRequestSettingTabItemChanged(newTabItem: RequestSettingsTabItemsType, reqId: string) {

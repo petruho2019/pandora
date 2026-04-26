@@ -66,7 +66,7 @@ export class SideBarHeader {
   }
 
   addCollection(collectionInfo: AddCollectionDto){
-    this.store.dispatch(addCollectionModal({actionData: { modalOverlayRef: this.overlayRef , body: collectionInfo}}));
+    this.store.dispatch(addCollectionModal({actionData: { modalOverlayRefs: [this.overlayRef] , body: collectionInfo}}));
   }
 
   buildOverlayRef(overlay: Overlay) : OverlayRef{

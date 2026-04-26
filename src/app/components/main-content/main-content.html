@@ -1,6 +1,9 @@
 <div class="main-content">
   <main-content-header></main-content-header>
-  <main-content-tab-items></main-content-tab-items>
+  <main-content-tab-items
+    (saveReq)="handleSaveRequest($event, false)"
+    (saveReqAlreadyInStore)="handleSaveRequest($event, true)"
+  ></main-content-tab-items>
 
   @if (isGeneralInfoDescriptionActiveTabItem()) {
     <description-content
@@ -24,7 +27,7 @@
       "
       (selectedBodyItemChanged)="handleSelectedBodyItemChanged($event.bodyItem, $event.reqId)"
       (selectedAuthItemChanged)="handleSelectedAuthItemChanged($event.authItem, $event.reqId)"
-      (saveReq)="handleSaveRequest()"
+      (saveReq)="handleSaveRequest($event, false)"
     ></request-info>
   }
 </div>

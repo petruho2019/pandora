@@ -6,8 +6,9 @@ export interface ModalActionSuccessResult<T> {
 }
 
 export interface ModalActionDataT<T> {
-    modalOverlayRef: OverlayRef | null;
+    modalOverlayRefs: OverlayRef[] | null;
     body: T;
+    successMessage?: string;
 }
 
 export interface ModalActionData {

@@ -8,6 +8,7 @@ import { Component, inject, TemplateRef, viewChild, ViewContainerRef } from '@an
 import { Store } from '@ngrx/store';
 import { selectAll } from '../../../store/selectors/collections.selector';
 import { Overlay } from '@angular/cdk/overlay';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'main-content-header',
@@ -25,6 +26,7 @@ export class MainContentHeader {
     public selectItemId = '__SELECT_ITEM__';
     public isOpenSelectItemMenu = this.actionsMenuService.openedId$;
     public allCollections$ = this.store.select(selectAll);
+    public allCollections = toSignal(this.allCollections$);
 
     public activeWorkspace = this.workspaceInfoService.activeWorkspace;
 

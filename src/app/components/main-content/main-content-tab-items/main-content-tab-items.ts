@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, ElementRef, HostListener, inject, OnInit, QueryList, signal, TemplateRef, viewChild, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, ElementRef, EventEmitter, HostListener, inject, OnInit, Output, QueryList, signal, TemplateRef, viewChild, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
 import { TabItem, TabItemTypes } from '../../../../../shared/models/utils';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { TabItemService } from '../../../../../services/tab-item-service';
@@ -18,6 +18,7 @@ import { createHttpRequest } from '../../../store/actions/modal-actions/request-
 import { SelectCollectionModal } from "./modals/save-request-modal/modals/select-collection-modal/select-collection-modal";
 import { selectRequest } from '../../../store/selectors/requests.selector';
 import { Subscription } from 'rxjs';
+import { updateRequest } from '../../../store/actions/requests.actions';
 
 @Component({
   selector: 'main-content-tab-items',
@@ -43,6 +44,9 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   @ViewChild('tabItems') tabItems: ElementRef<HTMLElement>;
 
   @ViewChild(SaveRequestModal) saveReqModalComponent: SaveRequestModal;
+
+  @Output() saveReq = new EventEmitter<TabItem>();
+  @Output() saveReqAlreadyInStore = new EventEmitter<TabItem>();
 
   public showScrollButtons = signal(false);
   public tabsScrollMaxWidth = signal(window.innerWidth - 500);
@@ -103,8 +107,6 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   closeTabItemWithCondition(tabItem: TabItem) {
-    console.log(`closeRequestTabItem`);
-
     if(tabItem.tabType === TabItemTypes.Request && this.requestStateService.isRequestChanged(tabItem.request!.request!.id)){
 
       this.showSaveRequest(tabItem);
@@ -113,8 +115,6 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     }
 
     this.closeTabItem(tabItem);
-
-    console.log(`Текущий выбранный таб айте ${JSON.stringify(this.activeTabItem())}`);
 
     this.changeDetector.detectChanges();
     this.updateWidth();
@@ -238,31 +238,11 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   } 
 
   handleSaveRequest(tabItem: TabItem){
-    this.store.select(selectRequest({ id: tabItem.request!.request!.id })).subscribe(r => {
+    this.saveReq.emit(tabItem);
+  }
 
-      console.log(`При сохранении запроса из store вернулся запрос: ${JSON.stringify(r, null, 2)}`);
-
-      if(r) {
-
-      }
-      else {
-        console.log(`Создаем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
-        this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
-        .subscribe(col => {
-          this.store.dispatch(createHttpRequest({ actionData: {
-            body: {
-              collectionId: tabItem.request!.request!.collectionId!,
-              method: tabItem.request!.request!.method,
-              url: tabItem.request!.request!.url,
-              name: tabItem.request!.request!.name,
-              collectionPath: col!.path,
-              type: 'HTTP'
-            },
-            modalOverlayRef: this.selectCollectionOverlayRef
-          }}))
-        });
-      }
-    })
+  handleSaveRequestAlreadyInStore(tabItem: TabItem) {
+    this.saveReqAlreadyInStore.emit(tabItem);
   }
 
   closeSaveRequestModal(withCloseTabItem: boolean, tabItem: TabItem | null) {

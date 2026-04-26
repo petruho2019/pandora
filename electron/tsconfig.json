@@ -2,6 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "../dist",
+    "rootDir": "..",
     "module": "commonjs",
     "target": "ES2020",
     "esModuleInterop": true,

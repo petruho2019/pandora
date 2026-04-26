@@ -1,6 +1,5 @@
 import { Component, EventEmitter, HostListener, inject, Input, OnInit, Output } from '@angular/core';
 import { ModalHeader } from "../../../../../../reuseable/modals/modal-header/modal-header";
-import { RequestModel } from '../../../../../../../../../shared/models/requests/request';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { selectAll } from '../../../../../../../store/selectors/collections.selector';
@@ -14,14 +13,19 @@ import { TabItem } from '../../../../../../../../../shared/models/utils';
   templateUrl: './select-collection-modal.html',
   styleUrl: './select-collection-modal.css',
 })
-export class SelectCollectionModal {
-
+export class SelectCollectionModal implements OnInit{
+  
+  ngOnInit(): void {
+    this.reqClone = structuredClone(this.req);
+  }
 
   private store = inject(Store);
 
-  public headerTitle = 'Выберете коллекцию';
+  public headerTitle = 'Сохранить запрос';
 
   @Input() req: TabItem;
+
+  reqClone: TabItem;
 
   @Output() save = new EventEmitter<TabItem>();
   @Output() close = new EventEmitter();
@@ -34,7 +38,7 @@ export class SelectCollectionModal {
   }
 
   saveRequest() {
-    this.save.emit(this.req);
+    this.save.emit(this.reqClone);
   }
 
   removeSelectedCollection() {
@@ -55,9 +59,5 @@ export class SelectCollectionModal {
   onKeyDown(event: KeyboardEvent) {
     if(event.key === 'Escape')
       this.onClose();
-  }
-
-  setFileName() {
-    this.req.request!.request!.fileName = this.req.request!.request!.name;
   }
 }

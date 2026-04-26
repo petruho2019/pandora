@@ -1,7 +1,7 @@
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { concatLatestFrom } from "@ngrx/operators";
 import { inject } from '@angular/core';
-import { loadRequests, loadRequestsFailure, loadRequestsSuccess, openRequestInFS, openRequestInFSFailure, openRequestInFSSuccess } from "../actions/requests.actions";
+import { loadRequests, loadRequestsFailure, loadRequestsSuccess, openRequestInFS, openRequestInFSFailure, openRequestInFSSuccess, updateRequest, updateRequestSuccess } from "../actions/requests.actions";
 import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, } from "rxjs/operators";
 import { from, of,map } from "rxjs";
 import { RequestElectronService } from "../../../../services/request-electron-service";
@@ -11,7 +11,7 @@ import { selectLoadedByCollectionId } from "../selectors/requests.selector";
 import { addAlertNotificationMessage } from "../actions/common.actions";
 import { cloneRequest, cloneRequestFailure, cloneRequestSuccess, createHttpRequest, createRequestFailure, createRequestSuccess, deleteRequest, deleteRequestFailure, deleteRequestSuccess, renameRequest, renameRequestFailure, renameRequestSuccess } from "../actions/modal-actions/request-modal.actions";
 import { OverlayRef } from "@angular/cdk/overlay";
-import { modalSuccess } from "../actions/modal-actions/modal.actions";
+import { closeModal } from "../actions/modal-actions/modal.actions";
 
 export class RequestEffects {
     private actions$ = inject(Actions); 
@@ -25,9 +25,10 @@ export class RequestEffects {
                     map(createRequestResult => {
                         if(createRequestResult.isSuccess)
                         {
-                            if(actionData.modalOverlayRef) {
-                                this.dispatchModalSuccess(actionData.modalOverlayRef);
+                            if(actionData.modalOverlayRefs) {
+                                this.dispatchCloseModal(actionData.modalOverlayRefs);
                             }
+                            this.dispatchModalSuccess(actionData.successMessage!);
                             console.log(`addHttpRequestSuccess логирование объекта ${JSON.stringify(createRequestResult)}`);
                             return createRequestSuccess({request: createRequestResult.body!});
                         }
@@ -79,7 +80,8 @@ export class RequestEffects {
                 map((renameRequestResult) => {
                     if(renameRequestResult.isSuccess) {
                         
-                        this.dispatchModalSuccess(actionData.modalOverlayRef!);
+                        this.dispatchCloseModal(actionData.modalOverlayRefs!);
+                        this.dispatchModalSuccess('Запрос успешно переименован');
                         return renameRequestSuccess({renamedRequest: renameRequestResult.body as RequestModel });
                     }
                     else {
@@ -103,7 +105,8 @@ export class RequestEffects {
                 map((cloneRequestResult) => {
                     console.log(`Результат клонирования: ${JSON.stringify(cloneRequestResult)}`);
                     if(cloneRequestResult.isSuccess) {
-                        this.dispatchModalSuccess(actionData.modalOverlayRef!);
+                        this.dispatchCloseModal(actionData.modalOverlayRefs!);
+                        this.dispatchModalSuccess('Запрос успешно склонирован');
                         return cloneRequestSuccess({clonedRequest: cloneRequestResult.body as RequestModel});
                     }
                     else {
@@ -149,13 +152,13 @@ export class RequestEffects {
     deleteRequest$ = createEffect(() => this.actions$.pipe(
         ofType(deleteRequest),
         switchMap(( { actionData } ) => {
-            console.log(`Удаление запроса ${actionData.body} в effect!`);
 
             return from(this.electronService.deleteRequest(actionData.body)).pipe(
                 map((deleteRequestResult) => {
                     console.log(`deleteRequestResult ${JSON.stringify(deleteRequestResult)}`);
                     if(deleteRequestResult.isSuccess){
-                        this.dispatchModalSuccess(actionData.modalOverlayRef!);
+                        this.dispatchCloseModal(actionData.modalOverlayRefs!);
+                        this.dispatchModalSuccess('Запрос успешно удален');
                         return deleteRequestSuccess({ newRequests: deleteRequestResult.body! });
                     }
 
@@ -172,14 +175,40 @@ export class RequestEffects {
         })
     ))
 
+    updateRequest$ = createEffect(() => this.actions$.pipe(
+        ofType(updateRequest),
+        switchMap(( { actionData } ) => {
+            return from(this.electronService.updateRequest(actionData.body)).pipe(
+                map((updateRequestResult) => {
+                    if(updateRequestResult.isSuccess){
+                        this.dispatchCloseModal(actionData.modalOverlayRefs!);
+                        this.dispatchModalSuccess('Запрос успешно сохранен');
+                        return updateRequestSuccess({ req: updateRequestResult.body! });
+                    }
+                    else {
+                        this.dispatchModalFailure(updateRequestResult.error!);
+                        return deleteRequestFailure({errorMessage: updateRequestResult.error as string});
+                    }
+                }),
+            catchError(err => {
+                const errorMessage = "Непредвиденная ошибка при сохранении запроса"
+                this.dispatchModalFailure(errorMessage)
+                return of(deleteRequestFailure({errorMessage: errorMessage}))
+            }))
+        })
+    ))
 
+  dispatchCloseModal(modalOverlayRef: OverlayRef[]) {
+    modalOverlayRef.forEach(ref => {
+        this.store.dispatch( closeModal({ modalOverlay: ref }) );
+    })
+  }
 
-  dispatchModalSuccess(modalOverlayRef: OverlayRef) {
-    this.store.dispatch( modalSuccess({ modalOverlay: modalOverlayRef }) );
+  dispatchModalSuccess(successMessage: string){
+    this.store.dispatch(addAlertNotificationMessage({message: { message: successMessage, showSuccess: true} }))
   }
 
   dispatchModalFailure(errorMessage: string){
-    console.log(`Диспатчим ошибку: ${errorMessage}`);
-    this.store.dispatch(addAlertNotificationMessage({message: errorMessage}))
+    this.store.dispatch(addAlertNotificationMessage({message: { message: errorMessage, showSuccess: false} }))
   }
 }

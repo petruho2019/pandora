@@ -48,6 +48,7 @@ export class SideBarContent {
   public requests = signal<Record<string, { isLoaded: boolean; requests: RequestModel[] }>>({});
   public requests$: Observable<Record<string, { isLoaded: boolean; requests: RequestModel[] }>> = toObservable(this.requests);
 
+  public emptyCollections: Record<string, boolean> = {};
   public openCollections: WritableSignal<Record<string, boolean>> = signal({});
 
   ngOnInit(): void {
@@ -60,13 +61,11 @@ export class SideBarContent {
   }
 
   handleCreateRequest(overlay: OverlayRef, request: CreateRequestInfo) {
-
-    console.log(`onCreateRequest логирование аргументов: ${JSON.stringify(request)}`);
     switch (request.type) {
 
       case RequestTypes.HTTP:
         console.log(`onCreateRequest addHttpRequest: ${JSON.stringify(request)} , collectionId ${this.actionsMenuService.currentId}`);
-        this.store.dispatch(createHttpRequest({ actionData: { body: request, modalOverlayRef: overlay } }));
+        this.store.dispatch(createHttpRequest({ actionData: { body: request, modalOverlayRefs: [overlay], successMessage: 'Запрос успешно добавлен' } }));
       break;
 
       // case 'gRPC':
@@ -76,12 +75,12 @@ export class SideBarContent {
   }
 
   handleCloneCollection(overlay: OverlayRef, collectionInfo: CloneCollectionDto) {
-    this.store.dispatch(cloneCollectionModal({ actionData: { modalOverlayRef: overlay, body: collectionInfo } }));
+    this.store.dispatch(cloneCollectionModal({ actionData: { modalOverlayRefs: [overlay], body: collectionInfo } }));
   }
 
   handleRenameCollection(overlay: OverlayRef, collectionInfo: RenameDto) {
     console.log(`handleRenameCollection ${JSON.stringify(collectionInfo)}`);
-    this.store.dispatch(renameCollectionModal({ actionData: { modalOverlayRef: overlay, body: collectionInfo} }));
+    this.store.dispatch(renameCollectionModal({ actionData: { modalOverlayRefs: [overlay], body: collectionInfo} }));
   }
 
   handleOpenCollection(collectionId: string, isOpen: boolean){
@@ -96,12 +95,10 @@ export class SideBarContent {
       this.loadRequestsByCollectionId(collectionId, this.collections()?.find(c => c.id === collectionId)?.path as string)
       return;
     }
-
-    console.log(`Данный по коллекции ${collectionId} уже получены`);
   }
 
   handleCloseCollection(overlay: OverlayRef, collectionId: string) {
-    this.store.dispatch(closeCollectionModal({ actionData: { modalOverlayRef: overlay, body: {collectionId: collectionId}} }));
+    this.store.dispatch(closeCollectionModal({ actionData: { modalOverlayRefs: [overlay], body: {collectionId: collectionId}} }));
   }
 
   loadRequestsByCollectionId(collectionId: string, collectionPath: string){
@@ -109,7 +106,6 @@ export class SideBarContent {
 
     this.store.select(selectRequestsByCollectionId({collectionId: collectionId}))
       .subscribe(reqs => {
-        console.log(`Обновляем запросы по collectionId: ${collectionId} , пришедшие запросы: ${reqs}`);
         this.requests.update(reqState => ({
           ...reqState,
           [collectionId]: {
@@ -118,20 +114,30 @@ export class SideBarContent {
           }
         }));
 
-        console.log(`Запросы после обновления: ${JSON.stringify(this.requests())}`);
+        console.log(`По коллекции нашли запросов: ${reqs.length}`);
+
+        setTimeout((reqs: RequestModel[])=> {
+          if(reqs.length === 0) {
+            this.emptyCollections[collectionId] = true;
+          }
+          else {
+            this.emptyCollections[collectionId] = false;
+          }
+        }, 200, reqs);
+        
     });
 
     if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b') {
       this.requests.update(state => ({
         ...state,
-        [collectionId]: INITIAL_REQUESTS_STATE[collectionId]
+        [collectionId]: { isLoaded: true, requests: Object.entries(INITIAL_REQUESTS_STATE.entities).filter(r => r[1]!.collectionId === collectionId).map(r => r[1] as RequestModel) }
       }));
     }
 
     if (collectionId === '33abfac2-d678-481c-aa9a-39ac8361bd3e') {
       this.requests.update(state => ({
         ...state,
-        [collectionId]: INITIAL_REQUESTS_STATE[collectionId]
+        [collectionId]: { isLoaded: true, requests: Object.entries(INITIAL_REQUESTS_STATE.entities).filter(r => r[1]!.collectionId === collectionId).map(r => r[1] as RequestModel) }
       }))
     };
   }

@@ -8,3 +8,8 @@ export interface AddCollectionDto {
     name: string; 
     path: string; 
 }
+
+export interface AlertNotificationMessage {
+    showSuccess: boolean;
+    message: string;
+}

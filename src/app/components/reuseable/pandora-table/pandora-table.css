@@ -76,7 +76,7 @@ tbody > tr:not(:last-child) {
   padding-left: 2px;     
   cursor: col-resize;
   top: 0px;
-  z-index: 100;
+  z-index: 1;
 }
 
 .drag-line {
@@ -84,6 +84,7 @@ tbody > tr:not(:last-child) {
   height: 100%;
   background-color: rgba(155, 155, 155, 0.315); 
   transition: background-color 0.2s;
+  z-index: 0;
 }
 
 .resizer:hover .drag-line {

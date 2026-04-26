@@ -20,8 +20,6 @@ export class WorkspaceFacadeService {
     const workspaceId = this.workspaceInfo.ensureCollectionWorkspace(coll);
     const tabId = this.tabItemService.ensureCollectionSettingsTabItem(coll, workspaceId);
 
-    console.log(`workspaceId: ${workspaceId} , tabId: ${tabId}`);
-
     this.workspaceInfo.setActiveWorkspaceId(workspaceId);
     this.tabItemService.setActiveTabItemId(tabId);
   }
@@ -32,8 +30,6 @@ export class WorkspaceFacadeService {
   }
 
   deleteTabItem(tabItemToDelete: TabItem, workspaceId: string){
-    console.log(`RequestId to delete : ${tabItemToDelete.id}`);
-
     let newActiveTabItemId = this.tabItemService.deleteTabItem(tabItemToDelete, workspaceId);
 
     if(!newActiveTabItemId){

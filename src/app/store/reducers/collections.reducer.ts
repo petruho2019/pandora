@@ -5,6 +5,7 @@ import { collectionsAdapter } from "../adapters/collection-adapter";
 import { moveItemInArray } from "@angular/cdk/drag-drop";
 import { Collection } from "../../../../shared/models/collections/collection";
 import { addCollectionModalSuccess, cloneCollectionModalSuccess, closeCollectionModalSuccess, deleteCollectionModalSuccess, renameCollectionModalSuccess } from "../actions/modal-actions/collections-modal.actions";
+import { updateRequestSuccess } from "../actions/requests.actions";
 
 export const collectionFeatureKey = 'collections';
 
@@ -146,4 +147,5 @@ export const collectionsReducer = createReducer(
 
     on(deleteCollectionModalSuccess, (state, {newCollections: collections}) => 
         collectionsAdapter.setAll(collections, state)),
+
 )

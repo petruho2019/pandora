@@ -107,7 +107,7 @@ export class DescriptionContent {
   }
 
   handleDeleteCollection(collId: string) {
-    this.store.dispatch(deleteCollectionModal({ actionData: { modalOverlayRef: this.deleteOverlayRef, body: collId  }}))
+    this.store.dispatch(deleteCollectionModal({ actionData: { modalOverlayRefs: [this.deleteOverlayRef], body: collId  }}))
   }
 
   handleAddCollection(){

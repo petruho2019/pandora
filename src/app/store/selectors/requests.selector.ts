@@ -29,8 +29,3 @@ export const selectRequest = (props: { id: string }) => createSelector(
   (requests: RequestModel[]) =>
     requests.find(r => r.id === props.id)
 );
-
-export const selectRequestError = () => createSelector(
-  selectRequestsState,
-  (state) => state.error
-);

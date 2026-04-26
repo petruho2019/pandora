@@ -2,6 +2,7 @@
   @for (message of alertNotificationMessages(); track message.id) {
     <alert-notification
       [message]="message.text"
+      [showSuccess]="message.showSuccess"
       animate.enter="enter-alert-notification"
       animate.leave="leave-alert-notification"
       (mouseEnter)="handleMouseEnterOnAlertNotification()"

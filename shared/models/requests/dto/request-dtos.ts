@@ -1,3 +1,5 @@
+import { RequestModel } from "../request"
+
 export interface RenameRequestDto {
     requestId: string,
     collectionPath: string,
@@ -31,4 +33,9 @@ export interface DeleteRequestDto {
 export interface BasicAuthInfoDto {
     username: string | null, 
     password: string | null
+}
+
+export interface UpdateRequestInfoDto {
+    collPath: string,
+    req: RequestModel
 }

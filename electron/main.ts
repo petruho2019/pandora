@@ -40,8 +40,6 @@ console.log(`Index: ${indexPath} isdev: ${isDev}`);
 
 let win: BrowserWindow | null;
 
-
-
 const createWindow = () => {
   win = new BrowserWindow({
     backgroundColor: '#ffffff',
@@ -66,7 +64,6 @@ const createWindow = () => {
   win.on('closed', () => {
     win = null;
   });
-
 
   win.removeMenu();
 }

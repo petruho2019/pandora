@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { ErrorNotification } from "./alert-notification/alert-notification";
 import { AlertNotificationService } from '../../../../../services/alert-notification-service';
 
@@ -13,6 +13,7 @@ export class AlertNotificationContainer {
   private alertNotificationService = inject(AlertNotificationService);
 
   public alertNotificationMessages = this.alertNotificationService.alertNotificationMessages.asReadonly();
+
 
   handleMouseEnterOnAlertNotification(){
     console.log(`MouseEnter`);

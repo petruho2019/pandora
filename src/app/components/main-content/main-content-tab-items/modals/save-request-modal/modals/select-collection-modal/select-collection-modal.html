@@ -5,12 +5,7 @@
     <div class="request-name-input-wrapper">
       <span style="font-weight: 650; margin-bottom: 10px; font-size: 13px">Название запроса</span>
 
-      <input
-        type="text"
-        class="pandora-input"
-        [(ngModel)]="req.request?.request!.name"
-        (change)="setFileName()"
-      />
+      <input type="text" class="pandora-input" [(ngModel)]="reqClone.name" />
     </div>
 
     <div class="collections-info">
@@ -25,29 +20,23 @@
           >{{ getCollName() }}</span
         >
       } @else {
-        <div class="collections-con scroll">
-          @if (collections()?.length === 0) {
-            <div class="no-collections">
-              <span style="color: #bbb">У вас нет коллекций</span>
-              <span style="color: #929292">
-                Коллекция помогает хранить запросы. Создайте одну что бы сохранить запрос
-              </span>
-            </div>
-          } @else {
-            <span style="font-weight: 650; font-size: 13px; margin-bottom: 10px"
-              >Выберете в какую коллекцию сохранить</span
-            >
+        @if (collections()?.length === 0) {
+          <div class="no-collections">
+            <span style="color: #bbb">У вас нет коллекций</span>
+            <span style="color: #929292">
+              Коллекция помогает хранить запросы. Создайте одну что бы сохранить запрос
+            </span>
+          </div>
+        } @else {
+          <span style="font-weight: 650; font-size: 13px; margin-bottom: 10px"
+            >Выберете в какую коллекцию сохранить</span
+          >
 
-            <span
-              style="
-                color: rgb(170, 170, 170);
-                font-weight: 650;
-                font-size: 13px;
-                margin-bottom: 8px;
-              "
-              >Коллекции</span
-            >
-
+          <span
+            style="color: rgb(170, 170, 170); font-weight: 650; font-size: 13px; margin-bottom: 8px"
+            >Коллекции</span
+          >
+          <div class="collections-con scroll">
             @for (col of collections(); track col.id) {
               <div class="collection-item pointer" (click)="selectCollection(col)">
                 <svg
@@ -96,8 +85,8 @@ z"
                 <span style="font-weight: 600; font-size: 13px">{{ col.name }}</span>
               </div>
             }
-          }
-        </div>
+          </div>
+        }
       }
     </div>
 

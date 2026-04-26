@@ -105,8 +105,6 @@ export class CollectionItem {
   }
 
   setCollectionWorkspace(event: MouseEvent) {
-    console.log(`setCollectionWorkspace из компонента`);
-
     this.workspaceFacadeService.openCollection(this.collection);
   }
 

@@ -55,14 +55,13 @@ export class App implements OnInit {
 
   @HostListener('click')
   closeActions() {
-    console.log(`closeActions`);
     this.actionMenuService.close();
   }
 
   test() {
-    this.alertNotificationService.addAlertNotification(`
+    this.alertNotificationService.addAlertNotification({ message: `
     Коллекция с таким именем уже существует по пути
-    D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests`);
+    D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests`, showSuccess: false});
   }
 
 }

@@ -27,16 +27,20 @@
       (click)="setWorkspace(workspaceTypes.GeneralInfo, null)"
       >Общая информация</span
     >
+    @if (allCollections()?.length !== 0) {
+      <div class="delimiter-line"></div>
 
-    <div class="delimiter-line"></div>
+      <span class="workspaces-header">Коллекции</span>
 
-    <span class="workspaces-header">Коллекции</span>
-    @for (coll of allCollections$ | async; track coll.id) {
-      <span
-        class="select-workspace pointer text-ellipsis"
-        (click)="setWorkspace(workspaceTypes.Collection, coll)"
-        >{{ coll.name }}</span
-      >
+      <div class="collection-workspaces scroll">
+        @for (coll of allCollections$ | async; track coll.id) {
+          <span
+            class="select-workspace pointer text-ellipsis"
+            (click)="setWorkspace(workspaceTypes.Collection, coll)"
+            >{{ coll.name }}</span
+          >
+        }
+      </div>
     }
   </div>
 </ng-template>

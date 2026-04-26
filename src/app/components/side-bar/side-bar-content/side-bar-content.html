@@ -23,10 +23,10 @@
         </div>
       } @else {
         <div class="collections scroll" cdkDropList (cdkDropListDropped)="dropCollection($event)">
-          @for (collection of collections; track collection.path) {
+          @for (coll of collections; track coll.path) {
             <collection-item
               cdkDrag
-              [collection]="collection"
+              [collection]="coll"
               (handleAddRequest)="handleCreateRequest($event.overlay, $event.addRequestInfo)"
               (handleCloneCollection)="
                 handleCloneCollection($event.overlay, $event.cloneCollectionDto)
@@ -36,18 +36,18 @@
               (handleOpenCollection)="handleOpenCollection($event.collectionId, $event.isOpen)"
             ></collection-item>
 
-            @if (openCollections()[collection.id]) {
+            @if (openCollections()[coll.id]) {
               <div class="requests" cdkDropList (cdkDropListDropped)="dropRequest($event)">
-                @for (req of this.requests()[collection.id]?.requests; track req.id) {
-                  <request-item [request]="req" [collection]="collection"></request-item>
+                @for (req of this.requests()[coll.id]?.requests; track req.id) {
+                  <request-item [request]="req" [collection]="coll"></request-item>
                 }
 
-                @if (this.requests()[collection.id]?.requests?.length === 0) {
+                @if (this.emptyCollections[coll.id]) {
                   <div class="collection-empty">
                     <span
                       class="pointer"
                       style="color: rgb(139, 194, 249); font-weight: 600"
-                      (click)="showAddRequestModal(collection)"
+                      (click)="showAddRequestModal(coll)"
                       >+ Добавить запрос</span
                     >
                   </div>

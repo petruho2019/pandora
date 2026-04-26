@@ -67,7 +67,6 @@ export class RequestCollectionItem implements OnInit {
   }
 
   onBlurRequest(){
-    console.log(`Blur request id: ${this.request.id}`);
     this.blurService.setCurrentBlurId(this.request.id);
   }
 
@@ -90,8 +89,6 @@ export class RequestCollectionItem implements OnInit {
   }
 
   addRequestTabItem(){
-    console.log(`Id запроса из компонента ${this.request.id}`);
-
     this.workspaceFacadeService.addTabItem(this.request, this.collection);
   }
 
@@ -139,14 +136,14 @@ export class RequestCollectionItem implements OnInit {
       newFileName: this.newRequestFolderName
     } 
 
-    this.store.dispatch(renameRequest({actionData: { body: requestInfo, modalOverlayRef: this.renameOverlayRef }}));
+    this.store.dispatch(renameRequest({actionData: { body: requestInfo, modalOverlayRefs: [this.renameOverlayRef] }}));
   }
 
   handleClone(requestInfo: CloneRequestDto){
     requestInfo.requestId = this.request.id;
     requestInfo.collectionPath = this.collection.path;
 
-    this.store.dispatch(cloneRequest({ actionData: { body: requestInfo , modalOverlayRef: this.cloneOverlayRef }  }));
+    this.store.dispatch(cloneRequest({ actionData: { body: requestInfo , modalOverlayRefs: [this.cloneOverlayRef] }  }));
   }
 
   handleDelete(requestId: string){
@@ -157,7 +154,7 @@ export class RequestCollectionItem implements OnInit {
       collectionPath: this.collection.path
     };
 
-    this.store.dispatch(deleteRequest({ actionData: { modalOverlayRef: this.deleteOverlayRef, body: requestInfo } }))
+    this.store.dispatch(deleteRequest({ actionData: { modalOverlayRefs: [this.deleteOverlayRef], body: requestInfo } }))
   }
 
   buildOverlayRef(overlay: Overlay) : OverlayRef{

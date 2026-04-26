@@ -1,12 +1,14 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { AlertNotificationContainer } from '../src/app/components/reuseable/alert-notification-container/alert-notification-container';
 import { v4 as uuidv4 } from 'uuid';
+import { AlertNotificationMessage } from '../shared/models/dto/shared-dtos';
 
 type AlertMessage = {
     id: string;
     text: string;
+    showSuccess: boolean;
 }
 
 
@@ -34,8 +36,8 @@ export class AlertNotificationService {
         this.overlayRef.attach(portal);
     }
 
-    addAlertNotification(message: string){
-        this.alertNotificationMessages.set([{ id: uuidv4(), text: message }, ...this.alertNotificationMessages()]);
+    addAlertNotification(message: AlertNotificationMessage){
+        this.alertNotificationMessages.set([{ id: uuidv4(), text: message.message, showSuccess: message.showSuccess }, ...this.alertNotificationMessages()]);
         this.startQueue();
     }
 
