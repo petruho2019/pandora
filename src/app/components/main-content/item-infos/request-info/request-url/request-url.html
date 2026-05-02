@@ -1,51 +1,52 @@
-<div class="url-con">
-  <div class="request-type-method-info">
-    @if (isHttp()) {
-      <div
-        class="http-request-method method-button pointer"
-        [ngClass]="req.method.toLowerCase()"
-        (click)="toggleMethods()"
-        (click)="$event.stopPropagation()"
-      >
-        {{ req.method }}
-      </div>
-
-      @if (showMethods) {
-        <div class="methods-dropdown">
-          @for (m of methods; track m) {
-            <div
-              class="method-item-con"
-              (click)="selectMethod(m); $event.stopPropagation()"
-              [ngClass]="[req.method === m ? 'active-method' : '']"
-            >
-              <div class="method-item">
-                {{ m }}
-              </div>
-            </div>
-          }
+<div class="url">
+  <div class="url-con">
+    <div class="request-type-method-info">
+      @if (isHttp()) {
+        <div
+          class="http-request-method method-button pointer"
+          [ngClass]="req.method.toLowerCase()"
+          (click)="toggleMethods()"
+          (click)="$event.stopPropagation()"
+        >
+          {{ req.method }}
         </div>
+
+        @if (showMethods) {
+          <div class="methods-dropdown">
+            @for (m of methods; track m) {
+              <div
+                class="method-item-con"
+                (click)="selectMethod(m); $event.stopPropagation()"
+                [ngClass]="[req.method === m ? 'active-method' : '']"
+              >
+                <div class="method-item">
+                  {{ m }}
+                </div>
+              </div>
+            }
+          </div>
+        }
       }
-    }
-  </div>
+    </div>
 
-  <input
-    class="url-input"
-    placeholder="Напишите путь запроса"
-    (input)="showPlaceholder(); handleUrlChanged($event)"
-    [(ngModel)]="req.url"
-    id="url"
-    #url
-  />
+    <input
+      class="url-input"
+      placeholder="Напишите путь запроса"
+      (input)="showPlaceholder(); handleUrlChanged($event)"
+      [(ngModel)]="req.url"
+      id="url"
+      #url
+    />
 
-  <div class="url-actions">
-    <div
-      class="url-action save"
-      [ngClass]="{ 'yellow-save-action': isReqChanged!, pointer: isReqChanged }"
-      (click)="isReqChanged && handleSaveRequest()"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
-        <path
-          d="M 0.8072,14.9381
+    <div class="url-actions">
+      <div
+        class="url-action save"
+        [ngClass]="{ 'yellow-save-action': isReqChanged!, pointer: isReqChanged }"
+        (click)="isReqChanged && handleSaveRequest()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
+          <path
+            d="M 0.8072,14.9381
 C 0.6006,14.8651 0.4758,14.7832 0.3242,14.6212 0.1854,14.4728 0.0926,14.3139 0.0405,14.1352 0.004,14.0103 0,13.355 0,7.4979 0,1.1914 0.0014,0.9946 0.0483,0.8439 0.1654,0.468 0.4885,0.1503 0.8658,0.0402 0.9902,0.0038 1.5073,-0.0003 5.918,0
 c 4.0212,0.0003 4.9368,0.0065 5.0412,0.0344 0.3217,0.086 0.3076,0.0735 2.1219,1.8875 1.8253,1.825 1.8059,1.8031 1.8937,2.1342 0.0232,0.0875 0.0287,1.2946 0.0232,5.0769
 l -0.0072,4.9621 -0.0753,0.1786
@@ -85,23 +86,22 @@ L 6.3089,0.9244 3.2023,0.9309 3.1957,2.181
 C 3.192,2.8686 3.1946,3.4454 3.2013,3.463 3.211,3.4883 3.8573,3.4949 6.3145,3.4949
 h 3.101
 z"
-        />
-      </svg>
+          />
+        </svg>
+      </div>
     </div>
-    <div class="url-action send pointer" (click)="handleSendRequestAction()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
-        <path
-          d="M 8.8846,11.9915
-C 8.5169,11.9271 8.2304,11.572 8.2559,11.2121 8.2713,10.9946 8.3073,10.929 8.5593,10.6597 8.8494,10.3496 9.7139,9.4749 11.2254,7.9622
-l 1.22,-1.221 -5.9779,-0.0082 -5.9779,-0.0082 -0.1063,-0.0597
-C 0.2554,6.5935 0.0858,6.4223 0.036,6.3148 0.0037,6.2449 -0.0002,6.2104 0,5.9924 0.0002,5.7552 0.0016,5.7456 0.0472,5.6588 0.1076,5.5437 0.252,5.4033 0.3878,5.3276
-l 0.1071,-0.0597
-h 5.9759
-c 3.2868,0 5.976,-0.0049 5.976,-0.0108 0,-0.0059 -0.7769,-0.788 -1.7263,-1.7378
-C 8.8251,1.6231 8.3599,1.144 8.3145,1.0418 8.2615,0.9224 8.2428,0.7614 8.2665,0.629 8.3386,0.2265 8.7003,-0.0486 9.084,0.0072 9.2891,0.037 9.3607,0.0765 9.5864,0.2837 10.2236,0.8688 14.1351,4.7885 14.8022,5.5103 14.9848,5.7079 15.0015,5.7499 15,6.0086 14.9986,6.2414 14.9813,6.2872 14.8315,6.4534 14.5418,6.775 13.5323,7.8 11.927,9.4029 10.1566,11.1706 9.5137,11.7994 9.3953,11.8786 9.251,11.9752 9.0479,12.0201 8.8846,11.9915
-Z"
-        />
-      </svg>
-    </div>
+  </div>
+
+  <div
+    class="pointer send"
+    [ngClass]="{ sended: isReqSended() }"
+    (click)="!isReqSended() && handleSendRequest()"
+    (click)="isReqSended() && handleCancelRequest()"
+  >
+    @if (isReqSended()) {
+      Закрыть
+    } @else {
+      Отправить
+    }
   </div>
 </div>

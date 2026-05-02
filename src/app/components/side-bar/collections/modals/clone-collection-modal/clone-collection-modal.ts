@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { SelectFileInput } from '../../../../reuseable/select-file-input/select-file-input';
-import { CollectionElectronService } from '../../../../../../../services/collection-electron-service';
+import { CollectionElectronService } from '../../../../../../../services/electron/collection-electron-service';
 import { CloneCollectionDto } from '../../../../../../../shared/models/collections/dto/collection-action-dtos';
 
 @Component({

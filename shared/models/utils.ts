@@ -1,7 +1,6 @@
 import { Collection } from "./collections/collection";
 import { RequestModel } from "./requests/request";
 
-
 export type WorkspaceType = "GeneralInfo" | "Collection";
 
 export const WorkspaceTypes = {

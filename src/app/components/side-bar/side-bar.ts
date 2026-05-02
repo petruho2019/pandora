@@ -5,6 +5,7 @@ import { ResizableBar } from './resizable-bar/resizable-bar';
 import { RenameDto } from '../../../../shared/models/dto/shared-dtos';
 import { CloseCollectionInfo } from '../../../../shared/models/collections/dto/collection-action-dtos';
 import { ActionMenuService } from '../../../../services/actions-menu-service';
+import { DEFAULT_SIDEBAR_WIDTH_PX } from '../../../../shared/models/constants';
 
 @Component({
   selector: 'side-bar',
@@ -13,15 +14,16 @@ import { ActionMenuService } from '../../../../services/actions-menu-service';
   styleUrl: './side-bar.css',
 })
 export class SideBarComponent {
-
-
   @ViewChild(SideBarContent) sidebarContent: SideBarContent;
 
-  protected defaultWidth = 400;
-  protected currentWidth = signal(this.defaultWidth);
+  protected defaultWidth = DEFAULT_SIDEBAR_WIDTH_PX;
+  public currentWidth = signal(this.defaultWidth);
 
-  updateCurrentWidth(newWidth: any){
+  @Output() widthChanged = new EventEmitter<number>();
+
+  updateCurrentWidth(newWidth: number) {
     this.currentWidth.set(newWidth);
+    this.widthChanged.emit(newWidth);
   }
 
   openCollection() {

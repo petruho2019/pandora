@@ -10,12 +10,13 @@ import { isEqual }  from 'lodash'
 import { buildJsonBody, buildTextBody, buildXmlBody, FormUrlEncodedBody, FileBody ,MultipartBody, MultipartField } from '../../../../../../shared/models/requests/http/body';
 import { TabItemService } from '../../../../../../services/tab-item-service';
 import { BODY_KIND } from '../../../../../../shared/models/constants';
-import { SendRequestService } from '../../../../../../services/send-request-service';
+import { SendRequestService } from '../../../../../../services/electron/send-request-service';
 import { RequestStateService } from '../../../../../../services/request-state-service';
 import { RequestAuth } from "./tab-items/request-auth/request-auth";
 import { BasicAuthInfoDto } from '../../../../../../shared/models/requests/dto/request-dtos';
 import { AUTH_KIND, BasicAuth, BearerAuth } from '../../../../../../shared/models/requests/http/auth';
 import { v4 as uuidv4 } from 'uuid';
+import { ResponseService } from '../../../../../../services/response-service';
 
 
 @Component({
@@ -29,6 +30,7 @@ export class RequestInfo implements OnInit, OnChanges {
   private tabItemService = inject(TabItemService);
   private sendRequestService = inject(SendRequestService);
   private requestStateService = inject(RequestStateService);
+  private responseService = inject(ResponseService);
 
   initialRequests = input<Record<string, RequestModel>>();
 
@@ -48,7 +50,11 @@ export class RequestInfo implements OnInit, OnChanges {
 
   public requestChanged = computed(() => {
     return this.requestStateService._requestChanged()[this.req.id].isChanged;
-  })
+  });
+
+  isReqSended = computed(() => {
+    return this.responseService.isReqSended(this.req.id);
+  });
 
   public tabItems = Object.values(RequestSettingsTabItems);
   public requestSettingsTabItems = RequestSettingsTabItems;
@@ -207,6 +213,15 @@ export class RequestInfo implements OnInit, OnChanges {
   isBodyTabItem(){
     let a = this.selectedTabItem();
     return this.selectedTabItem()![this.req.id] === RequestSettingsTabItems.BODY;
+  }
+  isJsonBodyItem() {
+    return this.isBodyTabItem() ? this.selectedBody()![this.req.id].kind === BODY_KIND.JSON : false; 
+  }
+  isTextBodyItem() {
+    return this.isBodyTabItem() ? this.selectedBody()![this.req.id].kind === BODY_KIND.TEXT : false; 
+  }
+  isXmlBodyItem() {
+    return this.isBodyTabItem() ? this.selectedBody()![this.req.id].kind === BODY_KIND.XML : false; 
   }
   isHeadersTabItem(){
     return this.selectedTabItem()![this.req.id] === RequestSettingsTabItems.HEADERS;
@@ -384,9 +399,11 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   async handleSendRequest() {
-    const response = await this.sendRequestService.sendRequest(this.req, this.selectedBody()![this.req.id], this.selectedAuthType()![this.req.id]);
-
-    console.log(`Статус ответа: ${response.status} , текст ответа: ${response.statusText}`);
+    await this.sendRequestService.sendRequest(this.req, this.selectedBody()![this.req.id], this.selectedAuthType()![this.req.id]);
+  }
+  
+  async handleCancelRequest() {
+    this.responseService.cancelRequest(this.req);
   }
 
   handleBasicAuthChanged(credInfo: BasicAuthInfoDto) {
@@ -505,5 +522,14 @@ export class RequestInfo implements OnInit, OnChanges {
 
     const changed = !isEqual(initial, req);
     this.requestStateService.setRequestChanged(req, changed);
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleGlobalKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 'Enter') {
+      // Логика для комбинации Ctrl + Enter
+      event.preventDefault();
+      this.handleSendRequest();
+    }
   }
 }

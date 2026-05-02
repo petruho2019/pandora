@@ -1,8 +1,8 @@
-import { AddCollectionDto, RenameDto } from '../shared/models/dto/shared-dtos';
+import { AddCollectionDto, RenameDto } from '../../shared/models/dto/shared-dtos';
 import { Injectable } from "@angular/core";
-import { Collection } from "../shared/models/collections/collection";
-import { CloneCollectionDto } from "../shared/models/collections/dto/collection-action-dtos";
-import { ResultT } from '../shared/models/result';
+import { Collection } from "../../shared/models/collections/collection";
+import { CloneCollectionDto } from "../../shared/models/collections/dto/collection-action-dtos";
+import { ResultT } from '../../shared/models/result';
 
 @Injectable({ providedIn: 'root'})
 export class CollectionElectronService {

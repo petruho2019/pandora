@@ -5,11 +5,11 @@
     <div class="request-name-input-wrapper">
       <span style="font-weight: 650; margin-bottom: 10px; font-size: 13px">Название запроса</span>
 
-      <input type="text" class="pandora-input" [(ngModel)]="reqClone.name" />
+      <input type="text" class="pandora-input" [(ngModel)]="reqClone.request!.request!.name" />
     </div>
 
     <div class="collections-info">
-      @if (req.request!.request!.collectionId) {
+      @if (reqClone.request!.request!.collectionId) {
         <span style="font-weight: 650; font-size: 13px; margin-bottom: 8px"
           >Сохранить в коллекцию</span
         >
@@ -95,7 +95,7 @@ z"
       <button
         (click)="saveRequest()"
         class="modal-positive-action-button action-button pointer"
-        [hidden]="req.request!.request!.collectionId === null"
+        [hidden]="reqClone.request!.request!.collectionId === null"
       >
         Сохранить
       </button>

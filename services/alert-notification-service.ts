@@ -11,7 +11,6 @@ type AlertMessage = {
     showSuccess: boolean;
 }
 
-
 @Injectable({ providedIn: 'root'})
 export class AlertNotificationService {
 

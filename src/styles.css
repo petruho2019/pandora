@@ -290,5 +290,7 @@ html, body {
 
 ngx-monaco-editor {
   min-height: 80%;
+  max-width: 80%;
+  z-index: 100;
 }
 

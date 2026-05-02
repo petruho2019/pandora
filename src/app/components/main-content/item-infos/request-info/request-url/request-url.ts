@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, input, Input, Output, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RequestModel, RequestTypes } from '../../../../../../../shared/models/requests/request';
 import { HttpMethod } from '../../../../../../../shared/models/requests/http/http-request-model';
@@ -20,7 +20,10 @@ export class RequestUrl {
   @Output() urlChanged = new EventEmitter<string>();
   @Output() methodChanged = new EventEmitter<HttpMethod>();
   @Output() send = new EventEmitter<HttpMethod>();
-  @Output() save = new EventEmitter();
+  @Output() save = new EventEmitter(); 
+  @Output() cancel = new EventEmitter();
+
+  isReqSended = input<boolean>();
 
   public showMethods = false;
   public methods: HttpMethod[] = [
@@ -66,7 +69,11 @@ export class RequestUrl {
     this.showMethods = false;
   }
 
-  handleSendRequestAction() {
+  handleSendRequest() {
     this.send.emit();
+  }
+
+  handleCancelRequest() {
+    this.cancel.emit();
   }
 }

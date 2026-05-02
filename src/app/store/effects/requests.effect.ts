@@ -4,7 +4,7 @@ import { inject } from '@angular/core';
 import { loadRequests, loadRequestsFailure, loadRequestsSuccess, openRequestInFS, openRequestInFSFailure, openRequestInFSSuccess, updateRequest, updateRequestSuccess } from "../actions/requests.actions";
 import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, } from "rxjs/operators";
 import { from, of,map } from "rxjs";
-import { RequestElectronService } from "../../../../services/request-electron-service";
+import { RequestElectronService } from "../../../../services/electron/request-electron-service";
 import { Store } from "@ngrx/store";
 import { RequestModel } from "../../../../shared/models/requests/request";
 import { selectLoadedByCollectionId } from "../selectors/requests.selector";

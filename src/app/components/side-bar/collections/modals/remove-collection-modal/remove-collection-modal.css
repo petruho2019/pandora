@@ -4,7 +4,6 @@
   border-radius: 8px;
   position: absolute;
   transform: translate(-50%, -50%);
-  top: var(--modal-top);
   min-width: 510px;
   max-width: 800px;
   background: var(--modal-background-color);

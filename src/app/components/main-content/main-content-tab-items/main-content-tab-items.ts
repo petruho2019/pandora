@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, ElementRef, EventEmitter, HostListener, inject, OnInit, Output, QueryList, signal, TemplateRef, viewChild, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, effect, ElementRef, EventEmitter, HostListener, inject, input, Input, OnInit, Output, QueryList, signal, TemplateRef, viewChild, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
 import { TabItem, TabItemTypes } from '../../../../../shared/models/utils';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { TabItemService } from '../../../../../services/tab-item-service';
@@ -6,20 +6,15 @@ import { WorkspaceInfoService } from '../../../../../services/workspace-info-ser
 import { NgClass } from '@angular/common';
 import { WorkspaceFacadeService } from '../../../../../services/workspace-facade-service';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
-import { GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID } from '../../../../../shared/models/constants';
+import { DEFAULT_SIDEBAR_WIDTH_PX, GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID, MIN_SIDEBAR_WIDTH_PX } from '../../../../../shared/models/constants';
 import { RequestStateService } from '../../../../../services/request-state-service';
 import { SaveRequestModal } from "./modals/save-request-modal/save-request-modal";
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Store } from '@ngrx/store';
-import { selectCollection } from '../../../store/selectors/collections.selector';
-import { map } from 'lodash';
-import { createHttpRequest } from '../../../store/actions/modal-actions/request-modal.actions';
 import { SelectCollectionModal } from "./modals/save-request-modal/modals/select-collection-modal/select-collection-modal";
-import { selectRequest } from '../../../store/selectors/requests.selector';
 import { Subscription } from 'rxjs';
-import { updateRequest } from '../../../store/actions/requests.actions';
-
+import { App, buildOverlayRef } from '../../../app'
 @Component({
   selector: 'main-content-tab-items',
   imports: [NgClass, CdkDropList, CdkDrag, SaveRequestModal, SelectCollectionModal],
@@ -35,7 +30,6 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   private requestStateService = inject(RequestStateService);
   private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
-  private store = inject(Store);
 
   private readonly THRESHOLD = 16;
 
@@ -48,8 +42,10 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   @Output() saveReq = new EventEmitter<TabItem>();
   @Output() saveReqAlreadyInStore = new EventEmitter<TabItem>();
 
+  public sidebarWidth = input<number>(400);
+
   public showScrollButtons = signal(false);
-  public tabsScrollMaxWidth = signal(window.innerWidth - 500);
+  public tabsScrollMaxWidth = signal(window.innerWidth - 300);
 
   savePortal = viewChild.required<TemplateRef<any>>('save');
   saveOverlayRef: OverlayRef;
@@ -59,6 +55,13 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   selectCollectionOverlayRef: OverlayRef;
   selectCollectionModalSubscription: Subscription;
   protected reqToSave: TabItem;
+
+  constructor() {
+    effect(() => {
+      this.sidebarWidth();
+      this.updateWidth();
+    })    
+  }
 
   ngDoCheck(): void {
     this.checkRequestNameOverflow();
@@ -113,7 +116,6 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
 
       return;
     }
-
     this.closeTabItem(tabItem);
 
     this.changeDetector.detectChanges();
@@ -128,7 +130,6 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
 
   dropTabItem($event: CdkDragDrop<string[]>){
     console.log(`Информация из ивента, previousIndes: ${$event.previousIndex} , currentIndex: ${$event.currentIndex}`);
-
     this.tabItemService.moveTabItem($event.previousIndex, $event.currentIndex, this.workspaceInfoService.activeWorkspaceId());
   }
 
@@ -174,7 +175,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   private updateWidth() {
-    this.tabsScrollMaxWidth.set(window.innerWidth - 420);
+    this.tabsScrollMaxWidth.set(window.innerWidth - (this.sidebarWidth() === undefined ? DEFAULT_SIDEBAR_WIDTH_PX : this.sidebarWidth()) - 115);
 
     requestAnimationFrame(() => {
       this.updateScrollButtons();
@@ -198,7 +199,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   showSaveRequest(tabItem: TabItem) {
     this.saveRequests = [tabItem];
 
-    this.saveOverlayRef = this.buildOverlayRef(this.overlay);
+    this.saveOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.savePortal(), this.viewContainerRef);
     this.saveOverlayRef.attach(portal);
   }
@@ -211,7 +212,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
 
     this.reqToSave = tabItem; 
 
-    this.selectCollectionOverlayRef = this.buildOverlayRef(this.overlay);
+    this.selectCollectionOverlayRef = buildOverlayRef(this.overlay, "250px");
     const portal = new TemplatePortal(this.selectCollectionPortal(), this.viewContainerRef);
     this.selectCollectionOverlayRef.attach(portal);
 
@@ -219,23 +220,6 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
       this.closeTabItem(this.reqToSave);
     })
   }
-
-  buildOverlayRef(overlay: Overlay) : OverlayRef{
-     const overlayRef = overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally(),
-        usePopover: false
-    })
-
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef?.detach();
-    });
-
-    return overlayRef;
-  } 
 
   handleSaveRequest(tabItem: TabItem){
     this.saveReq.emit(tabItem);
@@ -246,7 +230,6 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   closeSaveRequestModal(withCloseTabItem: boolean, tabItem: TabItem | null) {
-
     this.saveOverlayRef.detach()
 
     if(withCloseTabItem) {

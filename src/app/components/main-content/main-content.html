@@ -1,6 +1,7 @@
-<div class="main-content">
+<div #main class="main-content" [style.max-width.px]="getMainContentWidth()">
   <main-content-header></main-content-header>
   <main-content-tab-items
+    [sidebarWidth]="sidebarWidth()"
     (saveReq)="handleSaveRequest($event, false)"
     (saveReqAlreadyInStore)="handleSaveRequest($event, true)"
   ></main-content-tab-items>
@@ -16,18 +17,28 @@
   }
 
   @if (isRequestActiveTabItem()) {
-    <request-info
-      [initialRequests]="initialRequests()"
-      [req]="currentRequest()!"
-      [selectedTabItem]="selectedSettingRequestTabItems()"
-      [selectedAuthType]="selectedAuthType()"
-      [selectedBody]="selectedRequestBody()"
-      (selectedRequestSettingTabItemChanged)="
-        handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)
-      "
-      (selectedBodyItemChanged)="handleSelectedBodyItemChanged($event.bodyItem, $event.reqId)"
-      (selectedAuthItemChanged)="handleSelectedAuthItemChanged($event.authItem, $event.reqId)"
-      (saveReq)="handleSaveRequest($event, false)"
-    ></request-info>
+    <div #reqInfo [style.height.px]="reqInfoHeight()[currentRequest()!.id]">
+      <request-info
+        [initialRequests]="initialRequests()"
+        [req]="currentRequest()!"
+        [selectedTabItem]="selectedSettingRequestTabItems()"
+        [selectedAuthType]="selectedAuthType()"
+        [selectedBody]="selectedRequestBody()"
+        (selectedRequestSettingTabItemChanged)="
+          handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)
+        "
+        (selectedBodyItemChanged)="handleSelectedBodyItemChanged($event.bodyItem, $event.reqId)"
+        (selectedAuthItemChanged)="handleSelectedAuthItemChanged($event.authItem, $event.reqId)"
+        (saveReq)="handleSaveRequest($event, false)"
+      ></request-info>
+    </div>
+
+    <div #resizer cdkDrag cdkDragLockAxis="y" (cdkDragMoved)="onResize($event)" class="resizer">
+      <div class="drag-line"></div>
+    </div>
+
+    <div #reqResponseInfo [style.height.px]="reqResponseHeight()[currentRequest()!.id]">
+      <request-response-info [req]="currentRequest()!"></request-response-info>
+    </div>
   }
 </div>

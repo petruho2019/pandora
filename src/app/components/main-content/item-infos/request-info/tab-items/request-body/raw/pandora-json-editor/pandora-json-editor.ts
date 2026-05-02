@@ -24,7 +24,6 @@ export class PandoraJsonEditor implements OnChanges {
     if (changes['req']) {
       const body = this.req.body[BODY_KIND.JSON] as JsonBody;
       this.localValue = body ? body.value : '';
-      console.log(`Изменился запрос в JSON ngOnChanges, установим значение: ${this.localValue}`);
     }
   }
 

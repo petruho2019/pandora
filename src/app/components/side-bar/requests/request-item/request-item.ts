@@ -19,6 +19,7 @@ import { cloneRequest, deleteRequest, renameRequest } from '../../../../store/ac
 import { DeleteRequestModal } from "../modals/delete-request-modal/delete-request-modal";
 import { TabItemService } from '../../../../../../services/tab-item-service';
 import { WorkspaceFacadeService } from '../../../../../../services/workspace-facade-service';
+import { buildOverlayRef } from '../../../../app';
 
 @Component({
   selector: 'request-item',
@@ -99,7 +100,7 @@ export class RequestCollectionItem implements OnInit {
   showRenameModal(){
     this.actionsMenuService.close();
 
-    this.renameOverlayRef = this.buildOverlayRef(this.overlay);
+    this.renameOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.renamePortal(), this.viewContainerRef);
     this.renameOverlayRef.attach(portal);
   }
@@ -107,7 +108,7 @@ export class RequestCollectionItem implements OnInit {
   showCloneModal(){
     this.actionsMenuService.close();
 
-    this.cloneOverlayRef = this.buildOverlayRef(this.overlay);
+    this.cloneOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.clonePortal(), this.viewContainerRef);
     this.cloneOverlayRef.attach(portal);
   }
@@ -120,7 +121,7 @@ export class RequestCollectionItem implements OnInit {
   showDeleteRequest() {
     this.actionsMenuService.close();
 
-    this.deleteOverlayRef = this.buildOverlayRef(this.overlay);
+    this.deleteOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.deletePortal(), this.viewContainerRef);
     this.deleteOverlayRef.attach(portal);
   }
@@ -155,23 +156,6 @@ export class RequestCollectionItem implements OnInit {
     };
 
     this.store.dispatch(deleteRequest({ actionData: { modalOverlayRefs: [this.deleteOverlayRef], body: requestInfo } }))
-  }
-
-  buildOverlayRef(overlay: Overlay) : OverlayRef{
-     const overlayRef = overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally(),
-        usePopover: false
-    })
-
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef?.detach();
-    });
-
-    return overlayRef;
   }
 
   changeFolderNameEditMode(){

@@ -1,0 +1,28 @@
+.response-con {
+    width: 100%;
+    height: 100%;
+    min-width: 250px;
+    margin-left: 1px;
+    margin-top: 6px;
+}
+
+.response-data {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.empty-response-con {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    height: 100%;
+    font-weight: 600;
+}
+
+ngx-monaco-editor {
+    height: 100%;
+    width: 100%;
+}

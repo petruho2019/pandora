@@ -3,10 +3,12 @@
     <request-url
       [isReqChanged]="requestChanged()"
       [req]="req"
+      [isReqSended]="isReqSended()"
       (methodChanged)="handleMethodChanged($event)"
       (urlChanged)="handleUrlChanged($event)"
       (send)="handleSendRequest()"
       (save)="handleSaveRequest()"
+      (cancel)="handleCancelRequest()"
     ></request-url>
   }
 
@@ -76,7 +78,10 @@
     </div>
 
     @if (req) {
-      <div class="tab-item-content scroll">
+      <div
+        class="tab-item-content"
+        [ngClass]="{ scroll: !isJsonBodyItem() && !isJsonBodyItem() && !isJsonBodyItem() }"
+      >
         @if (isParamsTabItem()) {
           <request-params
             [req]="req"

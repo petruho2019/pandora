@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ModalHeader } from '../../../../reuseable/modals/modal-header/modal-header';
 import { CreateRequestInfo } from '../../../../../../../shared/models/event-models/add-request-info';
-import { HttpMethod } from '../../../../../../../shared/models/requests/http/http-request-model';
+import { buildDefaultAuth, buildDefaultBody, HttpMethod } from '../../../../../../../shared/models/requests/http/http-request-model';
 import { NgClass } from '@angular/common';
 import { RequestType, RequestTypes } from '../../../../../../../shared/models/requests/request';
 
@@ -57,7 +57,10 @@ export class AddRequestModal {
         method: this.selectedMethod,
         url: this.url.trim(),
         collectionId: this.collectionId,
-        collectionPath: this.collectionPath
+        collectionPath: this.collectionPath,
+        body: buildDefaultBody(),
+        auth: buildDefaultAuth(),
+        id: null
       });
     }
 

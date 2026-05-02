@@ -13,6 +13,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { DeleteCollection } from "../modals/delete-collection/delete-collection-modal";
 import { deleteCollectionModal } from '../../../../../store/actions/modal-actions/collections-modal.actions';
 import { WorkspaceFacadeService } from '../../../../../../../services/workspace-facade-service';
+import { buildOverlayRef } from '../../../../../app';
 
 @Component({
   selector: 'description-content',
@@ -101,7 +102,7 @@ export class DescriptionContent {
       collectionPath: this.actionsColl.path
     }
 
-    this.deleteOverlayRef = this.buildOverlayRef(this.overlay);
+    this.deleteOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.deletePortal(), this.viewContainerRef);
     this.deleteOverlayRef.attach(portal);
   }
@@ -122,32 +123,7 @@ export class DescriptionContent {
     this.workspaceFacadeService.openCollection(coll);
   }
 
-
-
-
-
-
-
   getCustomCollectionId(collId: string){
     return collId + '__description';
   }
-
-  buildOverlayRef(overlay: Overlay) : OverlayRef{
-     const overlayRef = overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally(),
-        usePopover: false
-    })
-
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef?.detach();
-    });
-
-    return overlayRef;
-  }
-
-  
 }

@@ -60,7 +60,6 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-width: 60%;
     height: calc(100vh - 300px);
     margin-top: 16px;
 }

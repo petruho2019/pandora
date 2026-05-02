@@ -1,5 +1,5 @@
 import { Collection } from './../../shared/models/collections/collection';
-import { Component, EventEmitter, HostListener, inject, OnInit, Output, signal, ViewChild } from '@angular/core';
+import { Component, computed, effect, EventEmitter, HostListener, inject, Input, OnInit, Output, signal, ViewChild } from '@angular/core';
 import { SideBarComponent } from "./components/side-bar/side-bar";
 import { ActionMenuService } from '../../services/actions-menu-service';
 import { AlertNotificationService } from '../../services/alert-notification-service';
@@ -8,6 +8,7 @@ import { CdkPortal } from "@angular/cdk/portal";
 import { MainContent } from "./components/main-content/main-content";
 import { RenameDto } from '../../shared/models/dto/shared-dtos';
 import { CloseCollectionInfo } from '../../shared/models/collections/dto/collection-action-dtos';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,6 @@ import { CloseCollectionInfo } from '../../shared/models/collections/dto/collect
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-
   private actionMenuService = inject(ActionMenuService);
   private alertNotificationService = inject(AlertNotificationService);
 
@@ -28,11 +28,17 @@ export class App implements OnInit {
 
   protected readonly title = signal('pandora');
 
+  sidebarWidth = signal(400);
+
   @Output() addCollection = new EventEmitter();
   @Output() openCollection = new EventEmitter();
   @Output() renameCollection = new EventEmitter();
   @Output() openInFSCollection = new EventEmitter();
   @Output() closeCollection = new EventEmitter();
+
+  onSidebarWidthChanged(width: number) {
+    this.sidebarWidth.set(width);
+  }
 
   handleRenameCollection(collInfo: RenameDto) {
     this.sideBarComponent.renameCollection(collInfo);
@@ -63,5 +69,22 @@ export class App implements OnInit {
     Коллекция с таким именем уже существует по пути
     D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests`, showSuccess: false});
   }
-
+  
 }
+
+export function buildOverlayRef(overlay: Overlay, top?: string) : OverlayRef {
+    const overlayRef = overlay.create({
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      positionStrategy: overlay.position()
+        .global()
+        .centerHorizontally().top(top ? top : "250px"),
+        usePopover: false
+    })
+
+    overlayRef.backdropClick().subscribe(() => {
+      overlayRef?.detach();
+    });
+
+    return overlayRef;
+  }

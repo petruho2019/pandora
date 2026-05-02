@@ -1,0 +1,28 @@
+<div class="response-con">
+
+  
+
+  <div class="response-tab-items"></div>
+
+  <div class="response-data">
+    @if (!responseStateFilled()) {
+      <div class="empty-response-con">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <span>Отправить запрос </span>
+          <span>Новый запрос </span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <span>Ctrl + Enter</span>
+          <span>Ctrl + R</span>
+        </div>
+      </div>
+    } @else if (responseState()?.isFailure) {
+      <div class="request-error">
+        <span>{{ responseState()?.error }}</span>
+      </div>
+    } @else {
+      <ngx-monaco-editor [options]="{ readOnly: true }" [ngModel]="responseData()">
+      </ngx-monaco-editor>
+    }
+  </div>
+</div>

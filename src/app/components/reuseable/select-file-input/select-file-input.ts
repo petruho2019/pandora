@@ -1,5 +1,5 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { CollectionElectronService } from '../../../../../services/collection-electron-service';
+import { CollectionElectronService } from '../../../../../services/electron/collection-electron-service';
 import { FormsModule } from '@angular/forms';
 
 @Component({

@@ -9,7 +9,8 @@ import { CommonModule } from '@angular/common';
 import { AddCollectionModal } from '../collections/modals/add-collection-modal/add-collection-modal';
 import { addCollectionModal } from '../../../store/actions/modal-actions/collections-modal.actions';
 import { AddCollectionDto } from '../../../../../shared/models/dto/shared-dtos';
-
+import { buildOverlayRef } from '../../../app'
+ 
 @Component({
   selector: 'side-bar-header',
   imports: [CommonModule, AddCollectionModal, PortalModule],
@@ -56,7 +57,7 @@ export class SideBarHeader {
     console.log(`Show add collection modal`);
     this.actionsMenuService.close();
 
-    this.overlayRef = this.buildOverlayRef(this.overlay);
+    this.overlayRef = buildOverlayRef(this.overlay);
     this.overlayRef.attach(this.addCollectionPortal());
   }
 
@@ -68,23 +69,5 @@ export class SideBarHeader {
   addCollection(collectionInfo: AddCollectionDto){
     this.store.dispatch(addCollectionModal({actionData: { modalOverlayRefs: [this.overlayRef] , body: collectionInfo}}));
   }
-
-  buildOverlayRef(overlay: Overlay) : OverlayRef{
-     const overlayRef = overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally(),
-        usePopover: false
-    })
-
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef?.detach();
-    });
-
-    return overlayRef;
-  }
-
 
 }

@@ -44,20 +44,4 @@ export class SaveRequestModal {
       this.onClose(false, null);
   }
 
-  buildOverlayRef(overlay: Overlay) : OverlayRef{
-     const overlayRef = overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally(),
-        usePopover: false
-    })
-
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef?.detach();
-    });
-
-    return overlayRef;
-  }
 }

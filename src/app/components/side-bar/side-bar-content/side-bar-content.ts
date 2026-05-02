@@ -114,8 +114,6 @@ export class SideBarContent {
           }
         }));
 
-        console.log(`По коллекции нашли запросов: ${reqs.length}`);
-
         setTimeout((reqs: RequestModel[])=> {
           if(reqs.length === 0) {
             this.emptyCollections[collectionId] = true;

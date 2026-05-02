@@ -66,7 +66,6 @@ tbody > tr:not(:last-child) {
   overflow: visible;
 }
 
-
 .resizer {
   display: flex;
   justify-content: center;

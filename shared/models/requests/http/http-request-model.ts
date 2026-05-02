@@ -2,6 +2,8 @@ import { BaseRequestModel, TableRow } from '../request';
 import { z } from "zod";
 import { FileBody, FormUrlEncodedBody, JsonBody, MultipartBody, NoBody, TextBody, XmlBody } from './body'
 import { BasicAuth, BearerAuth, InheritAuth, NoAuth } from './auth'
+import { AxiosResponse } from 'axios';
+import { ResultT } from '../../result';
 
 export interface HttpRequestModel extends BaseRequestModel{
     method: HttpMethod,
@@ -69,4 +71,29 @@ export function buildDefaultAuth() : Record<string, AuthItem> {
   return { 
     'none': { 'kind': 'none', 'name': 'Без аутентификации' } 
   };
+}
+
+export type TrackedRequest = {
+  req: HttpRequestModel;
+  controllerId: string;
+  result: ResultT<string, string>;
+};
+
+export type ResponseState = {
+  req: HttpRequestModel;
+  responseData: string | null;
+  controllerId: string | null;
+  isFinished: boolean;
+  isSended: boolean;
+  isFailure: boolean;
+  error: string | null;
+};
+
+export type HttpConfigPayload = {
+  method: string,
+  url: string,
+  headers: Record<string, string>,
+  data: any,
+  controllerId: string,
+  req: HttpRequestModel
 }

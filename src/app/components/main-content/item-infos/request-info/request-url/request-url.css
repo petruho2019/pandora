@@ -1,3 +1,10 @@
+.url {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+
 .url-con {
     position: relative;
     display: flex;
@@ -127,5 +134,25 @@
 }
 
 .send {
-    fill: #9b9b9b;
+    border-radius: 4px;
+    padding: 8px 5px;
+    border: var(--contrasting-color) solid 1px;
+    user-select: none;
+
+    color: #181818;
+    background-color: var(--contrasting-color);
+
+    transition: color 0.55s;
+    transition: border 0.55s;
+    transition: background-color 0.55s;
+}
+
+.sended {
+    background-color: none;
+    border: var(--contrasting-color) solid 1px;
+    color: var(--contrasting-color);
+
+    transition: color 0.15s;
+    transition: border 0.15s;
+    transition: background-color 0.15s;
 }

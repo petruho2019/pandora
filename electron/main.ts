@@ -8,6 +8,7 @@ import { CollectionsStoreSchema } from "../shared/store/schemes/collection-store
 import ElectronStore = require("electron-store");
 import { initializeRequest } from "./ipc-main-requests-initializer";
 import { RequestsStoreSchema } from "../shared/store/schemes/request-store-schema";
+import { initializeSendRequest } from "./ipc-main-send-request-initializer";
 
 
 export const COLLECTIONS_KEY = 'loadedCollections';
@@ -35,8 +36,6 @@ console.log(`IsDev: ${isDev}`);
 const indexPath = isDev
   ? path.join(__dirname, '../pandora/browser/index.html')
   : path.join(app.getAppPath(), 'dist/pandora/browser/index.html');
-
-console.log(`Index: ${indexPath} isdev: ${isDev}`);
 
 let win: BrowserWindow | null;
 
@@ -69,9 +68,9 @@ const createWindow = () => {
 }
 
 app.on('ready', () => {
-
   initializeCollection(collectionStore, requestsStore, ipcMain);
   initializeRequest(requestsStore, ipcMain);
+  initializeSendRequest(ipcMain);
   createWindow();
 });
 
@@ -80,7 +79,6 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-
   if (win === null)
     createWindow();
 })

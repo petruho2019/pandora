@@ -16,14 +16,11 @@ import { REQUESTS_KEY } from './main';
 import { HttpMethod, HttpRequestModel, HttpRequestSchema } from '../shared/models/requests/http/http-request-model';
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
 
-
-
 export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipcMain: IpcMain) {
 
   //region add-request
   ipcMain.handle('add-request', async (event, { requestInfo }: {requestInfo: CreateRequestInfo}) : Promise<ResultT<HttpRequestModel, string>> => {
     try {
-
       console.log(`Check collectionPath`);
 
       if (!requestInfo.collectionPath || typeof requestInfo.collectionPath !== 'string') {
@@ -54,12 +51,12 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       console.log(`Check request name with regex`);
       const invalidCharsRegex = /[<>:"/\\|?*\x00-\x1F]/;
       if (invalidCharsRegex.test(rawName)) {
-      return createRequestError(`Название файла содержит недопустимые символы`);
+      return createRequestError(`Название запроса содержит недопустимые символы`);
       }
 
       const safeName = rawName.trim();
       if (!safeName) {
-      return createRequestError(`Название файла некорректно`);
+        return createRequestError(`Название запроса некорректно`);
       }
     
       console.log(`Check request type`);
@@ -85,7 +82,6 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
       const hasDuplicate = dirFiles.some(f => {
         if (path.extname(f).toLowerCase() !== '.json') return false;
         const base = path.basename(f, '.json');
-        console.log(`In dir founded file: ${base} , condition result: ${base.toLowerCase() === safeName.toLowerCase()}`);
         return base.toLowerCase() === safeName.toLowerCase();
       });
 
@@ -93,7 +89,7 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
         return createRequestError("Запрос с таким именем уже есть");
       }
 
-      const savedRequest: RequestModel = mapCreateRequestModel(requestInfo, uuidv4());
+      const savedRequest: RequestModel = requestInfo.id !== null ? mapCreateRequestModel(requestInfo, requestInfo.id) : mapCreateRequestModel(requestInfo, uuidv4());
 
       const payload = JSON.stringify(savedRequest, null, 2);
 
@@ -398,9 +394,9 @@ function validateRenameRequestDto(requestInfo: RenameRequestDto){
           url: requestInfo.url,
           collectionId: requestInfo.collectionId, 
           fileName: requestInfo.name, 
-          auth: {},
+          auth: requestInfo.auth,
           headers: [],
-          body: {},
+          body: requestInfo.body,
           params: []
         };
 

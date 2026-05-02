@@ -42,17 +42,17 @@ export class SelectCollectionModal implements OnInit{
   }
 
   removeSelectedCollection() {
-    this.req.request!.request!.collectionId = null;
+    this.reqClone.request!.request!.collectionId = null;
     this.headerTitle = 'Выбрать коллекцию'; 
   }
 
   selectCollection(col: Collection) {
-    this.req.request!.request!.collectionId = col.id;
+    this.reqClone.request!.request!.collectionId = col.id;
     this.headerTitle = 'Сохранить запрос'; 
   }
 
   getCollName() {
-    return this.collections()!.find(c => c.id === this.req.request!.request!.collectionId)!.name;
+    return this.collections()!.find(c => c.id === this.reqClone.request!.request!.collectionId)!.name;
   }
 
   @HostListener('document:keydown', ['$event'])

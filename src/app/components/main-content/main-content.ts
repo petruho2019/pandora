@@ -1,5 +1,5 @@
 import { RequestModel, RequestSettingsTabItems, RequestSettingsTabItemsType } from './../../../../shared/models/requests/request';
-import { Component, computed, effect, EventEmitter, HostListener, inject, Output, signal, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, computed, effect, ElementRef, EventEmitter, HostListener, inject, input, Input, model, OnInit, Output, signal, ViewChild } from "@angular/core";
 import { MainContentHeader } from "./main-content-header/main-content-header";
 import { MainContentTabItems } from "./main-content-tab-items/main-content-tab-items";
 import { TabItemService } from "../../../../services/tab-item-service";
@@ -17,14 +17,16 @@ import { selectRequest } from '../../store/selectors/requests.selector';
 import { selectCollection } from '../../store/selectors/collections.selector';
 import { updateRequest } from '../../store/actions/requests.actions';
 import { createHttpRequest } from '../../store/actions/modal-actions/request-modal.actions';
+import { RequestResponseInfo } from "./request-response-info/request-response-info";
+import { CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'main-content',
   templateUrl: './main-content.html',
   styleUrl: './main-content.css',
-  imports: [MainContentHeader, MainContentTabItems, DescriptionContent, RequestInfo],
+  imports: [MainContentHeader, MainContentTabItems, DescriptionContent, RequestInfo, RequestResponseInfo, CdkDrag],
 })
-export class MainContent {
+export class MainContent  {
   private tabItemService = inject(TabItemService);
   private workspaceInfoService = inject(WorkspaceInfoService);
   private store = inject(Store);
@@ -39,10 +41,35 @@ export class MainContent {
   selectedSettingRequestTabItems = signal<Record<string, RequestSettingsTabItemsType>>({});
   selectedRequestBody = signal<Record<string, BodyItem>>({});
   selectedAuthType = signal<Record<string, AuthItem>>({});
+  reqInfoHeight = signal<Record<string, number>>({});
+  reqResponseHeight = signal<Record<string, number>>({});
+
+  sidebarWidth = input<number>(400);
 
   @ViewChild(MainContentTabItems) mainContentTabItems: MainContentTabItems;
+  @ViewChild('reqInfo') reqInfo: ElementRef<HTMLElement>;
+  @ViewChild('reqResponseInfo') reqResponseInfo: ElementRef<HTMLElement>;
+  @ViewChild('main') mainContainer!: ElementRef<HTMLElement>;
+  @ViewChild('resizer') resizer!: ElementRef<HTMLElement>;
 
   public isRequestChanged = signal(false);
+
+  private __initHeights = effect(() => {
+    const req = this.currentRequest();
+    if (!req) return;
+
+    const id = req.id;
+
+    this.reqInfoHeight.update(h => ({
+      ...h,
+      [id]: h[id] ?? 550
+    }));
+
+    this.reqResponseHeight.update(h => ({
+      ...h,
+      [id]: h[id] ?? 400
+    }));
+  });
 
   currentRequest = computed(() => {
     const tabItem = this.tabItemService.getActiveTabItem(
@@ -115,7 +142,7 @@ export class MainContent {
 
   handleSaveRequest(tabItem: TabItem, reqAlreadyInStore: boolean) {
     if(reqAlreadyInStore) {
-      console.log(`Обновляем запрос в fs`);
+      console.log(`Обновляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
         this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
         .subscribe(col => {
           this.store.dispatch(updateRequest({ actionData: {
@@ -125,16 +152,19 @@ export class MainContent {
         });
     }
     else {
-      console.log(`Добавляем запрос в fs`);
+      console.log(`Добавляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
       this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
         .subscribe(col => {
           this.store.dispatch(createHttpRequest({ actionData: {
             body: {
+              id: tabItem.request!.request!.id,
               collectionId: tabItem.request!.request!.collectionId!,
               method: tabItem.request!.request!.method,
               url: tabItem.request!.request!.url,
               name: tabItem.request!.request!.name,
               collectionPath: col!.path,
+              auth: tabItem.request!.request!.auth,
+              body: tabItem.request!.request!.body,
               type: 'HTTP'
             },
             modalOverlayRefs: [this.mainContentTabItems.saveOverlayRef, this.mainContentTabItems.selectCollectionOverlayRef],
@@ -184,4 +214,43 @@ export class MainContent {
     this.openCollection.emit();
   }
 
+  getMainContentWidth() {
+    return window.innerWidth - this.sidebarWidth();
+  }
+  
+  onResize(event: CdkDragMove) {
+    const id = this.currentRequest()!.id;
+
+    const reqInfoTop = this.reqInfo.nativeElement.getBoundingClientRect().top;
+    const mainContainerBottom = this.mainContainer.nativeElement.getBoundingClientRect().bottom;
+    const resizerHeight = this.resizer.nativeElement.clientHeight;
+
+    // Вся доступная зона только под reqInfo + resizer + reqResponse
+    const availableHeight = mainContainerBottom - reqInfoTop;
+
+    const minReqInfoHeight = 230;
+    const minReqResponseHeight = availableHeight * 0.2;
+    const maxReqInfoHeight = availableHeight - resizerHeight - minReqResponseHeight;
+
+    const y = event.pointerPosition.y;
+
+    let newReqInfoHeight = y - reqInfoTop;
+
+    newReqInfoHeight = Math.max(minReqInfoHeight, newReqInfoHeight);
+    newReqInfoHeight = Math.min(maxReqInfoHeight, newReqInfoHeight);
+
+    const newReqResponseHeight = availableHeight - newReqInfoHeight - resizerHeight;
+
+    this.reqInfoHeight.update(heights => ({
+      ...heights,
+      [id]: newReqInfoHeight
+    }));
+
+    this.reqResponseHeight.update(heights => ({
+      ...heights,
+      [id]: newReqResponseHeight
+    }));
+
+    event.source.element.nativeElement.style.transform = 'none';
+  }
 }

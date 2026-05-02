@@ -10,6 +10,7 @@ export const REQUEST_TAB_ITEM_DEFAULT_NAME =  'Без названия';
 
 export const MIN_SIDEBAR_WIDTH_PX = 200;
 export const MAX_SIDEBAR_WIDTH_PX = 500;
+export const DEFAULT_SIDEBAR_WIDTH_PX = 400;
 
 export const MIN_NAME_COLUMN_WIDTH_PX = 100;
 

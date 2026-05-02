@@ -3,8 +3,9 @@
 </ng-template>
 
 <div class="main">
-  <side-bar></side-bar>
+  <side-bar (widthChanged)="onSidebarWidthChanged($event)"></side-bar>
   <main-content
+    [sidebarWidth]="sidebarWidth()"
     (addCollection)="handleAddCollection()"
     (openCollection)="handleOpenCollection()"
     (renameCollection)="handleRenameCollection($event)"

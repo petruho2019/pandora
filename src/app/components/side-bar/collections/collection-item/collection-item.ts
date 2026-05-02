@@ -18,6 +18,7 @@ import { openCollectionInFS } from '../../../../store/actions/collections.action
 import { WorkspaceInfoService } from '../../../../../../services/workspace-info-service';
 import { TabItemService } from '../../../../../../services/tab-item-service';
 import { WorkspaceFacadeService } from '../../../../../../services/workspace-facade-service';
+import { buildOverlayRef } from '../../../../app';
 
 
 @Component({
@@ -128,7 +129,7 @@ export class CollectionItem {
     
     this.actionsMenuService.close();
 
-    this.addRequestOverlayRef = this.buildModalOverlayRef(this.overlay);
+    this.addRequestOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.addRequestPortal(), this.viewContainerRef);
     this.addRequestOverlayRef.attach(portal);
   }
@@ -139,7 +140,7 @@ export class CollectionItem {
 
     this.actionsMenuService.close();
 
-    this.cloneCollectionOverlayRef = this.buildModalOverlayRef(this.overlay);
+    this.cloneCollectionOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.cloneCollectionPortal(), this.viewContainerRef);
     this.cloneCollectionOverlayRef.attach(portal);
   }
@@ -151,7 +152,7 @@ export class CollectionItem {
     this.actionsMenuService.close();
 
 
-    this.renameCollectionOverlayRef = this.buildModalOverlayRef(this.overlay);
+    this.renameCollectionOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.renameCollectionPortal(), this.viewContainerRef);
     this.renameCollectionOverlayRef.attach(portal);
   }
@@ -164,7 +165,7 @@ export class CollectionItem {
     }
 
     this.actionsMenuService.close();
-    this.removeCollectionOverlayRef = this.buildModalOverlayRef(this.overlay);
+    this.removeCollectionOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.removeCollectionPortal(), this.viewContainerRef);
     this.removeCollectionOverlayRef.attach(portal);
   }
@@ -202,24 +203,11 @@ export class CollectionItem {
     this.blurService.setCurrentBlurId(id as string);
   }
 
-  buildModalOverlayRef(overlay: Overlay) : OverlayRef{
-     const overlayRef = overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: this.overlay.position()
-        .global()
-        .centerHorizontally(),
-        usePopover: false
-    })
 
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef?.detach();
-    });
 
-    return overlayRef;
-  }
   stopPropagation(event: MouseEvent){
     event.stopPropagation();
   }
 
 }
+

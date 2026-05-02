@@ -1,4 +1,4 @@
-import { CollectionElectronService } from "../../../../services/collection-electron-service";
+import { CollectionElectronService } from "../../../../services/electron/collection-electron-service";
 import { catchError, debounceTime, distinctUntilChanged, exhaustMap, from, map, of, switchMap, tap } from "rxjs";
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
