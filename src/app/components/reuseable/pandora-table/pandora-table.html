@@ -71,7 +71,7 @@
 
             @if (canAddFile && !isValueSet(tableRow)) {
               @if (!isFileValueSet(tableRow)) {
-                <div class="add-file-con pointer" type="button" (click)="fileValueInput.click()">
+                <div class="add-file-con pointer" type="button" (click)="addFileElem.click()">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -121,15 +121,7 @@ z"
                     ></path>
                     />
                   </svg>
-                  <input
-                    hidden
-                    #fileValueInput
-                    class="input-file-value"
-                    type="file"
-                    (change)="addFile($event, tableRow)"
-                    name="file"
-                    id="file-value-input"
-                  />
+                  <div hidden #addFileElem (click)="addFile(tableRow)"></div>
                 </div>
               }
             }
@@ -137,7 +129,7 @@ z"
             @if (isFileValueSet(tableRow)) {
               <div class="file-con">
                 <span class="text-ellipsis file-name">{{
-                  tableRow!.fileInfo?.fileValue?.name
+                  getFileNameFromPath(tableRow!.fileInfo?.path)
                 }}</span>
                 <div class="delete-file pointer" (click)="deleteFile(tableRow)">
                   <svg

@@ -1,6 +1,7 @@
 <pandora-table
   [canAddFile]="true"
   [initialData]="tableInitialData"
+  [reqId]="req.id"
   [canChangeContentType]="true"
   (tableChanged)="handleMultipartChanged($event)"
 ></pandora-table>

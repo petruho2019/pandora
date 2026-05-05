@@ -1,30 +1,30 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow } from 'electron';
 
 import { app, ipcMain } from 'electron';
 import { initializeCollection } from './ipc-main-collections-initializer';
-import url from "url";
-import path from "path";
-import { CollectionsStoreSchema } from "../shared/store/schemes/collection-store-schema";
-import ElectronStore = require("electron-store");
-import { initializeRequest } from "./ipc-main-requests-initializer";
-import { RequestsStoreSchema } from "../shared/store/schemes/request-store-schema";
-import { initializeSendRequest } from "./ipc-main-send-request-initializer";
-
+import url from 'url';
+import path from 'path';
+import { CollectionsStoreSchema } from '../shared/store/schemes/collection-store-schema';
+import ElectronStore = require('electron-store');
+import { initializeRequest } from './ipc-main-requests-initializer';
+import { RequestsStoreSchema } from '../shared/store/schemes/request-store-schema';
+import { initializeSendRequest } from './ipc-main-send-request-initializer';
+import { initializeCommon } from './ipc-main-common-initializer';
 
 export const COLLECTIONS_KEY = 'loadedCollections';
 
 const collectionStore = new ElectronStore<CollectionsStoreSchema>({
   name: 'collections',
   defaults: {
-    loadedCollections: []
-  }
+    loadedCollections: [],
+  },
 });
 
 const requestsStore = new ElectronStore<RequestsStoreSchema>({
   name: 'requests',
   defaults: {
-    loadedRequests: []
-  }
+    loadedRequests: [],
+  },
 });
 
 export const REQUESTS_KEY = 'loadedRequests';
@@ -45,17 +45,17 @@ const createWindow = () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true
-    }
-  })
+      contextIsolation: true,
+    },
+  });
 
   win.loadURL(
-        url.format({
-          pathname: indexPath,
-          protocol: 'file:',
-          slashes: true
-        })
-      );
+    url.format({
+      pathname: indexPath,
+      protocol: 'file:',
+      slashes: true,
+    }),
+  );
 
   win.maximize();
   win.webContents.openDevTools();
@@ -65,20 +65,20 @@ const createWindow = () => {
   });
 
   win.removeMenu();
-}
+};
 
 app.on('ready', () => {
   initializeCollection(collectionStore, requestsStore, ipcMain);
   initializeRequest(requestsStore, ipcMain);
   initializeSendRequest(ipcMain);
+  initializeCommon(ipcMain);
   createWindow();
 });
 
 app.on('window-all-closed', () => {
   app.quit();
-})
+});
 
 app.on('activate', () => {
-  if (win === null)
-    createWindow();
-})
+  if (win === null) createWindow();
+});

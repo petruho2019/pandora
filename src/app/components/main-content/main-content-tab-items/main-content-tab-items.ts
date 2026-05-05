@@ -1,4 +1,26 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, DoCheck, effect, ElementRef, EventEmitter, HostListener, inject, input, Input, OnInit, Output, QueryList, signal, TemplateRef, viewChild, ViewChild, ViewChildren, ViewContainerRef } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DoCheck,
+  effect,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  input,
+  Input,
+  OnInit,
+  Output,
+  QueryList,
+  signal,
+  TemplateRef,
+  viewChild,
+  ViewChild,
+  ViewChildren,
+  ViewContainerRef,
+} from '@angular/core';
 import { TabItem, TabItemTypes } from '../../../../../shared/models/utils';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { TabItemService } from '../../../../../services/tab-item-service';
@@ -6,23 +28,26 @@ import { WorkspaceInfoService } from '../../../../../services/workspace-info-ser
 import { NgClass } from '@angular/common';
 import { WorkspaceFacadeService } from '../../../../../services/workspace-facade-service';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
-import { DEFAULT_SIDEBAR_WIDTH_PX, GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID, MIN_SIDEBAR_WIDTH_PX } from '../../../../../shared/models/constants';
+import {
+  DEFAULT_SIDEBAR_WIDTH_PX,
+  GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID,
+  MIN_SIDEBAR_WIDTH_PX,
+} from '../../../../../shared/models/constants';
 import { RequestStateService } from '../../../../../services/request-state-service';
-import { SaveRequestModal } from "./modals/save-request-modal/save-request-modal";
+import { SaveRequestModal } from './modals/save-request-modal/save-request-modal';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Store } from '@ngrx/store';
-import { SelectCollectionModal } from "./modals/save-request-modal/modals/select-collection-modal/select-collection-modal";
+import { SelectCollectionModal } from './modals/save-request-modal/modals/select-collection-modal/select-collection-modal';
 import { Subscription } from 'rxjs';
-import { App, buildOverlayRef } from '../../../app'
+import { App, buildOverlayRef } from '../../../app';
 @Component({
   selector: 'main-content-tab-items',
   imports: [NgClass, CdkDropList, CdkDrag, SaveRequestModal, SelectCollectionModal],
   templateUrl: './main-content-tab-items.html',
   styleUrl: './main-content-tab-items.css',
 })
-export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
-
+export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
   private workspaceInfoService = inject(WorkspaceInfoService);
   private workspaceFacadeService = inject(WorkspaceFacadeService);
   private tabItemService = inject(TabItemService);
@@ -60,7 +85,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     effect(() => {
       this.sidebarWidth();
       this.updateWidth();
-    })    
+    });
   }
 
   ngDoCheck(): void {
@@ -68,9 +93,9 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   ngOnInit(): void {
-    if(!this.getTabItemsByWorkspaceId())
+    if (!this.getTabItemsByWorkspaceId())
       this.tabItemService.setActiveTabItemId(GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID);
-  }  
+  }
 
   ngAfterViewInit(): void {
     this.updateWidth();
@@ -81,10 +106,10 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     const items = this.tabItemService.tabItemsByWorkspaceId();
     const activeId = this.tabItemService.activeTabItemId();
 
-    return items[workspaceId]?.find(ti => ti.id === activeId);
+    return items[workspaceId]?.find((ti) => ti.id === activeId);
   });
-  
-  selectTabItem(id: string){
+
+  selectTabItem(id: string) {
     this.tabItemService.setActiveTabItemId(id);
     this.changeDetector.detectChanges();
   }
@@ -94,7 +119,9 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   getTabItemsByWorkspaceId() {
-    return this.tabItemService.tabItemsByWorkspaceId()[this.workspaceInfoService.activeWorkspace()!.id]
+    return this.tabItemService.tabItemsByWorkspaceId()[
+      this.workspaceInfoService.activeWorkspace()!.id
+    ];
   }
 
   checkRequestNameOverflow() {
@@ -102,7 +129,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
       this.applyOverflow(ref.nativeElement);
     });
 
-    this.requestNames?.changes.subscribe(names => {
+    this.requestNames?.changes.subscribe((names) => {
       names.forEach((ref: ElementRef<HTMLElement>) => {
         this.applyOverflow(ref.nativeElement);
       });
@@ -110,8 +137,10 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   closeTabItemWithCondition(tabItem: TabItem) {
-    if(tabItem.tabType === TabItemTypes.Request && this.requestStateService.isRequestChanged(tabItem.request!.request!.id)){
-
+    if (
+      tabItem.tabType === TabItemTypes.Request &&
+      this.requestStateService.isRequestChanged(tabItem.request!.request!.id)
+    ) {
       this.showSaveRequest(tabItem);
 
       return;
@@ -122,50 +151,53 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     this.updateWidth();
   }
 
-
   addRequestTabItem() {
     this.tabItemService.addDefaultRequestTabItem(this.workspaceInfoService.activeWorkspace()!);
     this.updateWidth();
   }
 
-  dropTabItem($event: CdkDragDrop<string[]>){
-    console.log(`Информация из ивента, previousIndes: ${$event.previousIndex} , currentIndex: ${$event.currentIndex}`);
-    this.tabItemService.moveTabItem($event.previousIndex, $event.currentIndex, this.workspaceInfoService.activeWorkspaceId());
+  dropTabItem($event: CdkDragDrop<string[]>) {
+    console.log(
+      `Информация из ивента, previousIndes: ${$event.previousIndex} , currentIndex: ${$event.currentIndex}`,
+    );
+    this.tabItemService.moveTabItem(
+      $event.previousIndex,
+      $event.currentIndex,
+      this.workspaceInfoService.activeWorkspaceId(),
+    );
   }
 
-  isHttp(req: RequestModel){
+  isHttp(req: RequestModel) {
     return req.type === RequestTypes.HTTP;
   }
 
-  isGeneralInfoType(tabItem: TabItem){
+  isGeneralInfoType(tabItem: TabItem) {
     return tabItem.tabType === TabItemTypes.GeneralInfo;
   }
 
-  isCollectionSettingsType(tabItem: TabItem){
+  isCollectionSettingsType(tabItem: TabItem) {
     return tabItem.tabType === TabItemTypes.CollectionSettings;
   }
 
-  isRequestType(tabItem: TabItem){
+  isRequestType(tabItem: TabItem) {
     return tabItem.tabType === TabItemTypes.Request;
   }
 
-  scrollTabs(delta: number){
+  scrollTabs(delta: number) {
     const el = this.tabsScroll?.nativeElement;
-    if(!el) return;
+    if (!el) return;
 
     el.scrollBy({
       left: delta,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }
 
   updateScrollButtons() {
     const el = this.tabsScroll?.nativeElement;
-    if(!el) return;
+    if (!el) return;
 
-    this.showScrollButtons.set(
-      this.tabsScrollMaxWidth() - el.clientWidth < this.THRESHOLD
-    );
+    this.showScrollButtons.set(this.tabsScrollMaxWidth() - el.clientWidth < this.THRESHOLD);
   }
 
   @HostListener('window:resize')
@@ -175,7 +207,11 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   private updateWidth() {
-    this.tabsScrollMaxWidth.set(window.innerWidth - (this.sidebarWidth() === undefined ? DEFAULT_SIDEBAR_WIDTH_PX : this.sidebarWidth()) - 115);
+    this.tabsScrollMaxWidth.set(
+      window.innerWidth -
+        (this.sidebarWidth() === undefined ? DEFAULT_SIDEBAR_WIDTH_PX : this.sidebarWidth()) -
+        115,
+    );
 
     requestAnimationFrame(() => {
       this.updateScrollButtons();
@@ -193,7 +229,10 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   private closeTabItem(tabItem: TabItem) {
-    this.workspaceFacadeService.deleteTabItem(tabItem, this.workspaceInfoService.activeWorkspaceId());
+    this.workspaceFacadeService.deleteTabItem(
+      tabItem,
+      this.workspaceInfoService.activeWorkspaceId(),
+    );
   }
 
   showSaveRequest(tabItem: TabItem) {
@@ -204,24 +243,25 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
     this.saveOverlayRef.attach(portal);
   }
 
-  handleShowSelectCollection(tabItem: TabItem){
-
-    if(this.saveRequests?.length !== 1){
+  handleShowSelectCollection(tabItem: TabItem) {
+    if (this.saveRequests?.length !== 1) {
       // тут логика когда закрывается само приложение
     }
 
-    this.reqToSave = tabItem; 
+    this.reqToSave = tabItem;
 
-    this.selectCollectionOverlayRef = buildOverlayRef(this.overlay, "250px");
+    this.selectCollectionOverlayRef = buildOverlayRef(this.overlay, '250px');
     const portal = new TemplatePortal(this.selectCollectionPortal(), this.viewContainerRef);
     this.selectCollectionOverlayRef.attach(portal);
 
-    this.selectCollectionModalSubscription = this.selectCollectionOverlayRef.detachments().subscribe(() => {
-      this.closeTabItem(this.reqToSave);
-    })
+    this.selectCollectionModalSubscription = this.selectCollectionOverlayRef
+      .detachments()
+      .subscribe(() => {
+        this.closeTabItem(this.reqToSave);
+      });
   }
 
-  handleSaveRequest(tabItem: TabItem){
+  handleSaveRequest(tabItem: TabItem) {
     this.saveReq.emit(tabItem);
   }
 
@@ -230,14 +270,14 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit{
   }
 
   closeSaveRequestModal(withCloseTabItem: boolean, tabItem: TabItem | null) {
-    this.saveOverlayRef.detach()
+    this.saveOverlayRef.detach();
 
-    if(withCloseTabItem) {
+    if (withCloseTabItem) {
       this.closeTabItem(tabItem!);
     }
   }
 
-  handleCloseSelectCollection(){
+  handleCloseSelectCollection() {
     this.selectCollectionModalSubscription.unsubscribe();
     this.selectCollectionOverlayRef.detach();
   }

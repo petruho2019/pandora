@@ -4,11 +4,11 @@
       @if (isHttp()) {
         <div
           class="http-request-method method-button pointer"
-          [ngClass]="req.method.toLowerCase()"
+          [ngClass]="req()!.method.toLowerCase()"
           (click)="toggleMethods()"
           (click)="$event.stopPropagation()"
         >
-          {{ req.method }}
+          {{ req()!.method }}
         </div>
 
         @if (showMethods) {
@@ -17,7 +17,7 @@
               <div
                 class="method-item-con"
                 (click)="selectMethod(m); $event.stopPropagation()"
-                [ngClass]="[req.method === m ? 'active-method' : '']"
+                [ngClass]="[req()!.method === m ? 'active-method' : '']"
               >
                 <div class="method-item">
                   {{ m }}
@@ -33,7 +33,7 @@
       class="url-input"
       placeholder="Напишите путь запроса"
       (input)="showPlaceholder(); handleUrlChanged($event)"
-      [(ngModel)]="req.url"
+      [(ngModel)]="req()!.url"
       id="url"
       #url
     />
@@ -94,12 +94,12 @@ z"
 
   <div
     class="pointer send"
-    [ngClass]="{ sended: isReqSended() }"
+    [ngClass]="{ sended: isReqSended(), 'not-sended': isReqSended() }"
     (click)="!isReqSended() && handleSendRequest()"
     (click)="isReqSended() && handleCancelRequest()"
   >
     @if (isReqSended()) {
-      Закрыть
+      Отменить
     } @else {
       Отправить
     }

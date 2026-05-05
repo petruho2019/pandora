@@ -8,6 +8,8 @@
 html, body {
   height: 100%;  
   width: 100%;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden; 
   background-color: var(--main-background-color);
   font-family: 'Nunito Sans', 'Open Sans', 'Raleway';

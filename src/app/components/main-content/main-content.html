@@ -1,4 +1,4 @@
-<div #main class="main-content" [style.max-width.px]="getMainContentWidth()">
+<div #main class="main-content" [style.width.px]="getMainContentWidth()">
   <main-content-header></main-content-header>
   <main-content-tab-items
     [sidebarWidth]="sidebarWidth()"
@@ -29,7 +29,7 @@
         "
         (selectedBodyItemChanged)="handleSelectedBodyItemChanged($event.bodyItem, $event.reqId)"
         (selectedAuthItemChanged)="handleSelectedAuthItemChanged($event.authItem, $event.reqId)"
-        (saveReq)="handleSaveRequest($event, false)"
+        (saveReq)="handleClickSaveRequestIcon($event)"
       ></request-info>
     </div>
 

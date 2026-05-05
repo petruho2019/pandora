@@ -2,6 +2,7 @@
   <div class="headers-table-con">
     <pandora-table
       [initialData]="tableInitialData"
+      [reqId]="req.id"
       (tableChanged)="handleHeadersChanged($event)"
     ></pandora-table>
   </div>

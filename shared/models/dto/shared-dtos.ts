@@ -1,15 +1,15 @@
-
 export interface RenameDto {
-    name: string,
-    id: string
+  name: string;
+  id: string;
 }
 
-export interface AddCollectionDto { 
-    name: string; 
-    path: string; 
+export interface AddCollectionDto {
+  name: string;
+  path: string;
 }
 
 export interface AlertNotificationMessage {
-    showSuccess: boolean;
-    message: string;
+  showSuccess: boolean;
+  message: string;
 }
+

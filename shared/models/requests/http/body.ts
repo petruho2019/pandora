@@ -1,83 +1,105 @@
-import { TableRow } from '../request'
+import { TableRow } from '../request';
 
 export interface FileBody {
   kind: 'file';
   name: 'Файл';
   files: TableRow[];
-  group: 'Other',
+  group: 'Other';
 }
 
 export interface FormUrlEncodedBody {
   kind: 'form-url-encoded';
-  name: 'Форма закодирована в url'
-  fields: TableRow[],
-  group: 'Form'
+  name: 'Форма закодирована в url';
+  fields: TableRow[];
+  group: 'Form';
 }
 
 export interface MultipartBody {
   kind: 'multipart-form';
-  name: 'Составная форма'
-  fields: MultipartField[],
-  group: 'Form'
+  name: 'Составная форма';
+  fields: MultipartField[];
+  group: 'Form';
 }
 
 export type MultipartField =
   | {
-      id: string,
+      id: string;
       type: 'text';
       key: string;
       value: string;
-      contentType: string | null,
+      contentType: string | null;
       isActive: boolean;
     }
   | {
-      id: string,
+      id: string;
       type: 'file';
       key: string;
-      file: File; 
-      contentType: string | null,
+      path: string;
+      contentType: string | null;
       isActive: boolean;
     };
 
 export interface NoBody {
-    kind: 'none',
-    name: 'Без тела',
-    group: 'Other'
+  kind: 'none';
+  name: 'Без тела';
+  group: 'Other';
 }
 
 export type RawBody = JsonBody | XmlBody | TextBody;
 
 export interface JsonBody {
   kind: 'json';
-  name: 'Json'
-  contentType: 'application/json',
-  value: string,
-  group: 'Raw'
+  name: 'Json';
+  contentType: 'application/json';
+  value: string;
+  group: 'Raw';
 }
 
 export interface XmlBody {
   kind: 'xml';
-  name: 'Xml'
-  contentType: 'application/xml',
-  value: string,
-  group: 'Raw'
+  name: 'Xml';
+  contentType: 'application/xml';
+  value: string;
+  group: 'Raw';
 }
 
 export interface TextBody {
   kind: 'text';
-  name: 'Text'
-  contentType: 'text/plain',
-  value: string,
-  group: 'Raw'
+  name: 'Text';
+  contentType: 'text/plain';
+  value: string;
+  group: 'Raw';
 }
 
+export type ElectronFilePayload = {
+  kind: 'file';
+  path: string;
+  contentType?: string | null;
+};
 
-export function buildJsonBody(jsonValue: string) : JsonBody {
-  return { kind: 'json', 'contentType': 'application/json', 'group': 'Raw', 'name': 'Json', value: jsonValue };
+export type ElectronMultipartPayload = {
+  kind: 'multipart-form';
+  fields: any[];
+};
+
+export function buildJsonBody(jsonValue: string): JsonBody {
+  return {
+    kind: 'json',
+    contentType: 'application/json',
+    group: 'Raw',
+    name: 'Json',
+    value: jsonValue,
+  };
 }
-export function buildTextBody(textValue: string) : TextBody {
-  return { kind: 'text', 'contentType': 'text/plain', 'group': 'Raw', 'name': 'Text', value: textValue };
+export function buildTextBody(textValue: string): TextBody {
+  return { kind: 'text', contentType: 'text/plain', group: 'Raw', name: 'Text', value: textValue };
 }
-export function buildXmlBody(xmlValue: string) : XmlBody {
-  return { kind: 'xml', 'contentType': 'application/xml', 'group': 'Raw', 'name': 'Xml', value: xmlValue };
+export function buildXmlBody(xmlValue: string): XmlBody {
+  return {
+    kind: 'xml',
+    contentType: 'application/xml',
+    group: 'Raw',
+    name: 'Xml',
+    value: xmlValue,
+  };
 }

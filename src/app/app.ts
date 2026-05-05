@@ -73,18 +73,24 @@ export class App implements OnInit {
 }
 
 export function buildOverlayRef(overlay: Overlay, top?: string) : OverlayRef {
-    const overlayRef = overlay.create({
-      hasBackdrop: true,
-      backdropClass: 'cdk-overlay-dark-backdrop',
-      positionStrategy: overlay.position()
-        .global()
-        .centerHorizontally().top(top ? top : "250px"),
-        usePopover: false
-    })
+  const overlayRef = overlay.create({
+    hasBackdrop: true,
+    backdropClass: 'cdk-overlay-dark-backdrop',
+    positionStrategy: overlay.position()
+      .global()
+      .centerHorizontally().top(top ? top : "250px"),
+      usePopover: false
+  })
 
-    overlayRef.backdropClick().subscribe(() => {
-      overlayRef?.detach();
-    });
+  overlayRef.backdropClick().subscribe(() => {
+    overlayRef?.detach();
+  });
 
-    return overlayRef;
-  }
+  return overlayRef;
+}
+
+export function getFileNameFromPath(path: string | null | undefined) {
+  if (!path) return null;
+
+  return path.replace(/\\/g, '/').split('/').pop();
+}

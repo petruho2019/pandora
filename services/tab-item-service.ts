@@ -61,7 +61,6 @@ export class TabItemService {
   }
 
   addRequestTabItem(req: RequestModel, coll: Collection){
-
     this._tabItemsByWorkspaceId.update(items => {
         const requestTabItem = items[coll.id].find(ti => ti.collection?.id === coll.id && ti.request?.request?.id === req.id);
 

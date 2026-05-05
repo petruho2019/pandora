@@ -1,5 +1,6 @@
 import { WorkspaceInfoService } from '../../services/workspace-info-service';
 import { AlertNotificationService } from './../../services/alert-notification-service';
+import { StopwatchService } from './../../services/stopwatch-service';
 import { RequestStateService } from './../../services/request-state-service';
 import { SendRequestService } from './../../services/electron/send-request-service';
 import { ApplicationConfig } from '@angular/core';
@@ -19,6 +20,7 @@ import { MonacoEditorModule, provideMonacoEditor } from 'ngx-monaco-editor-v2';
 import { ResponseService } from '../../services/response-service';
 import * as monaco from 'monaco-editor';
 import { provideHttpClient } from '@angular/common/http';
+import { fileFeatureKey, filesReducer } from './store/reducers/files.reducer';
 
 export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   theme: 'customTheme',
@@ -30,7 +32,7 @@ export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions =
   wordBasedSuggestions: 'off',
 
   parameterHints: {
-    enabled: false
+    enabled: false,
   },
 
   suggest: {
@@ -56,38 +58,38 @@ export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions =
     showMethods: false,
     showStructs: false,
     showUsers: false,
-    showColors: false
-  }
+    showColors: false,
+  },
 };
 
 function onMonacoLoad() {
   const options = {
-    base: 'vs-dark', 
-    inherit: true, 
+    base: 'vs-dark',
+    inherit: true,
     colors: {
-      "editor.background": '#222222',
+      'editor.background': '#222222',
       'editorCursor.foreground': '#bbbbbb',
-      'editor.lineHighlightBackground': '#222222', 
-      'editor.lineHighlightBorder': '#222222', 
-      'editor.selectionBackground': '#666666', 
+      'editor.lineHighlightBackground': '#222222',
+      'editor.lineHighlightBorder': '#222222',
+      'editor.selectionBackground': '#666666',
       'editorLineNumber.foreground': '#bbbbbb',
       'editorLineNumber.activeForeground': '#bbbbbb',
       'editorBracketMatch.border': '#222222',
       'editorBracketMatch.background': '#2e2e2e',
       'textPreformat.foreground': '#bbbbbb',
       'editorSuggestWidget.highlightForeground': '#ff0000',
-      "editorHoverWidget.background": "#2e2e2e",
-      "editorHoverWidget.border": "#444444",
-      "editorHoverWidget.foreground": "#cccccc",
-      'scrollbar.shadow': '#222222'                    // https://gist.github.com/NeuroNexul/7db6741e8c006159727f26a0fbddf10a
+      'editorHoverWidget.background': '#2e2e2e',
+      'editorHoverWidget.border': '#444444',
+      'editorHoverWidget.foreground': '#cccccc',
+      'scrollbar.shadow': '#222222', // https://gist.github.com/NeuroNexul/7db6741e8c006159727f26a0fbddf10a
     },
     rules: [
       { token: 'comment', foreground: '7E890B' },
       { token: 'keyword', foreground: 'FF0000' },
       { token: 'string', foreground: 'ff0000' },
       { token: 'number', foreground: '00FFFF' },
-      { token: 'identifier', foreground: 'FFFFFF' }           
-    ]
+      { token: 'identifier', foreground: 'FFFFFF' },
+    ],
   };
 
   (window as any).monaco.editor.defineTheme('customTheme', options);
@@ -97,19 +99,20 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideMonacoEditor({
       defaultOptions: {
-          theme: 'customTheme',
-          automaticLayout: true,
-          minimap: { enabled: false },
-          fontSize: 13,
-          scrollBeyondLastLine: false,
-          ...editorOptions
-        },
-        onMonacoLoad: onMonacoLoad
+        theme: 'customTheme',
+        automaticLayout: true,
+        minimap: { enabled: false },
+        fontSize: 13,
+        scrollBeyondLastLine: false,
+        ...editorOptions,
+      },
+      onMonacoLoad: onMonacoLoad,
     }),
     provideBrowserGlobalErrorListeners(),
     provideStore({
       [collectionFeatureKey]: collectionsReducer,
       [requestFeatureKey]: requestsReducer,
+      [fileFeatureKey]: filesReducer,
     }),
     provideEffects([CollectionEffects, RequestEffects, CommonEffects]),
     provideHttpClient(),
@@ -122,7 +125,7 @@ export const appConfig: ApplicationConfig = {
     MonacoEditorModule,
     SendRequestService,
     RequestStateService,
-    ResponseService
-  ]
+    ResponseService,
+    StopwatchService,
+  ],
 };
-

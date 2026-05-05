@@ -9,8 +9,8 @@ import { CommonModule } from '@angular/common';
 import { AddCollectionModal } from '../collections/modals/add-collection-modal/add-collection-modal';
 import { addCollectionModal } from '../../../store/actions/modal-actions/collections-modal.actions';
 import { AddCollectionDto } from '../../../../../shared/models/dto/shared-dtos';
-import { buildOverlayRef } from '../../../app'
- 
+import { buildOverlayRef } from '../../../app';
+
 @Component({
   selector: 'side-bar-header',
   imports: [CommonModule, AddCollectionModal, PortalModule],
@@ -18,7 +18,6 @@ import { buildOverlayRef } from '../../../app'
   styleUrl: './side-bar-header.css',
 })
 export class SideBarHeader {
-  
   readonly store = inject(Store);
   private actionsMenuService = inject(ActionMenuService);
   private overlay = inject(Overlay);
@@ -38,36 +37,45 @@ export class SideBarHeader {
   toggleMenu(event: MouseEvent, trigger: HTMLElement) {
     event.stopPropagation();
 
-    this.actionsMenuService.openedId$.pipe(take(1)).subscribe(current => {
+    this.actionsMenuService.openedId$.pipe(take(1)).subscribe((current) => {
       console.log(`Current: ${current}`);
-        current === this.HEADER_MENU_ID ? this.actionsMenuService.close() : this.actionsMenuService.open(this.HEADER_MENU_ID, trigger, this.collectionActionPortal(), this.viewContainerRef, [
-        {
-          originX: 'end',
-          originY: 'bottom',
-          overlayX: 'start',
-          overlayY: 'top',
-          offsetX: 30,
-          offsetY: 6,
-        }
-      ]);
+      current === this.HEADER_MENU_ID
+        ? this.actionsMenuService.close()
+        : this.actionsMenuService.open(
+            this.HEADER_MENU_ID,
+            trigger,
+            this.collectionActionPortal(),
+            this.viewContainerRef,
+            [
+              {
+                originX: 'end',
+                originY: 'bottom',
+                overlayX: 'start',
+                overlayY: 'top',
+                offsetX: 30,
+                offsetY: 6,
+              },
+            ],
+          );
     });
   }
 
   showAddCollectionModal() {
-    console.log(`Show add collection modal`);
     this.actionsMenuService.close();
 
     this.overlayRef = buildOverlayRef(this.overlay);
     this.overlayRef.attach(this.addCollectionPortal());
   }
 
-  openCollection(){
-    console.log(`Open collection`);
+  openCollection() {
     this.store.dispatch(openCollection());
   }
 
-  addCollection(collectionInfo: AddCollectionDto){
-    this.store.dispatch(addCollectionModal({actionData: { modalOverlayRefs: [this.overlayRef] , body: collectionInfo}}));
+  addCollection(collectionInfo: AddCollectionDto) {
+    this.store.dispatch(
+      addCollectionModal({
+        actionData: { modalOverlayRefs: [this.overlayRef], body: collectionInfo },
+      }),
+    );
   }
-
 }

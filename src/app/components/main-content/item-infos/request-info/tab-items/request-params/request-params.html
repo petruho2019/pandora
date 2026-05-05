@@ -2,6 +2,7 @@
   <div class="query-table-con">
     <pandora-table
       [initialData]="tableInitialData"
+      [reqId]="req.id"
       (tableChanged)="handleParamsTableChanged($event)"
     ></pandora-table>
   </div>

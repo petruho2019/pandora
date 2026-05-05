@@ -1,35 +1,69 @@
-import { RequestModel, RequestSettingsTabItems, RequestSettingsTabItemsType } from './../../../../shared/models/requests/request';
-import { AfterViewInit, Component, computed, effect, ElementRef, EventEmitter, HostListener, inject, input, Input, model, OnInit, Output, signal, ViewChild } from "@angular/core";
-import { MainContentHeader } from "./main-content-header/main-content-header";
-import { MainContentTabItems } from "./main-content-tab-items/main-content-tab-items";
-import { TabItemService } from "../../../../services/tab-item-service";
-import { WorkspaceInfoService } from "../../../../services/workspace-info-service";
-import { TabItem, TabItemTypes } from "../../../../shared/models/utils";
-import { BODY_KIND, GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID, REQUEST_TAB_ITEM_DEFAULT_NAME } from "../../../../shared/models/constants";
-import { DescriptionContent } from "./item-infos/general-info/description-content/description-content";
-import { RenameDto } from "../../../../shared/models/dto/shared-dtos";
-import { CloseCollectionInfo } from "../../../../shared/models/collections/dto/collection-action-dtos";
-import { RequestInfo } from "./item-infos/request-info/request-info";
+import {
+  RequestModel,
+  RequestSettingsTabItems,
+  RequestSettingsTabItemsType,
+} from './../../../../shared/models/requests/request';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  input,
+  Input,
+  model,
+  OnInit,
+  Output,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { MainContentHeader } from './main-content-header/main-content-header';
+import { MainContentTabItems } from './main-content-tab-items/main-content-tab-items';
+import { TabItemService } from '../../../../services/tab-item-service';
+import { WorkspaceInfoService } from '../../../../services/workspace-info-service';
+import { TabItem, TabItemTypes } from '../../../../shared/models/utils';
+import {
+  BODY_KIND,
+  GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID,
+  GENERAL_INFORMATION_WORKSPACE_ID,
+  REQUEST_TAB_ITEM_DEFAULT_NAME,
+} from '../../../../shared/models/constants';
+import { DescriptionContent } from './item-infos/general-info/description-content/description-content';
+import { RenameDto } from '../../../../shared/models/dto/shared-dtos';
+import { CloseCollectionInfo } from '../../../../shared/models/collections/dto/collection-action-dtos';
+import { RequestInfo } from './item-infos/request-info/request-info';
 import { AuthItem, BodyItem } from '../../../../shared/models/requests/http/http-request-model';
 import { AUTH_KIND } from '../../../../shared/models/requests/http/auth';
 import { Store } from '@ngrx/store';
 import { selectRequest } from '../../store/selectors/requests.selector';
 import { selectCollection } from '../../store/selectors/collections.selector';
-import { updateRequest } from '../../store/actions/requests.actions';
-import { createHttpRequest } from '../../store/actions/modal-actions/request-modal.actions';
-import { RequestResponseInfo } from "./request-response-info/request-response-info";
+import { createHttpRequest, updateRequest } from '../../store/actions/modal-actions/request-modal.actions';
+import { RequestResponseInfo } from './request-response-info/request-response-info';
 import { CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
+import { take } from 'rxjs';
+import { RequestStateService } from '../../../../services/request-state-service';
 
 @Component({
   selector: 'main-content',
   templateUrl: './main-content.html',
   styleUrl: './main-content.css',
-  imports: [MainContentHeader, MainContentTabItems, DescriptionContent, RequestInfo, RequestResponseInfo, CdkDrag],
+  imports: [
+    MainContentHeader,
+    MainContentTabItems,
+    DescriptionContent,
+    RequestInfo,
+    RequestResponseInfo,
+    CdkDrag,
+  ],
 })
-export class MainContent  {
+export class MainContent {
   private tabItemService = inject(TabItemService);
   private workspaceInfoService = inject(WorkspaceInfoService);
   private store = inject(Store);
+  private requestStateService = inject(RequestStateService);
 
   @Output() addCollection = new EventEmitter();
   @Output() openCollection = new EventEmitter();
@@ -58,30 +92,32 @@ export class MainContent  {
     const req = this.currentRequest();
     if (!req) return;
 
+    if (!req) return;
+
     const id = req.id;
 
-    this.reqInfoHeight.update(h => ({
+    this.reqInfoHeight.update((h) => ({
       ...h,
-      [id]: h[id] ?? 550
+      [id]: h[id] ?? 550,
     }));
 
-    this.reqResponseHeight.update(h => ({
+    this.reqResponseHeight.update((h) => ({
       ...h,
-      [id]: h[id] ?? 400
+      [id]: h[id] ?? 400,
     }));
   });
 
   currentRequest = computed(() => {
     const tabItem = this.tabItemService.getActiveTabItem(
-      this.workspaceInfoService.activeWorkspaceId()
+      this.workspaceInfoService.activeWorkspaceId(),
     );
 
-    return tabItem?.request?.request ?? null;
+    return tabItem?.request?.request;
   });
 
   private _ = effect(() => {
     const tabItem = this.tabItemService.getActiveTabItem(
-      this.workspaceInfoService.activeWorkspaceId()
+      this.workspaceInfoService.activeWorkspaceId(),
     );
 
     const req = tabItem?.request?.request;
@@ -91,47 +127,56 @@ export class MainContent  {
     const current = this.initialRequests()[id];
 
     if (!current) {
-      this.selectedSettingRequestTabItems.update(ti => ({
+      this.selectedSettingRequestTabItems.update((ti) => ({
         ...ti,
-        [req.id]: RequestSettingsTabItems.PARAMS
+        [req.id]: RequestSettingsTabItems.PARAMS,
       }));
 
-      this.selectedRequestBody.update(ti => ({
+      this.selectedRequestBody.update((ti) => ({
         ...ti,
         [req.id]: req.body?.[BODY_KIND.NONE] ?? {
           kind: BODY_KIND.NONE,
           name: 'Без тела',
-          group: 'Other'
-        }
+          group: 'Other',
+        },
       }));
 
-      this.selectedAuthType.update(ai => ({
+      this.selectedAuthType.update((ai) => ({
         ...ai,
         [req.id]: req.auth?.[AUTH_KIND.NONE] ?? {
           kind: AUTH_KIND.NONE,
           name: 'Без аутентификации',
-        }
+        },
       }));
 
-      this.initialRequests.update(map => ({
+      this.initialRequests.update((map) => ({
         ...map,
-        [id]: structuredClone(req)
+        [id]: structuredClone(req),
       }));
     }
   });
 
   isGeneralInfoDescriptionActiveTabItem() {
-    const tabItem = this.tabItemService.getActiveTabItem(this.workspaceInfoService.activeWorkspaceId());
-    return this.isGeneralInfoType(tabItem!) && tabItem?.id === GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID;
+    const tabItem = this.tabItemService.getActiveTabItem(
+      this.workspaceInfoService.activeWorkspaceId(),
+    );
+    return (
+      this.isGeneralInfoType(tabItem!) &&
+      tabItem?.id === GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID
+    );
   }
 
   isRequestActiveTabItem() {
-    const tabItem = this.tabItemService.getActiveTabItem(this.workspaceInfoService.activeWorkspaceId());
+    const tabItem = this.tabItemService.getActiveTabItem(
+      this.workspaceInfoService.activeWorkspaceId(),
+    );
     return tabItem!.tabType === TabItemTypes.Request;
   }
 
-  getRequestModel(){
-    const tabItem = this.tabItemService.getActiveTabItem(this.workspaceInfoService.activeWorkspaceId());
+  getRequestModel() {
+    const tabItem = this.tabItemService.getActiveTabItem(
+      this.workspaceInfoService.activeWorkspaceId(),
+    );
     console.log(`Вызов метода getRequestModel, был получаен таб айтем : ${tabItem!.id}`);
     return tabItem!.request!.request!;
   }
@@ -140,57 +185,97 @@ export class MainContent  {
     return tabItem.tabType === TabItemTypes.GeneralInfo;
   }
 
+  handleClickSaveRequestIcon(req: RequestModel) {
+    if (req.collectionId) {
+      const tabItem = this.tabItemService.getActiveTabItem(req.collectionId!)!;
+      this.store
+        .select(selectRequest({ id: req.id! }))
+        .pipe(take(1))
+        .subscribe((r) => {
+          if (r) {
+            this.handleSaveRequest(tabItem, true);
+          } else {
+            this.mainContentTabItems.showSaveRequest(tabItem);
+          }
+        });
+    } else {
+      this.mainContentTabItems.showSaveRequest(
+        this.tabItemService.getActiveTabItem(GENERAL_INFORMATION_WORKSPACE_ID)!,
+      );
+    }
+  }
+
   handleSaveRequest(tabItem: TabItem, reqAlreadyInStore: boolean) {
-    if(reqAlreadyInStore) {
+    if (reqAlreadyInStore) {
       console.log(`Обновляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
-        this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
-        .subscribe(col => {
-          this.store.dispatch(updateRequest({ actionData: {
-            body: { req: tabItem.request!.request!, collPath: col!.path },
-            modalOverlayRefs: [this.mainContentTabItems.saveOverlayRef, this.mainContentTabItems.selectCollectionOverlayRef]
-          }}));
+      this.store
+        .select(selectCollection(tabItem.request!.request!.collectionId!))
+        .subscribe((col) => {
+          this.store.dispatch(
+            updateRequest({
+              actionData: {
+                body: { req: tabItem.request!.request!, collPath: col!.path },
+                modalOverlayRefs: [
+                  this.mainContentTabItems.saveOverlayRef,
+                  this.mainContentTabItems.selectCollectionOverlayRef,
+                ],
+              },
+            }),
+          );
+        });
+    } else {
+      console.log(`Добавляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
+      this.store
+        .select(selectCollection(tabItem.request!.request!.collectionId!))
+        .subscribe((col) => {
+          this.store.dispatch(
+            createHttpRequest({
+              actionData: {
+                body: {
+                  id: tabItem.request!.request!.id,
+                  collectionId: tabItem.request!.request!.collectionId!,
+                  method: tabItem.request!.request!.method,
+                  url: tabItem.request!.request!.url,
+                  name: tabItem.request!.request!.name,
+                  collectionPath: col!.path,
+                  auth: tabItem.request!.request!.auth,
+                  body: tabItem.request!.request!.body,
+                  type: 'HTTP',
+                },
+                modalOverlayRefs: [
+                  this.mainContentTabItems.saveOverlayRef,
+                  this.mainContentTabItems.selectCollectionOverlayRef,
+                ],
+                successMessage: 'Запрос успешно сохранен',
+              },
+            }),
+          );
         });
     }
-    else {
-      console.log(`Добавляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
-      this.store.select(selectCollection(tabItem.request!.request!.collectionId!))
-        .subscribe(col => {
-          this.store.dispatch(createHttpRequest({ actionData: {
-            body: {
-              id: tabItem.request!.request!.id,
-              collectionId: tabItem.request!.request!.collectionId!,
-              method: tabItem.request!.request!.method,
-              url: tabItem.request!.request!.url,
-              name: tabItem.request!.request!.name,
-              collectionPath: col!.path,
-              auth: tabItem.request!.request!.auth,
-              body: tabItem.request!.request!.body,
-              type: 'HTTP'
-            },
-            modalOverlayRefs: [this.mainContentTabItems.saveOverlayRef, this.mainContentTabItems.selectCollectionOverlayRef],
-            successMessage: 'Запрос успешно сохранен'
-          }}))
-        });
-    };
+
+    this.requestStateService.setRequestNotChanged(tabItem.request!.request!);
   }
 
-  handleSelectedRequestSettingTabItemChanged(newTabItem: RequestSettingsTabItemsType, reqId: string) {
-    this.selectedSettingRequestTabItems.update(items => ({
+  handleSelectedRequestSettingTabItemChanged(
+    newTabItem: RequestSettingsTabItemsType,
+    reqId: string,
+  ) {
+    this.selectedSettingRequestTabItems.update((items) => ({
       ...items,
-      [reqId]: newTabItem
+      [reqId]: newTabItem,
     }));
   }
-  handleSelectedBodyItemChanged(newBody: BodyItem, reqId: string){
-    this.selectedRequestBody.update(items => ({
+  handleSelectedBodyItemChanged(newBody: BodyItem, reqId: string) {
+    this.selectedRequestBody.update((items) => ({
       ...items,
-      [reqId]: newBody
+      [reqId]: newBody,
     }));
   }
 
-  handleSelectedAuthItemChanged(newAuth: AuthItem, reqId: string){
-    this.selectedAuthType.update(items => ({
+  handleSelectedAuthItemChanged(newAuth: AuthItem, reqId: string) {
+    this.selectedAuthType.update((items) => ({
       ...items,
-      [reqId]: newAuth
+      [reqId]: newAuth,
     }));
   }
 
@@ -201,7 +286,7 @@ export class MainContent  {
   handleOpenInFS(collId: string) {
     this.openCollectionInFS.emit(collId);
   }
-  
+
   handleCloseCollection(collInfo: CloseCollectionInfo) {
     this.closeCollection.emit(collInfo);
   }
@@ -217,7 +302,7 @@ export class MainContent  {
   getMainContentWidth() {
     return window.innerWidth - this.sidebarWidth();
   }
-  
+
   onResize(event: CdkDragMove) {
     const id = this.currentRequest()!.id;
 
@@ -241,14 +326,14 @@ export class MainContent  {
 
     const newReqResponseHeight = availableHeight - newReqInfoHeight - resizerHeight;
 
-    this.reqInfoHeight.update(heights => ({
+    this.reqInfoHeight.update((heights) => ({
       ...heights,
-      [id]: newReqInfoHeight
+      [id]: newReqInfoHeight,
     }));
 
-    this.reqResponseHeight.update(heights => ({
+    this.reqResponseHeight.update((heights) => ({
       ...heights,
-      [id]: newReqResponseHeight
+      [id]: newReqResponseHeight,
     }));
 
     event.source.element.nativeElement.style.transform = 'none';

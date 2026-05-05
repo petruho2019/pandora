@@ -1,14 +1,14 @@
 <div class="request-info-content">
-  @if (req) {
+  @if (req()) {
     <request-url
       [isReqChanged]="requestChanged()"
-      [req]="req"
-      [isReqSended]="isReqSended()"
-      (methodChanged)="handleMethodChanged($event)"
-      (urlChanged)="handleUrlChanged($event)"
-      (send)="handleSendRequest()"
-      (save)="handleSaveRequest()"
-      (cancel)="handleCancelRequest()"
+      [req]="req()!"
+      [isReqSended]="isReqSended()!"
+      (onMethodChanged)="handleMethodChanged($event)"
+      (onUrlChanged)="handleUrlChanged($event)"
+      (onSend)="handleSendRequest()"
+      (onSave)="handleSaveRequest()"
+      (onCancel)="handleCancelRequest()"
     ></request-url>
   }
 
@@ -18,7 +18,7 @@
         @for (tabItem of tabItems; track $index) {
           <div
             class="tab-item pointer"
-            [ngClass]="{ selected: selectedTabItem()![req.id] === tabItem }"
+            [ngClass]="{ selected: selectedTabItem()![req()!.id] === tabItem }"
             (click)="selectTabItem(tabItem)"
           >
             {{ tabItem }}
@@ -28,7 +28,7 @@
 
       @if (isBodyTabItem()) {
         <div class="selectd-body-con" (click)="showBodyTypes(); $event.stopPropagation()">
-          <span class="selected-body pointer">{{ selectedBody()![req.id].name }}</span>
+          <span class="selected-body pointer">{{ selectedBody()![req()!.id].name }}</span>
         </div>
 
         @if (isShowBodyTypes) {
@@ -42,7 +42,9 @@
                 @for (item of group.items; track item.kind) {
                   <span
                     class="body-type pointer"
-                    [ngClass]="{ 'active-body': selectedBody()![req.id].kind === item.kind }"
+                    [ngClass]="{
+                      'active-body': selectedBody()![req()!.id].kind === item.kind,
+                    }"
                     (click)="selectBodyType(item)"
                   >
                     {{ item.name }}
@@ -56,7 +58,7 @@
 
       @if (isAuthTabItem()) {
         <div class="selectd-auth-con" (click)="showAuthTypes(); $event.stopPropagation()">
-          <span class="selected-auth pointer">{{ selectedAuthType()![req.id].name }}</span>
+          <span class="selected-auth pointer">{{ selectedAuthType()![req()!.id].name }}</span>
         </div>
 
         @if (isShowAuthTypes) {
@@ -64,7 +66,9 @@
             @for (authItem of authItems; track authItem.kind) {
               <div
                 class="auth-type-con pointer"
-                [ngClass]="{ 'active-body': selectedAuthType()![req.id].kind === authItem.kind }"
+                [ngClass]="{
+                  'active-body': selectedAuthType()![req()!.id].kind === authItem.kind,
+                }"
                 (click)="selectAuthType(authItem)"
               >
                 <span class="auth-type">
@@ -77,20 +81,20 @@
       }
     </div>
 
-    @if (req) {
+    @if (this.req()!) {
       <div
         class="tab-item-content"
-        [ngClass]="{ scroll: !isJsonBodyItem() && !isJsonBodyItem() && !isJsonBodyItem() }"
+        [ngClass]="{ scroll: !isJsonBodyItem() && !isTextBodyItem() && !isXmlBodyItem() }"
       >
         @if (isParamsTabItem()) {
           <request-params
-            [req]="req"
+            [req]="req()!"
             (urlParamsChanged)="handleUrlParamsChanged($event)"
           ></request-params>
         } @else if (isBodyTabItem()) {
           <request-body
-            [req]="req"
-            [selectedBody]="selectedBody()![req.id]"
+            [req]="req()!"
+            [selectedBody]="selectedBody()![req()!.id]"
             (multipartChanged)="handleMultipartBodyChanged($event)"
             (urlEncodedChanged)="handleUrlEndodedBodyChanged($event)"
             (jsonChanged)="handleJsonBodyChanged($event)"
@@ -100,13 +104,13 @@
           ></request-body>
         } @else if (isHeadersTabItem()) {
           <request-headers
-            [req]="req"
+            [req]="req()!"
             (headersChanged)="handleHeadersChanged($event)"
           ></request-headers>
         } @else if (isAuthTabItem()) {
           <request-auth
-            [req]="req"
-            [selectedAuth]="selectedAuthType()![req.id]"
+            [req]="req()!"
+            [selectedAuth]="selectedAuthType()![req()!.id]"
             (basicAuthChanged)="handleBasicAuthChanged($event)"
             (bearerAuthChanged)="handleBearerAuthChaned($event)"
           >

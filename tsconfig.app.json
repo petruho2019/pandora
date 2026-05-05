@@ -8,7 +8,7 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/store/reducers"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

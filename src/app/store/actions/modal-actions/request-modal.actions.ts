@@ -1,21 +1,75 @@
-import { createAction, props } from "@ngrx/store";
-import { CreateRequestInfo } from "../../../../../shared/models/event-models/add-request-info";
-import { RequestModel } from "../../../../../shared/models/requests/request";
-import { CloneRequestDto, DeleteRequestDto, RenameRequestDto } from "../../../../../shared/models/requests/dto/request-dtos";
-import { ModalActionDataT } from "../../../../../shared/models/dto/action-modal-result-models";
+import { createAction, props } from '@ngrx/store';
+import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info';
+import { RequestModel } from '../../../../../shared/models/requests/request';
+import {
+  CloneRequestDto,
+  DeleteRequestDto,
+  RenameRequestDto,
+  UpdateRequestInfoDto,
+} from '../../../../../shared/models/requests/dto/request-dtos';
+import { ModalActionDataT } from '../../../../../shared/models/dto/action-modal-result-models';
 
-export const createHttpRequest = createAction( '[Request] Create Http', props<{ actionData: ModalActionDataT<CreateRequestInfo> }>());
-export const createRequestSuccess = createAction( '[Request] Create Success', props<{ request: RequestModel }>());
-export const createRequestFailure = createAction( '[Request] Create Failure', props<{errorMessage: string}>());
+export const createHttpRequest = createAction(
+  '[Request] Create Http',
+  props<{ actionData: ModalActionDataT<CreateRequestInfo> }>(),
+);
+export const createRequestSuccess = createAction(
+  '[Request] Create Success',
+  props<{ request: RequestModel }>(),
+);
+export const createRequestFailure = createAction(
+  '[Request] Create Failure',
+  props<{ errorMessage: string }>(),
+);
 
-export const renameRequest = createAction('[Request] Rename', props<{actionData: ModalActionDataT<RenameRequestDto>}>());
-export const renameRequestSuccess = createAction('[Request] Rename Success', props<{renamedRequest: RequestModel}>());
-export const renameRequestFailure = createAction('[Request] Rename Failure', props<{errorMessage: string}>());
+export const renameRequest = createAction(
+  '[Request] Rename',
+  props<{ actionData: ModalActionDataT<RenameRequestDto> }>(),
+);
+export const renameRequestSuccess = createAction(
+  '[Request] Rename Success',
+  props<{ renamedRequest: RequestModel }>(),
+);
+export const renameRequestFailure = createAction(
+  '[Request] Rename Failure',
+  props<{ errorMessage: string }>(),
+);
 
-export const cloneRequest = createAction('[Request] Clone', props<{actionData: ModalActionDataT<CloneRequestDto>}>());
-export const cloneRequestSuccess = createAction('[Request] Clone Success', props<{clonedRequest: RequestModel}>());
-export const cloneRequestFailure = createAction('[Request] Clone Failure', props<{errorMessage: string}>());
+export const cloneRequest = createAction(
+  '[Request] Clone',
+  props<{ actionData: ModalActionDataT<CloneRequestDto> }>(),
+);
+export const cloneRequestSuccess = createAction(
+  '[Request] Clone Success',
+  props<{ clonedRequest: RequestModel }>(),
+);
+export const cloneRequestFailure = createAction(
+  '[Request] Clone Failure',
+  props<{ errorMessage: string }>(),
+);
 
-export const deleteRequest = createAction('[Request] Delete', props<{actionData: ModalActionDataT<DeleteRequestDto>}>());
-export const deleteRequestSuccess = createAction('[Request] Delete Success', props<{newRequests: RequestModel[]}>());
-export const deleteRequestFailure = createAction('[Request] Delete Failure', props<{errorMessage: string}>());
+export const deleteRequest = createAction(
+  '[Request] Delete',
+  props<{ actionData: ModalActionDataT<DeleteRequestDto> }>(),
+);
+export const deleteRequestSuccess = createAction(
+  '[Request] Delete Success',
+  props<{ newRequests: RequestModel[] }>(),
+);
+export const deleteRequestFailure = createAction(
+  '[Request] Delete Failure',
+  props<{ errorMessage: string }>(),
+);
+
+export const updateRequest = createAction(
+  '[Request] Update',
+  props<{ actionData: ModalActionDataT<UpdateRequestInfoDto> }>(),
+);
+export const updateRequestSuccess = createAction(
+  '[Request] Update Success',
+  props<{ req: RequestModel }>(),
+);
+export const updateRequestFailure = createAction(
+  '[Request] Update Failure',
+  props<{ errorMessage: string }>(),
+);
