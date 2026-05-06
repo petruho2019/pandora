@@ -43,9 +43,11 @@ export class SendRequestService {
 
     console.log(`Отправляем запрос по url ${req.url}`);
 
-    this.responseService.addStartedResponse(req);
+    const controllerId = uuidv4();
 
-    const response = await this.sendRequestByHttpMethod(req, body, headers);
+    this.responseService.addStartedResponse(req, controllerId);
+
+    const response = await this.sendRequestByHttpMethod(req, body, headers, controllerId);
 
     this.responseService.addFinishedResponse(response);
 
@@ -56,9 +58,8 @@ export class SendRequestService {
     req: RequestModel,
     body: any,
     headers: Record<string, string>,
+    controllerId: string,
   ): Promise<HttpResponseModelWrapper> {
-    const controllerId = uuidv4();
-
     const config: HttpConfigPayload = {
       method: req.method as any,
       url: req.url,
@@ -70,7 +71,7 @@ export class SendRequestService {
 
     this.stopwatchService.start(req.id);
 
-    const result = false
+    const result = true
       ? await this.requestElectronService.sendRequest(config)
       : JSON.parse(`{
   "req": {
@@ -147,7 +148,31 @@ export class SendRequestService {
         "date": "Tue, 05 May 2026 20:13:40 GMT",
         "server": "Kestrel"
       },
-      "body": "slkdfnhsl,jdf"
+      "body": "slkdfnhsl
+      фыв
+      фыв
+      
+      фыв
+      
+      фыв
+      
+      фыв
+      
+      фы
+      в
+      фы
+      в
+      фы
+      в
+      фы
+      в
+      ф
+      ыв
+      ф
+      ыв
+      
+      фы
+      в,jdf"
     },
     "error": null,
     "isSuccess": true,

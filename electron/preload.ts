@@ -39,7 +39,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('delete-request', requestInfo),
   updateRequest: (reqInfo: UpdateRequestInfoDto) => ipcRenderer.invoke('update-request', reqInfo),
   sendRequest: (config: HttpConfigPayload) => ipcRenderer.invoke('send-request', config),
-  cancelRequest: (controllerId: string) => ipcRenderer.invoke('cancel-request', controllerId),
+  cancelRequest: (id: string) => ipcRenderer.invoke('cancel-request', id),
 
   openFile: () => ipcRenderer.invoke('open-file'),
   fileExists: (path: string) => ipcRenderer.invoke('file-exists', path),

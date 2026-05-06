@@ -18,13 +18,13 @@ export class ResponseService {
   private _responses = signal<Record<string, ResponseState>>({});
   public responses = this._responses.asReadonly();
 
-  addStartedResponse(req: HttpRequestModel) {
+  addStartedResponse(req: HttpRequestModel, controllerId: string) {
     this._responses.update((current) => ({
       ...current,
       [req.id]: {
         req,
         responseModel: null,
-        controllerId: null,
+        controllerId: controllerId,
         isFinished: false,
         isSended: true,
         isFailure: false,
@@ -37,7 +37,7 @@ export class ResponseService {
   }
 
   addFinishedResponse(responseWrapper: HttpResponseModelWrapper) {
-    const { req, responseResult, controllerId } = responseWrapper;
+    const { req, responseResult } = responseWrapper;
 
     if (responseResult.isFailure) {
       this._responses.update((current) => {
@@ -49,7 +49,6 @@ export class ResponseService {
             ...prev,
             req: { ...req },
             responseModel: null,
-            controllerId,
             isFinished: true,
             isSended: false,
             isFailure: responseResult.isFailure,
@@ -67,7 +66,6 @@ export class ResponseService {
         ...current[req.id],
         req,
         responseModel: responseResult.body!,
-        controllerId,
         isFinished: true,
         isSended: false,
         isFailure: false,
@@ -80,6 +78,8 @@ export class ResponseService {
     const current = this._responses()[req.id];
     if (!current) return;
 
+    console.log(`Отменяем запрос: ${JSON.stringify(this._responses()[req.id])}`);
+
     this.requestElectronService.cancelRequest(this._responses()[req.id]?.controllerId);
 
     this._responses.update((responses) => ({
@@ -88,6 +88,7 @@ export class ResponseService {
         ...responses[req.id],
         isFinished: true,
         isSended: false,
+        isFailure: true,
         error: 'Отменено пользователем',
       },
     }));

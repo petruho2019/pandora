@@ -40,7 +40,10 @@ import { AUTH_KIND } from '../../../../shared/models/requests/http/auth';
 import { Store } from '@ngrx/store';
 import { selectRequest } from '../../store/selectors/requests.selector';
 import { selectCollection } from '../../store/selectors/collections.selector';
-import { createHttpRequest, updateRequest } from '../../store/actions/modal-actions/request-modal.actions';
+import {
+  createHttpRequest,
+  updateRequest,
+} from '../../store/actions/modal-actions/request-modal.actions';
 import { RequestResponseInfo } from './request-response-info/request-response-info';
 import { CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
 import { take } from 'rxjs';
@@ -92,19 +95,9 @@ export class MainContent {
     const req = this.currentRequest();
     if (!req) return;
 
-    if (!req) return;
-
-    const id = req.id;
-
-    this.reqInfoHeight.update((h) => ({
-      ...h,
-      [id]: h[id] ?? 550,
-    }));
-
-    this.reqResponseHeight.update((h) => ({
-      ...h,
-      [id]: h[id] ?? 400,
-    }));
+    queueMicrotask(() => {
+      this.syncHeightsFromLayout();
+    });
   });
 
   currentRequest = computed(() => {
@@ -199,8 +192,9 @@ export class MainContent {
           }
         });
     } else {
-      this.mainContentTabItems.showSaveRequest(
+      this.mainContentTabItems.handleShowSelectCollection(
         this.tabItemService.getActiveTabItem(GENERAL_INFORMATION_WORKSPACE_ID)!,
+        false,
       );
     }
   }
@@ -303,6 +297,11 @@ export class MainContent {
     return window.innerWidth - this.sidebarWidth();
   }
 
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.syncHeightsFromLayout();
+  }
+
   onResize(event: CdkDragMove) {
     const id = this.currentRequest()!.id;
 
@@ -337,5 +336,45 @@ export class MainContent {
     }));
 
     event.source.element.nativeElement.style.transform = 'none';
+  }
+
+  private syncHeightsFromLayout() {
+    const req = this.currentRequest();
+    if (!req) return;
+
+    if (
+      !this.reqInfo?.nativeElement ||
+      !this.reqResponseInfo?.nativeElement ||
+      !this.mainContainer?.nativeElement ||
+      !this.resizer?.nativeElement
+    ) {
+      return;
+    }
+
+    const id = req.id;
+
+    const reqInfoTop = this.reqInfo.nativeElement.getBoundingClientRect().top;
+    const mainContainerBottom = this.mainContainer.nativeElement.getBoundingClientRect().bottom;
+    const resizerRect = this.resizer.nativeElement.getBoundingClientRect();
+
+    const availableHeight = mainContainerBottom - reqInfoTop;
+    const resizerHeight = resizerRect.height;
+
+    const minReqInfoHeight = 230;
+
+    let newReqInfoHeight = resizerRect.top - reqInfoTop;
+    newReqInfoHeight = Math.max(minReqInfoHeight, newReqInfoHeight);
+
+    const newReqResponseHeight = Math.max(0, availableHeight - newReqInfoHeight - resizerHeight);
+
+    this.reqInfoHeight.update((heights) => ({
+      ...heights,
+      [id]: newReqInfoHeight,
+    }));
+
+    this.reqResponseHeight.update((heights) => ({
+      ...heights,
+      [id]: newReqResponseHeight,
+    }));
   }
 }

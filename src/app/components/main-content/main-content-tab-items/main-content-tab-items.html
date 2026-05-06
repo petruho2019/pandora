@@ -163,7 +163,7 @@ Z"
 <ng-template cdkPortal #save>
   <save-request-modal
     (close)="closeSaveRequestModal($event.withCloseTabItem, $event.tabItem)"
-    (showSelectCollection)="handleShowSelectCollection($event)"
+    (showSelectCollection)="handleShowSelectCollection($event, true)"
     (saveReqAlreadyInStore)="handleSaveRequestAlreadyInStore($event)"
     [requests]="saveRequests"
     animate.enter="enter-animation"

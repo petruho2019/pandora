@@ -3,7 +3,7 @@ table {
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
-   flex: 1
+  flex: 1
 }
 
 thead > tr > td { padding: 5px 10px; }

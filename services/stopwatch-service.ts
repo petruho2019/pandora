@@ -53,7 +53,7 @@ export class StopwatchService {
     const spentTimeInfo = this._timeInfo()[reqId];
 
     return spentTimeInfo.sec != 0
-      ? `${spentTimeInfo.sec}.${spentTimeInfo.ms}сек`
+      ? `${spentTimeInfo.sec}.${this.getMsView(spentTimeInfo.ms)}сек`
       : `${spentTimeInfo.ms}милисек`;
   }
 
@@ -67,7 +67,7 @@ export class StopwatchService {
       const s = sec;
       const msView = this.getMsView(ms);
 
-      return `${s}${msView}`;
+      return `${s}.${msView}`;
     });
   }
 
@@ -106,6 +106,6 @@ export class StopwatchService {
   }
 
   private getMsView(ms: number): string {
-    return '.' + ms / 100;
+    return `${ms / 100}`;
   }
 }

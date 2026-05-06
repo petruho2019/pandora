@@ -243,7 +243,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
     this.saveOverlayRef.attach(portal);
   }
 
-  handleShowSelectCollection(tabItem: TabItem) {
+  handleShowSelectCollection(tabItem: TabItem, needToCloseTabItem: boolean) {
     if (this.saveRequests?.length !== 1) {
       // тут логика когда закрывается само приложение
     }
@@ -254,11 +254,13 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
     const portal = new TemplatePortal(this.selectCollectionPortal(), this.viewContainerRef);
     this.selectCollectionOverlayRef.attach(portal);
 
-    this.selectCollectionModalSubscription = this.selectCollectionOverlayRef
-      .detachments()
-      .subscribe(() => {
-        this.closeTabItem(this.reqToSave);
-      });
+    if (needToCloseTabItem) {
+      this.selectCollectionModalSubscription = this.selectCollectionOverlayRef
+        .detachments()
+        .subscribe(() => {
+          this.closeTabItem(this.reqToSave);
+        });
+    }
   }
 
   handleSaveRequest(tabItem: TabItem) {
@@ -278,7 +280,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
   }
 
   handleCloseSelectCollection() {
-    this.selectCollectionModalSubscription.unsubscribe();
+    this.selectCollectionModalSubscription?.unsubscribe();
     this.selectCollectionOverlayRef.detach();
   }
 }

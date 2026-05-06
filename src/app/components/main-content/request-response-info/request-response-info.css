@@ -12,7 +12,30 @@
   display: flex;
   justify-content: space-between;
   min-height: 20px;
-  padding-bottom: 4px;
+  padding: 6px 10px 4px 10px;
+
+  margin-bottom: 6px;
+}
+
+.items {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+}
+
+.item {
+  padding-bottom: 8px;
+}
+
+.selected {
+  color: #e7e7e7;
+  border-bottom: 2px solid var(--contrasting-color);
+}
+
+.response-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .response-status {
@@ -20,62 +43,98 @@
   font-weight: 600;
 }
 
+.ok {
+  color: rgb(133, 235, 106);
+}
+
+.err {
+  color: rgb(255, 53, 53)
+}
+
+.response-spent-time {
+  font-size: 13px;
+}
+
+.copy-icon {
+  padding: 4px;
+  height: 12px;
+  flex: 0 0 12px;
+  display: block;
+  fill: #bbb;
+  stroke: #bbb;
+  stroke-width: 0.3px;
+
+  transition: background-color 0.15s;
+}
+
+.copy-icon:hover {
+  background-color: rgb(51, 51, 51);
+  border-radius: 2px;
+}
+
 .response-data {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  min-width: 0;
+  padding-bottom: 10px;
+  padding-right: 6px;
+}
+
+.request-error {
+  padding: 6px 10px 4px 10px;
+  
 }
 
 .empty-response-con {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    width: 100%;
-    height: 100%;
-    font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  height: 100%;
+  font-weight: 600;
 }
 
 .waiting-response {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  gap: 12px;
 }
 
 .waiting-time {
-    font-weight: 600;
-    font-size: 16px;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 .waiting-gif {
-    height: 14px;
-    flex: 0 0 20px;
+  height: 14px;
+  flex: 0 0 20px;
 }
 
 .waiting-icon {
-    height: 18px;
-    flex: 0 0 12px;
-    display: block;
-    fill: #bbb;
-    stroke-width: 0.3px;
-    stroke: #bbb;
+  height: 18px;
+  flex: 0 0 12px;
+  display: block;
+  fill: #bbb;
+  stroke-width: 0.3px;
+  stroke: #bbb;
 }
 
 .cancel-button {
-    padding: 4px 6px;
-    background-color: var(--background-color);
-    border-radius: 4px;
-    border: var(--border-style);
-    font-size: 12px;
+  padding: 4px 6px;
+  background-color: var(--background-color);
+  border-radius: 4px;
+  border: var(--border-style);
+  font-size: 12px;
 
-    transition: background-color 0.2s;
+  transition: background-color 0.2s;
 }
 
 .cancel-button:hover {
-    background-color: #202020;
+  background-color: #202020;
 }
 
 @keyframes rotating {
@@ -91,8 +150,78 @@
 }
 
 ngx-monaco-editor {
+  display: block;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
+}
+
+.headers {
+  display: flex;
+  margin: 0px 10px 0px 10px;
+  border: var(--border-style);
+  border-radius: 4px;
+  min-height: 0;
+  
+}
+
+.headers-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  flex: 1;
+}
+
+.headers-table thead th,
+.headers-table tbody td {
+  box-sizing: border-box;
+}
+
+.headers-table thead th {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: var(--border-style);
+  background: #1b1b1b;
+  font-weight: 600;
+  height: 100%;
+  font-size: 13px;
+}
+
+.headers-table tbody td {
+  padding: 4px 6px;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.headers-table tbody tr:nth-child(odd) {
+  background: #222222;
+}
+
+.headers-table tbody tr:nth-child(even) {
+  background: #202020;
+}
+
+.headers-table tbody tr:not(:last-child) {
+  border-bottom: var(--border-style);
+}
+
+.headers-table td:first-child,
+.headers-table th:first-child {
+  width: 35%;
+  border-right: var(--border-style);
+}
+
+.headers-table td:last-child,
+.headers-table th:last-child {
+  width: 65%;
+}
+
+.empty-headers {
+  padding: 10px;
+  border: var(--border-style);
+  background: #222222;
 }
