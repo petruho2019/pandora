@@ -89,7 +89,7 @@ export type ResponseState = {
   isSended: boolean;
   isFailure: boolean;
   error: string | null;
-  time: string;
+  time: string | null;
 };
 
 export type HttpConfigPayload = {

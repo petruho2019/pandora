@@ -1,6 +1,7 @@
 import { SideBarHeader } from './../side-bar-header/side-bar-header';
 import {
   Component,
+  computed,
   EventEmitter,
   inject,
   Output,
@@ -72,8 +73,13 @@ export class SideBarContent {
   public requests$: Observable<Record<string, { isLoaded: boolean; requests: RequestModel[] }>> =
     toObservable(this.requests);
 
-  public emptyCollections: Record<string, boolean> = {};
-  public openCollections: WritableSignal<Record<string, boolean>> = signal({});
+  public openCollections = signal<Record<string, boolean>>({});
+
+  public emptyCollections = (collId: string) => {
+    return computed(() => {
+      return this.requests()[collId].requests.length === 0;
+    });
+  };
 
   ngOnInit(): void {
     this.store.dispatch(loadCollections());
@@ -167,18 +173,6 @@ export class SideBarContent {
             requests: reqs,
           },
         }));
-
-        setTimeout(
-          (reqs: RequestModel[]) => {
-            if (reqs.length === 0) {
-              this.emptyCollections[collectionId] = true;
-            } else {
-              this.emptyCollections[collectionId] = false;
-            }
-          },
-          200,
-          reqs,
-        );
       });
 
     if (collectionId === 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b') {

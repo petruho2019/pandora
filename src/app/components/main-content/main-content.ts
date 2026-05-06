@@ -186,7 +186,7 @@ export class MainContent {
         .pipe(take(1))
         .subscribe((r) => {
           if (r) {
-            this.handleSaveRequest(tabItem, true);
+            this.handleSaveRequest(tabItem, false, true);
           } else {
             this.mainContentTabItems.showSaveRequest(tabItem);
           }
@@ -199,7 +199,7 @@ export class MainContent {
     }
   }
 
-  handleSaveRequest(tabItem: TabItem, reqAlreadyInStore: boolean) {
+  handleSaveRequest(tabItem: TabItem, needCloseTabItem: boolean, reqAlreadyInStore: boolean) {
     if (reqAlreadyInStore) {
       console.log(`Обновляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
       this.store
@@ -248,6 +248,8 @@ export class MainContent {
     }
 
     this.requestStateService.setRequestNotChanged(tabItem.request!.request!);
+
+    if (needCloseTabItem) this.mainContentTabItems.closeTabItem(tabItem);
   }
 
   handleSelectedRequestSettingTabItemChanged(

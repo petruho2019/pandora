@@ -1,5 +1,15 @@
-import { Component, EventEmitter, HostListener, inject, Input, Output, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
-import { ModalHeader } from "../../../../reuseable/modals/modal-header/modal-header";
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  Output,
+  TemplateRef,
+  viewChild,
+  ViewContainerRef,
+} from '@angular/core';
+import { ModalHeader } from '../../../../reuseable/modals/modal-header/modal-header';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TabItem } from '../../../../../../../shared/models/utils';
 import { Store } from '@ngrx/store';
@@ -12,36 +22,37 @@ import { selectRequest } from '../../../../../store/selectors/requests.selector'
   styleUrl: './save-request-modal.css',
 })
 export class SaveRequestModal {
-
   private overlay = inject(Overlay);
   private store = inject(Store);
 
   public headerTitle = 'Не сохраненные изменения';
 
   @Input() requests: TabItem[];
-  @Output() close = new EventEmitter<{ withCloseTabItem: boolean, tabItem: TabItem | null}>();
+  @Output() close = new EventEmitter<{ withCloseTabItem: boolean; tabItem: TabItem | null }>();
   @Output() showSelectCollection = new EventEmitter<TabItem>();
-  @Output() saveReqAlreadyInStore = new EventEmitter<TabItem>();
+  @Output() saveReqAlreadyInStore = new EventEmitter<{
+    tabItem: TabItem;
+    needCloseTabItem: boolean;
+  }>();
 
-  onClose(withCloseTabItem: boolean, tabItem: TabItem | null){
-    this.close.emit({ withCloseTabItem: withCloseTabItem, tabItem: tabItem } );
+  onClose(withCloseTabItem: boolean, tabItem: TabItem | null) {
+    this.close.emit({ withCloseTabItem: withCloseTabItem, tabItem: tabItem });
   }
 
   handleShowSelectCollection() {
-    this.store.select(selectRequest({id: this.requests[0].request?.request?.id!})).subscribe(r => {
-      if(r) {
-        this.saveReqAlreadyInStore.emit(this.requests[0]!);
-      }
-      else {
-        this.showSelectCollection.emit(this.requests[0]!);
-      }
-    });
+    this.store
+      .select(selectRequest({ id: this.requests[0].request?.request?.id! }))
+      .subscribe((r) => {
+        if (r) {
+          this.saveReqAlreadyInStore.emit({ tabItem: this.requests[0]!, needCloseTabItem: true });
+        } else {
+          this.showSelectCollection.emit(this.requests[0]!);
+        }
+      });
   }
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    if(event.key === 'Escape')
-      this.onClose(false, null);
+    if (event.key === 'Escape') this.onClose(false, null);
   }
-
 }

@@ -164,7 +164,9 @@ Z"
   <save-request-modal
     (close)="closeSaveRequestModal($event.withCloseTabItem, $event.tabItem)"
     (showSelectCollection)="handleShowSelectCollection($event, true)"
-    (saveReqAlreadyInStore)="handleSaveRequestAlreadyInStore($event)"
+    (saveReqAlreadyInStore)="
+      handleSaveRequestAlreadyInStore($event.tabItem, $event.needCloseTabItem)
+    "
     [requests]="saveRequests"
     animate.enter="enter-animation"
     animate.leave="leave-animation"

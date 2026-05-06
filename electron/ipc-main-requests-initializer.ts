@@ -379,9 +379,14 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
         return buildFailureResultT('Название запроса не может быть пустым');
       }
 
-      const request = store.get(REQUESTS_KEY, []).find((r) => r.id === reqInfo.req.id);
+      const requestFromStore = store.get(REQUESTS_KEY, []);
 
-      if (!request) return buildFailureResultT('Ошибка при сохранении запроса');
+      const request = requestFromStore.find((r) => r.id === reqInfo.req.id);
+
+      if (!request) {
+        console.log(`Request not found in store`);
+        return buildFailureResultT('Ошибка при сохранении запроса');
+      }
 
       const pathWithOldFileName = path.join(reqInfo.collPath, request.fileName.trim() + '.json');
 
@@ -395,14 +400,23 @@ export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipc
 
       try {
         await fs.promises.writeFile(
-          path.join(reqInfo.collPath, reqInfo.req.fileName.trim() + '.json'),
+          path.join(reqInfo.collPath, request.fileName.trim() + '.json'),
           JSON.stringify(reqInfo.req, null, 2),
           { encoding: 'utf8' },
         );
         console.log(`Request successfully updated`);
       } catch (error) {
+        console.log(error);
         return buildFailureResultT('Ошибка при сохранении запроса');
       }
+
+      requestFromStore.splice(
+        requestFromStore.findIndex((c) => c.id === reqInfo.req.id),
+        1,
+        reqInfo.req,
+      );
+
+      store.set(REQUESTS_KEY, requestFromStore);
 
       return buildSuccessResultT(reqInfo.req);
     },

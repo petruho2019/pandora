@@ -65,7 +65,10 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
   @ViewChild(SaveRequestModal) saveReqModalComponent: SaveRequestModal;
 
   @Output() saveReq = new EventEmitter<TabItem>();
-  @Output() saveReqAlreadyInStore = new EventEmitter<TabItem>();
+  @Output() saveReqAlreadyInStore = new EventEmitter<{
+    tabItem: TabItem;
+    needCloseTabItem: boolean;
+  }>();
 
   public sidebarWidth = input<number>(400);
 
@@ -228,7 +231,7 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
     });
   }
 
-  private closeTabItem(tabItem: TabItem) {
+  closeTabItem(tabItem: TabItem) {
     this.workspaceFacadeService.deleteTabItem(
       tabItem,
       this.workspaceInfoService.activeWorkspaceId(),
@@ -267,8 +270,8 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
     this.saveReq.emit(tabItem);
   }
 
-  handleSaveRequestAlreadyInStore(tabItem: TabItem) {
-    this.saveReqAlreadyInStore.emit(tabItem);
+  handleSaveRequestAlreadyInStore(tabItem: TabItem, needCloseTabItem: boolean) {
+    this.saveReqAlreadyInStore.emit({ tabItem, needCloseTabItem });
   }
 
   closeSaveRequestModal(withCloseTabItem: boolean, tabItem: TabItem | null) {

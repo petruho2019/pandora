@@ -57,6 +57,8 @@ export function initializeSendRequest(ipcMain: IpcMain) {
           validateStatus: () => true,
         });
 
+        console.log(`response: ${res.status}`);
+
         const resultResponseModel = handleResponse(res, configPayload.req)!;
 
         return {
@@ -80,6 +82,7 @@ export function initializeSendRequest(ipcMain: IpcMain) {
   // region cancel-request
 
   ipcMain.handle('cancel-request', (_e, id: string | null) => {
+    console.log(`cancel-request withId: ${id}`);
     if (id) {
       controllers.get(id)!.abort();
       controllers.delete(id);
@@ -205,11 +208,15 @@ export function initializeSendRequest(ipcMain: IpcMain) {
     });
   }
 
-  function handleError(err: unknown) {
+  function handleError(err: any) {
     if (axios.isCancel(err)) {
       return 'Запрос отменен пользователем';
     }
-    const errorMessage = err instanceof Error ? err.message : 'Ошибка при отправке запроса';
+
+    const errorMessage =
+      err instanceof Error && err && err.message && err.message !== ''
+        ? err.message
+        : 'Ошибка при отправке запроса';
 
     return errorMessage;
   }

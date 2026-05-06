@@ -2,8 +2,8 @@
   <main-content-header></main-content-header>
   <main-content-tab-items
     [sidebarWidth]="sidebarWidth()"
-    (saveReq)="handleSaveRequest($event, false)"
-    (saveReqAlreadyInStore)="handleSaveRequest($event, true)"
+    (saveReq)="handleSaveRequest($event, false, false)"
+    (saveReqAlreadyInStore)="handleSaveRequest($event.tabItem, $event.needCloseTabItem, true)"
   ></main-content-tab-items>
 
   @if (isGeneralInfoDescriptionActiveTabItem()) {

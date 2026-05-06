@@ -42,7 +42,7 @@
                   <request-item [request]="req" [collection]="coll"></request-item>
                 }
 
-                @if (this.emptyCollections[coll.id]) {
+                @if (this.emptyCollections(coll.id)()) {
                   <div class="collection-empty">
                     <span
                       class="pointer"

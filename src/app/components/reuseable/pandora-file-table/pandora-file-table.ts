@@ -48,7 +48,6 @@ export class PandoraFileTable implements OnChanges, OnInit {
 
   constructor() {
     effect(() => {
-      console.log(`Изменились файлы, текущее состояние: ${JSON.stringify(this.files(), null, 2)}`);
       const files = this.files();
 
       for (const f of files) {

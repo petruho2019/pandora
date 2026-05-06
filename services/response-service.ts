@@ -29,7 +29,7 @@ export class ResponseService {
         isSended: true,
         isFailure: false,
         error: null,
-        time: '',
+        time: null,
       },
     }));
 
@@ -70,6 +70,7 @@ export class ResponseService {
         isSended: false,
         isFailure: false,
         error: null,
+        time: this.stopWatchService.getSpentTime(req.id),
       },
     }));
   }

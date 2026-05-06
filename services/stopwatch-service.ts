@@ -19,9 +19,25 @@ export class StopwatchService {
 
   start(reqId: string) {
     this._timeInfo.update((state) => {
+      if (state[reqId]?.intervalId) {
+        return {
+          ...state,
+          [reqId]: {
+            ms: 0,
+            sec: 0,
+            intervalId: null,
+          },
+        };
+      }
+
+      return state;
+    });
+
+    this._timeInfo.update((state) => {
       if (!state[reqId]) {
         state[reqId] = { ms: 0, sec: 0, intervalId: null };
       }
+
       return state;
     });
 
@@ -43,7 +59,6 @@ export class StopwatchService {
 
     if (current?.intervalId) {
       clearInterval(current.intervalId);
-      this.clearTime(reqId);
 
       console.log(`Очистили интервал ${current.intervalId}`);
     }
@@ -54,7 +69,7 @@ export class StopwatchService {
 
     return spentTimeInfo.sec != 0
       ? `${spentTimeInfo.sec}.${this.getMsView(spentTimeInfo.ms)}сек`
-      : `${spentTimeInfo.ms}милисек`;
+      : `${this.getMsView(spentTimeInfo.ms)}милисек`;
   }
 
   getFormattedTime(reqId: string) {

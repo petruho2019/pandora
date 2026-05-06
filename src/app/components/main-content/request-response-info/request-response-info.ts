@@ -154,23 +154,6 @@ export class RequestResponseInfo implements OnChanges {
     this.responseModel.set(state?.responseModel);
   });
 
-  handleFinish = effect(() => {
-    const req = this.req();
-    if (!req) return;
-
-    if (!this.isFinished()) return;
-
-    const current = this.responseState();
-    if (!current || current.time != null) return;
-
-    const time = this.stopwatchService.getSpentTime(req.id);
-
-    this.responseState.update((s) => {
-      if (!s) return s;
-      return { ...s, time };
-    });
-  });
-
   formattedTime = computed(() => {
     return this.stopwatchService.getFormattedTime(this.req()!.id)();
   });
