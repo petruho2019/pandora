@@ -6,19 +6,18 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './alert-notification.html',
   styleUrl: './alert-notification.css',
 })
-export class ErrorNotification {
-
+export class AlertNotification {
   @Input() message: string;
   @Input() showSuccess: boolean;
 
   @Output() mouseEnter = new EventEmitter();
   @Output() mouseLeave = new EventEmitter();
 
-  handleMouseEnter(){
+  handleMouseEnter() {
     this.mouseEnter.emit();
   }
 
-  handleMouseLeave(){
+  handleMouseLeave() {
     this.mouseLeave.emit();
   }
 }

@@ -20,7 +20,7 @@ import { Store } from '@ngrx/store';
 import { addFile } from '../../../store/actions/common.actions';
 import { getFileNameFromPath } from '../../../app';
 import { FileModel } from '../../../../../shared/models/files/file';
-import { selectFilesByReqId } from '../../../store/selectors/files.selector';
+import { selectFilesByReqId } from '../../../store/selectors/files.selectors';
 
 @Component({
   selector: 'pandora-file-table',

@@ -1,4 +1,4 @@
-import { AlertNotificationService } from './../../../../services/alert-notification-service';
+import { AlertNotificationService } from '../../../../services/alert-notification-service';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {

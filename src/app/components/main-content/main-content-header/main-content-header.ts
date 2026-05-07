@@ -6,7 +6,7 @@ import { ActionMenuService } from './../../../../../services/actions-menu-servic
 import { WorkspaceInfoService } from '../../../../../services/workspace-info-service';
 import { Component, inject, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectAll } from '../../../store/selectors/collections.selector';
+import { selectAll } from '../../../store/selectors/collections.selectors';
 import { Overlay } from '@angular/cdk/overlay';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -17,32 +17,37 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './main-content-header.css',
 })
 export class MainContentHeader {
-    private workspaceFacadeService = inject(WorkspaceFacadeService);
-    private workspaceInfoService = inject(WorkspaceInfoService);
-    private actionsMenuService = inject(ActionMenuService);
-    private store = inject(Store);
-    private viewContainerRef = inject(ViewContainerRef);
+  private workspaceFacadeService = inject(WorkspaceFacadeService);
+  private workspaceInfoService = inject(WorkspaceInfoService);
+  private actionsMenuService = inject(ActionMenuService);
+  private store = inject(Store);
+  private viewContainerRef = inject(ViewContainerRef);
 
-    public selectItemId = '__SELECT_ITEM__';
-    public isOpenSelectItemMenu = this.actionsMenuService.openedId$;
-    public allCollections$ = this.store.select(selectAll);
-    public allCollections = toSignal(this.allCollections$);
+  public selectItemId = '__SELECT_ITEM__';
+  public isOpenSelectItemMenu = this.actionsMenuService.openedId$;
+  public allCollections$ = this.store.select(selectAll);
+  public allCollections = toSignal(this.allCollections$);
 
-    public activeWorkspace = this.workspaceInfoService.activeWorkspace;
+  public activeWorkspace = this.workspaceInfoService.activeWorkspace;
 
-    public workspaceTypes = WorkspaceTypes;
+  public workspaceTypes = WorkspaceTypes;
 
-    workspacesPortal = viewChild.required<TemplateRef<any>>('workspaces');
+  workspacesPortal = viewChild.required<TemplateRef<any>>('workspaces');
 
-    showSelectWorkspace($event: MouseEvent, trigger: HTMLElement) {
-      $event.stopPropagation();
+  showSelectWorkspace($event: MouseEvent, trigger: HTMLElement) {
+    $event.stopPropagation();
 
-      if(this.actionsMenuService.currentId === this.selectItemId){
-        this.actionsMenuService.close();
-        return;
-      }
+    if (this.actionsMenuService.currentId === this.selectItemId) {
+      this.actionsMenuService.close();
+      return;
+    }
 
-      this.actionsMenuService.open(this.selectItemId, trigger, this.workspacesPortal(), this.viewContainerRef, [
+    this.actionsMenuService.open(
+      this.selectItemId,
+      trigger,
+      this.workspacesPortal(),
+      this.viewContainerRef,
+      [
         {
           originX: 'start',
           originY: 'bottom',
@@ -50,18 +55,18 @@ export class MainContentHeader {
           overlayY: 'bottom',
           offsetX: 0,
           offsetY: 6,
-        }
-      ]);
+        },
+      ],
+    );
+  }
+
+  setWorkspace(type: WorkspaceType, coll: Collection | null) {
+    if (type === this.workspaceTypes.Collection) {
+      this.workspaceFacadeService.openCollection(coll!);
+    } else {
+      this.workspaceFacadeService.openGeneralInfo();
     }
 
-    setWorkspace(type: WorkspaceType, coll: Collection | null){
-      if(type === this.workspaceTypes.Collection){
-        this.workspaceFacadeService.openCollection(coll!);
-      }
-      else {
-        this.workspaceFacadeService.openGeneralInfo();
-      }
-
-      this.actionsMenuService.close();
-    }
+    this.actionsMenuService.close();
+  }
 }

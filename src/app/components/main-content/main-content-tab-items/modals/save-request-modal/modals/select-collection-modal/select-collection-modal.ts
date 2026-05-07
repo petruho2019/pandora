@@ -1,8 +1,16 @@
-import { Component, EventEmitter, HostListener, inject, Input, OnInit, Output } from '@angular/core';
-import { ModalHeader } from "../../../../../../reuseable/modals/modal-header/modal-header";
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
+import { ModalHeader } from '../../../../../../reuseable/modals/modal-header/modal-header';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { selectAll } from '../../../../../../../store/selectors/collections.selector';
+import { selectAll } from '../../../../../../../store/selectors/collections.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Collection } from '../../../../../../../../../shared/models/collections/collection';
 import { TabItem } from '../../../../../../../../../shared/models/utils';
@@ -13,8 +21,7 @@ import { TabItem } from '../../../../../../../../../shared/models/utils';
   templateUrl: './select-collection-modal.html',
   styleUrl: './select-collection-modal.css',
 })
-export class SelectCollectionModal implements OnInit{
-  
+export class SelectCollectionModal implements OnInit {
   ngOnInit(): void {
     this.reqClone = structuredClone(this.req);
   }
@@ -33,7 +40,7 @@ export class SelectCollectionModal implements OnInit{
   private collections$ = this.store.select(selectAll);
   public collections = toSignal(this.collections$);
 
-  onClose(){
+  onClose() {
     this.close.emit();
   }
 
@@ -43,21 +50,21 @@ export class SelectCollectionModal implements OnInit{
 
   removeSelectedCollection() {
     this.reqClone.request!.request!.collectionId = null;
-    this.headerTitle = 'Выбрать коллекцию'; 
+    this.headerTitle = 'Выбрать коллекцию';
   }
 
   selectCollection(col: Collection) {
     this.reqClone.request!.request!.collectionId = col.id;
-    this.headerTitle = 'Сохранить запрос'; 
+    this.headerTitle = 'Сохранить запрос';
   }
 
   getCollName() {
-    return this.collections()!.find(c => c.id === this.reqClone.request!.request!.collectionId)!.name;
+    return this.collections()!.find((c) => c.id === this.reqClone.request!.request!.collectionId)!
+      .name;
   }
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    if(event.key === 'Escape')
-      this.onClose();
+    if (event.key === 'Escape') this.onClose();
   }
 }

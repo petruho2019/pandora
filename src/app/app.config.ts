@@ -8,19 +8,22 @@ import { provideBrowserGlobalErrorListeners } from '@angular/core';
 import { collectionFeatureKey, collectionsReducer } from './store/reducers/collections.reducer';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
-import { CollectionEffects } from './store/effects/collections.effect';
+import { CollectionEffects } from './store/effects/collections.effects';
 import { CollectionElectronService } from '../../services/electron/collection-electron-service';
-import { RequestEffects } from './store/effects/requests.effect';
+import { CookieElectronService } from '../../services/electron/cookie-electron-service';
+import { RequestEffects } from './store/effects/requests.effects';
 import { requestFeatureKey, requestsReducer } from './store/reducers/requests.reducer';
 import { BlurService } from '../../services/blur-service';
 import { RequestElectronService } from '../../services/electron/request-electron-service';
-import { CommonEffects } from './store/effects/common.effect';
+import { CommonEffects } from './store/effects/common.effects';
 import { TabItemService } from '../../services/tab-item-service';
 import { MonacoEditorModule, provideMonacoEditor } from 'ngx-monaco-editor-v2';
 import { ResponseService } from '../../services/response-service';
 import * as monaco from 'monaco-editor';
 import { provideHttpClient } from '@angular/common/http';
 import { fileFeatureKey, filesReducer } from './store/reducers/files.reducer';
+import { cookieReducer, cookiesFeatureKey } from './store/reducers/cookie.reducer';
+import { CookieEffects } from './store/effects/cookie.effects';
 
 export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   theme: 'customTheme',
@@ -113,8 +116,9 @@ export const appConfig: ApplicationConfig = {
       [collectionFeatureKey]: collectionsReducer,
       [requestFeatureKey]: requestsReducer,
       [fileFeatureKey]: filesReducer,
+      [cookiesFeatureKey]: cookieReducer,
     }),
-    provideEffects([CollectionEffects, RequestEffects, CommonEffects]),
+    provideEffects([CollectionEffects, RequestEffects, CommonEffects, CookieEffects]),
     provideHttpClient(),
     CollectionElectronService,
     BlurService,
@@ -127,5 +131,6 @@ export const appConfig: ApplicationConfig = {
     RequestStateService,
     ResponseService,
     StopwatchService,
+    CookieElectronService,
   ],
 };

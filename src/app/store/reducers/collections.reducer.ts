@@ -1,15 +1,12 @@
 import { createReducer, on } from '@ngrx/store';
-import { CollectionState } from '../states/collection-state';
+import { CollectionState } from '../states/states';
 import {
   loadCollections,
-  loadCollectionsFailure,
   loadCollectionsSuccess,
   openCollectionSuccess,
   moveCollection,
-  openCollectionFailure,
-  openCollectionInFSFailure,
 } from '../actions/collections.actions';
-import { collectionsAdapter } from '../adapters/collection-adapter';
+import { collectionsAdapter } from '../adapters/adapters';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { Collection } from '../../../../shared/models/collections/collection';
 import {

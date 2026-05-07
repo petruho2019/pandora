@@ -1,10 +1,9 @@
 import { IpcMain } from 'electron';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import FormData from 'form-data';
 import { buildFailureResultT, buildSuccessResultT, ResultT } from '../shared/models/result';
 import {
   HttpConfigPayload,
-  HttpRequestModel,
   HttpResponseModel,
   HttpResponseModelWrapper,
 } from '../shared/models/requests/http/http-request-model';

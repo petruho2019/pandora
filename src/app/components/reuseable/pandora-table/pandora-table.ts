@@ -22,7 +22,7 @@ import { MIN_NAME_COLUMN_WIDTH_PX } from '../../../../../shared/models/constants
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { addFile as addFile } from '../../../store/actions/common.actions';
-import { selectFilesByReqId } from '../../../store/selectors/files.selector';
+import { selectFilesByReqId } from '../../../store/selectors/files.selectors';
 import { FileModel } from '../../../../../shared/models/files/file';
 import { getFileNameFromPath } from '../../../app';
 

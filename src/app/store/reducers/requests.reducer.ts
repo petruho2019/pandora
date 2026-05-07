@@ -1,6 +1,4 @@
 import { createReducer, on } from '@ngrx/store';
-import { RequestState } from '../states/request-state';
-import { requestAdapter } from '../adapters/request-adapter';
 import { loadRequestsSuccess, moveRequest } from '../actions/requests.actions';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { RequestModel } from '../../../../shared/models/requests/request';
@@ -15,6 +13,8 @@ import {
   buildDefaultAuth,
   buildDefaultBody,
 } from '../../../../shared/models/requests/http/http-request-model';
+import { RequestState } from '../states/states';
+import { requestAdapter } from '../adapters/adapters';
 
 export const requestFeatureKey = 'requests';
 export const INITIAL_REQUESTS_STATE: RequestState = {

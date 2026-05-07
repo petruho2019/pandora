@@ -24,8 +24,8 @@ import { loadRequests, moveRequest } from '../../../store/actions/requests.actio
 import { CreateRequestInfo } from '../../../../../shared/models/event-models/add-request-info';
 import { RequestModel, RequestTypes } from '../../../../../shared/models/requests/request';
 import { RenameDto } from '../../../../../shared/models/dto/shared-dtos';
-import { selectRequestsByCollectionId } from '../../../store/selectors/requests.selector';
-import { selectAll } from '../../../store/selectors/collections.selector';
+import { selectRequestsByCollectionId } from '../../../store/selectors/requests.selectors';
+import { selectAll } from '../../../store/selectors/collections.selectors';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CollectionItem } from '../collections/collection-item/collection-item';
 import { RequestCollectionItem } from '../requests/request-item/request-item';

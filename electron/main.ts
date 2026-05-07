@@ -4,30 +4,41 @@ import { app, ipcMain } from 'electron';
 import { initializeCollection } from './ipc-main-collections-initializer';
 import url from 'url';
 import path from 'path';
-import { CollectionsStoreSchema } from '../shared/store/schemes/collection-store-schema';
+import {
+  CollectionsElectronSchema,
+  CookieElectronSchema,
+  RequestsElectronSchema,
+} from '../shared/electron/schemes';
 import ElectronStore = require('electron-store');
 import { initializeRequest } from './ipc-main-requests-initializer';
-import { RequestsStoreSchema } from '../shared/store/schemes/request-store-schema';
 import { initializeSendRequest } from './ipc-main-send-request-initializer';
 import { initializeCommon } from './ipc-main-common-initializer';
+import { initializeCookies } from './ipc-main-cookie-initializer';
 
 export const COLLECTIONS_KEY = 'loadedCollections';
+export const REQUESTS_KEY = 'loadedRequests';
+export const COOKIES_KEY = 'loadedCookies';
 
-const collectionStore = new ElectronStore<CollectionsStoreSchema>({
+const collectionStore = new ElectronStore<CollectionsElectronSchema>({
   name: 'collections',
   defaults: {
     loadedCollections: [],
   },
 });
 
-const requestsStore = new ElectronStore<RequestsStoreSchema>({
+const requestsStore = new ElectronStore<RequestsElectronSchema>({
   name: 'requests',
   defaults: {
     loadedRequests: [],
   },
 });
 
-export const REQUESTS_KEY = 'loadedRequests';
+const cookiesStore = new ElectronStore<CookieElectronSchema>({
+  name: 'cookies',
+  defaults: {
+    loadedCookies: [],
+  },
+});
 
 const isDev = !app.isPackaged;
 
@@ -72,6 +83,7 @@ app.on('ready', () => {
   initializeRequest(requestsStore, ipcMain);
   initializeSendRequest(ipcMain);
   initializeCommon(ipcMain);
+  initializeCookies(cookiesStore, ipcMain);
   createWindow();
 });
 

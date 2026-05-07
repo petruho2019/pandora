@@ -9,6 +9,10 @@
       (onSend)="handleSendRequest()"
       (onSave)="handleSaveRequest()"
       (onCancel)="handleCancelRequest()"
+      (onAddCookie)="handleAddCookie($event.cookie, $event.overlayRef)"
+      (onModifyCookie)="handleModifyCookie($event.cookie, $event.overlayRef)"
+      (onDeleteCookie)="handleDeleteCookie($event)"
+      (onDeleteDomain)="handleDeleteDomain($event)"
     ></request-url>
   }
 

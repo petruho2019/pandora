@@ -13,7 +13,7 @@ import { ModalHeader } from '../../../../reuseable/modals/modal-header/modal-hea
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TabItem } from '../../../../../../../shared/models/utils';
 import { Store } from '@ngrx/store';
-import { selectRequest } from '../../../../../store/selectors/requests.selector';
+import { selectRequest } from '../../../../../store/selectors/requests.selectors';
 
 @Component({
   selector: 'save-request-modal',

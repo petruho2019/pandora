@@ -38,8 +38,8 @@ import { RequestInfo } from './item-infos/request-info/request-info';
 import { AuthItem, BodyItem } from '../../../../shared/models/requests/http/http-request-model';
 import { AUTH_KIND } from '../../../../shared/models/requests/http/auth';
 import { Store } from '@ngrx/store';
-import { selectRequest } from '../../store/selectors/requests.selector';
-import { selectCollection } from '../../store/selectors/collections.selector';
+import { selectRequest } from '../../store/selectors/requests.selectors';
+import { selectCollection } from '../../store/selectors/collections.selectors';
 import {
   createHttpRequest,
   updateRequest,

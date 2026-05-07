@@ -10,7 +10,7 @@ import {
   RenameRequestDto,
   UpdateRequestInfoDto,
 } from '../shared/models/requests/dto/request-dtos';
-import { HttpConfigPayload } from '../shared/models/requests/http/http-request-model';
+import { CookieModel, HttpConfigPayload } from '../shared/models/requests/http/http-request-model';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   addCollection: (data: { name: string; path: string }) =>
@@ -44,4 +44,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openFile: () => ipcRenderer.invoke('open-file'),
   fileExists: (path: string) => ipcRenderer.invoke('file-exists', path),
   getFileStream: (path: string) => ipcRenderer.invoke('get-file-stream', path),
+
+  addCookie: (cookie: CookieModel) => ipcRenderer.invoke('add-cookie', cookie),
+  modifyCookie: (cookie: CookieModel) => ipcRenderer.invoke('modify-cookie', cookie),
+  deleteCookie: (cookie: CookieModel) => ipcRenderer.invoke('delete-cookie', cookie),
+  deleteDomain: (domainName: string) => ipcRenderer.invoke('delete-domain', domainName),
+  loadCookies: () => ipcRenderer.invoke('load-cookies'),
 });

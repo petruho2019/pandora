@@ -28,6 +28,7 @@ import {
   AuthItem,
   BodyGroup,
   BodyItem,
+  CookieModel,
   HttpMethod,
   HttpRequestModel,
 } from '../../../../../../shared/models/requests/http/http-request-model';
@@ -56,6 +57,18 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { ResponseService } from '../../../../../../services/response-service';
 import { TabItem } from '../../../../../../shared/models/utils';
+import { Store } from '@ngrx/store';
+import {
+  addCookieModal,
+  deleteCookieModal,
+  deleteDomainModal,
+  modifyCookieModal,
+} from '../../../../store/actions/modal-actions/cookie-modal.actions';
+import { OverlayRef } from '@angular/cdk/overlay';
+import {
+  DeleteCookieActionDto,
+  DeleteDomainActionDto,
+} from './request-url/cookies-info/cookies-info';
 
 @Component({
   selector: 'request-info',
@@ -68,6 +81,7 @@ export class RequestInfo implements OnInit, OnChanges {
   private sendRequestService = inject(SendRequestService);
   private requestStateService = inject(RequestStateService);
   private responseService = inject(ResponseService);
+  private store = inject(Store);
 
   initialRequests = input<Record<string, RequestModel>>();
 
@@ -452,6 +466,33 @@ export class RequestInfo implements OnInit, OnChanges {
   handleHeadersChanged(headers: TableRow[]) {
     this.req()!.headers = headers;
     this.tabItemService.updateRequest(this.req()!.id, { headers: headers });
+  }
+
+  handleAddCookie(cookie: CookieModel, overlayRef: OverlayRef) {
+    this.store.dispatch(
+      addCookieModal({ actionData: { body: cookie, modalOverlayRefs: [overlayRef] } }),
+    );
+  }
+
+  handleModifyCookie(cookie: CookieModel, overlayRef: OverlayRef) {
+    this.store.dispatch(
+      modifyCookieModal({ actionData: { body: cookie, modalOverlayRefs: [overlayRef] } }),
+    );
+  }
+
+  handleDeleteCookie(cookieInfo: DeleteCookieActionDto) {
+    this.store.dispatch(
+      deleteCookieModal({
+        actionData: { body: cookieInfo, modalOverlayRefs: [cookieInfo.overlayRef] },
+      }),
+    );
+  }
+  handleDeleteDomain(domainInfo: DeleteDomainActionDto) {
+    this.store.dispatch(
+      deleteDomainModal({
+        actionData: { body: domainInfo, modalOverlayRefs: [domainInfo.overlayRef] },
+      }),
+    );
   }
 
   async handleSendRequest() {

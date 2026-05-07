@@ -125,3 +125,14 @@ export type HttpResponseModel = {
       >
     | axios.AxiosResponseHeaders;
 };
+
+export interface CookieModel {
+  id: string;
+  name: string;
+  value: string;
+  path: string;
+  domain: string;
+  expiresAt: string | null;
+  secure: boolean;
+  httpOnly: boolean;
+}

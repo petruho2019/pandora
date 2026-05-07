@@ -14,7 +14,7 @@ import { from, of, map } from 'rxjs';
 import { RequestElectronService } from '../../../../services/electron/request-electron-service';
 import { Store } from '@ngrx/store';
 import { RequestModel } from '../../../../shared/models/requests/request';
-import { selectLoadedByCollectionId } from '../selectors/requests.selector';
+import { selectLoadedByCollectionId } from '../selectors/requests.selectors';
 import { addAlertNotificationMessage } from '../actions/common.actions';
 import {
   cloneRequest,

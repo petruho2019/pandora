@@ -68,18 +68,6 @@
     width: 100%;
 }
 
-[contenteditable]:focus {
-    outline: 0px solid transparent;
-}
-
-[contentEditable=true]:empty:before {
-  content: attr(placeholder);
-  color: #616060;
-  font-weight: 600;
-  position: absolute;
-  left: 0.5%;
-}
-
 .url-actions {
     display: flex;
     gap: 16px;
@@ -93,7 +81,8 @@
     position: relative;
 }
 
-.save {
+.save,
+.cookie {
     stroke: #9b9b9b;
     fill: #9b9b9b;
     stroke-width: 0.2px;
@@ -125,7 +114,34 @@
     z-index: 1;
 }
 
-.url-action.save:hover::after {
+.url-action.cookie {
+    position: relative;
+}
+
+.url-action.cookie::after {
+    content: "Cookies";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    margin-bottom: 10px;
+
+    background: rgb(80, 80, 80);
+    color: #bbb;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 2;
+}
+
+.url-action.save:hover::after,
+.url-action.cookie:hover::after {
     opacity: 1;
 }
 

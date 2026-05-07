@@ -1,6 +1,6 @@
 import { createSelector } from '@ngrx/store';
-import { filesAdapter } from '../adapters/file-adapter';
-import { FileState } from '../states/files-state';
+import { FileState } from '../states/states';
+import { filesAdapter } from '../adapters/adapters';
 
 export const selectFilesState = (state: any): FileState => state.files;
 

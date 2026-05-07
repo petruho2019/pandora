@@ -1,5 +1,5 @@
 import { buildSuccessResult, Result } from './../shared/models/result';
-import { RequestsStoreSchema } from './../shared/store/schemes/request-store-schema';
+import { RequestsElectronSchema } from '../shared/electron/schemes';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -32,7 +32,7 @@ import {
 } from '../shared/models/requests/http/http-request-model';
 import { CreateRequestInfo } from '../shared/models/event-models/add-request-info';
 
-export function initializeRequest(store: ElectronStore<RequestsStoreSchema>, ipcMain: IpcMain) {
+export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, ipcMain: IpcMain) {
   //region add-request
   ipcMain.handle(
     'add-request',
