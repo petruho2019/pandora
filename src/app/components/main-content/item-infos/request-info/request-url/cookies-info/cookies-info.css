@@ -132,6 +132,7 @@
   font-size: 13px;
   color: #bbb;
   vertical-align: middle;
+  position: relative;
 }
 
 .cookie-name {
@@ -145,6 +146,10 @@
   width: fit-content;
   max-width: 500px;
   color: #e9e9e9;
+}
+
+.cookie-value:hover + .cookie-full-value {
+  opacity: 1;
 }
 
 .row-actions {
@@ -222,3 +227,24 @@ svg {
   margin-top: 32px;
 }
   
+
+
+
+.cookie-full-value {
+  position: absolute;
+  bottom: 60%;
+  
+  margin-bottom: 10px;
+
+  background: rgb(80, 80, 80);
+  color: #bbb;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 1002;
+  pointer-events: none;
+}

@@ -25,6 +25,8 @@ import { selectAll } from '../../../../../../store/selectors/cookies.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TEST_COOKIES } from '../../../../../../store/reducers/cookie.reducer';
 import { ClearCookieModal } from './modals/delete-cookie-modal/delete-cookie-modal';
+import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
+import { AlertNotificationService } from '../../../../../../../../services/alert-notification-service';
 
 export interface CookieDomainGroup {
   domain: string;
@@ -48,7 +50,7 @@ export interface DeleteDomainActionDto {
 
 @Component({
   selector: 'cookies-info',
-  imports: [ModalHeader, AddCookieModal, ClearCookieModal],
+  imports: [ModalHeader, AddCookieModal, ClearCookieModal, CdkCopyToClipboard],
   templateUrl: './cookies-info.html',
   styleUrl: './cookies-info.css',
 })
@@ -56,6 +58,7 @@ export class CookieInfo implements OnInit {
   private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
   private store = inject(Store);
+  private alertNotificationService = inject(AlertNotificationService);
 
   @Output() onClose = new EventEmitter<void>();
   @Output() onAddCookie = new EventEmitter<CookieActionDto>();
@@ -64,12 +67,12 @@ export class CookieInfo implements OnInit {
   @Output() onDeleteDomain = new EventEmitter<DeleteDomainActionDto>();
 
   ngOnInit(): void {
-    this.store.dispatch(loadCookies());
+    // this.store.dispatch(loadCookies());
   }
 
   private cookies$ = this.store.select(selectAll);
-  public cookies = toSignal(this.cookies$);
-  // public cookies = signal<CookieModel[]>(TEST_COOKIES);
+  // public cookies = toSignal(this.cookies$);
+  public cookies = signal<CookieModel[]>(TEST_COOKIES);
 
   cookieGroups = computed(() => {
     try {
@@ -232,5 +235,12 @@ export class CookieInfo implements OnInit {
     if (this.expandedDomains.size === 0) {
       this.expandedDomains.add(this.cookieGroups()![0].domain);
     }
+  }
+
+  addAlertNotificationCopiedSuccess() {
+    return this.alertNotificationService.addAlertNotification({
+      message: 'Значение cookie успешно скопированно',
+      showSuccess: true,
+    });
   }
 }

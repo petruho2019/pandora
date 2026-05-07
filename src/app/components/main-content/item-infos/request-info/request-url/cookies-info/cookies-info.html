@@ -163,7 +163,16 @@ Z"
                           </td>
 
                           <td>
-                            <div class="cookie-value text-ellipsis">{{ cookie.value }}</div>
+                            <div
+                              class="cookie-value text-ellipsis"
+                              [cdkCopyToClipboard]="cookie.value"
+                              (cdkCopyToClipboardCopied)="addAlertNotificationCopiedSuccess()"
+                            >
+                              {{ cookie.value }}
+                            </div>
+                            <div class="cookie-full-value">
+                              {{ cookie.value }}
+                            </div>
                           </td>
 
                           <td>{{ cookie.path || '—' }}</td>

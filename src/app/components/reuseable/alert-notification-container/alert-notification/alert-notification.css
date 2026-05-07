@@ -11,6 +11,25 @@
   box-shadow: 0px 1px 4px rgb(82, 82, 82);
 }
 
+.success-icon-con {
+  display: flex;
+  padding-right: 4px;
+  justify-content: center;
+  align-items: center;
+  fill-rule: nonzero;
+  fill: white;
+}
+
+.success-icon-svg {
+  flex-shrink: 0;
+  fill-rule: nonzero;
+
+}
+
+.success-circle {
+  fill: #39d339;
+}
+
 .error-icon-con {
   display: flex;
   padding-right: 4px;
@@ -26,11 +45,10 @@
 
 }
 
-.stroke-circle {
+.error-circle {
   fill: #C41E3A;
 }
 
 .message {
   display: flex;
-  justify-content: center;
 }

@@ -1,11 +1,23 @@
 import { Collection } from './../../shared/models/collections/collection';
-import { Component, computed, effect, EventEmitter, HostListener, inject, Input, OnInit, Output, signal, ViewChild } from '@angular/core';
-import { SideBarComponent } from "./components/side-bar/side-bar";
+import {
+  Component,
+  computed,
+  effect,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { SideBarComponent } from './components/side-bar/side-bar';
 import { ActionMenuService } from '../../services/actions-menu-service';
 import { AlertNotificationService } from '../../services/alert-notification-service';
-import { AlertNotificationContainer } from "./components/reuseable/alert-notification-container/alert-notification-container";
-import { CdkPortal } from "@angular/cdk/portal";
-import { MainContent } from "./components/main-content/main-content";
+import { AlertNotificationContainer } from './components/reuseable/alert-notification-container/alert-notification-container';
+import { CdkPortal } from '@angular/cdk/portal';
+import { MainContent } from './components/main-content/main-content';
 import { RenameDto } from '../../shared/models/dto/shared-dtos';
 import { CloseCollectionInfo } from '../../shared/models/collections/dto/collection-action-dtos';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
@@ -14,7 +26,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
   selector: 'app-root',
   imports: [SideBarComponent, AlertNotificationContainer, CdkPortal, MainContent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App implements OnInit {
   private actionMenuService = inject(ActionMenuService);
@@ -47,7 +59,7 @@ export class App implements OnInit {
   handleOpenInFS(collId: string) {
     this.sideBarComponent.openCollectionInFS(collId);
   }
-  
+
   handleCloseCollection(collInfo: CloseCollectionInfo) {
     this.sideBarComponent.closeCollection(collInfo);
   }
@@ -65,22 +77,26 @@ export class App implements OnInit {
   }
 
   test() {
-    this.alertNotificationService.addAlertNotification({ message: `
+    this.alertNotificationService.addAlertNotification({
+      message: `
     Коллекция с таким именем уже существует по пути
-    D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests`, showSuccess: false});
+    D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests`,
+      showSuccess: true,
+    });
   }
-  
 }
 
-export function buildOverlayRef(overlay: Overlay, top?: string) : OverlayRef {
+export function buildOverlayRef(overlay: Overlay, top?: string): OverlayRef {
   const overlayRef = overlay.create({
     hasBackdrop: true,
     backdropClass: 'cdk-overlay-dark-backdrop',
-    positionStrategy: overlay.position()
+    positionStrategy: overlay
+      .position()
       .global()
-      .centerHorizontally().top(top ? top : "250px"),
-      usePopover: false
-  })
+      .centerHorizontally()
+      .top(top ? top : '250px'),
+    usePopover: false,
+  });
 
   overlayRef.backdropClick().subscribe(() => {
     overlayRef?.detach();

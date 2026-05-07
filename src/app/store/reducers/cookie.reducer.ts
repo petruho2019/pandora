@@ -138,11 +138,9 @@ export const cookieReducer = createReducer(
     ),
   ),
   on(deleteCookieModalSuccess, (state, { newCookies }) => {
-    console.log(`Новые кукесы: ${JSON.stringify(newCookies)}`);
     return cookieAdapter.setAll(newCookies, state);
   }),
   on(deleteDomainModalSuccess, (state, { newCookies }) => {
-    console.log(`Новые кукесы: ${JSON.stringify(newCookies)}`);
     return cookieAdapter.setAll(newCookies, state);
   }),
 );

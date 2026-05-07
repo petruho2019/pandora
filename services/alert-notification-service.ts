@@ -6,67 +6,68 @@ import { v4 as uuidv4 } from 'uuid';
 import { AlertNotificationMessage } from '../shared/models/dto/shared-dtos';
 
 type AlertMessage = {
-    id: string;
-    text: string;
-    showSuccess: boolean;
-}
+  id: string;
+  text: string;
+  showSuccess: boolean;
+};
 
-@Injectable({ providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AlertNotificationService {
+  private overlay = inject(Overlay);
+  private overlayRef?: OverlayRef;
 
-    private overlay = inject(Overlay);
-    private overlayRef?: OverlayRef;
+  public alertNotificationMessages = signal<AlertMessage[]>([]);
+  private intervalId: number | null = null;
 
-    public alertNotificationMessages = signal<AlertMessage[]>([]);
-    private intervalId: number | null = null;
+  renderAlertNotificationContainer() {
+    if (this.overlayRef) return;
 
-    renderAlertNotificationContainer() {
-        if (this.overlayRef) return;
+    this.overlayRef = this.overlay.create({
+      positionStrategy: this.overlay.position().global(),
+      hasBackdrop: false,
+      panelClass: 'cdk-overlay-notification-container',
+      backdropClass: 'cdk-overlay-notification-container-backdrop',
+    });
 
-        this.overlayRef = this.overlay.create({
-            positionStrategy: this.overlay.position()
-                .global(),
-            hasBackdrop: false,
-            panelClass: 'cdk-overlay-notification-container',
-            backdropClass: 'cdk-overlay-notification-container-backdrop'
-        });
+    const portal = new ComponentPortal(AlertNotificationContainer);
+    this.overlayRef.attach(portal);
+  }
 
-        const portal = new ComponentPortal(AlertNotificationContainer);
-        this.overlayRef.attach(portal);
+  addAlertNotification(message: AlertNotificationMessage) {
+    this.alertNotificationMessages.set([
+      { id: uuidv4(), text: message.message, showSuccess: message.showSuccess },
+      ...this.alertNotificationMessages(),
+    ]);
+    this.startQueue();
+  }
+
+  startQueue() {
+    if (this.intervalId !== null) return;
+
+    this.intervalId = window.setInterval(() => {
+      const messages = this.alertNotificationMessages();
+      if (messages.length === 0) {
+        this.stopQueue();
+        return;
+      }
+
+      this.removeFirstAlertNotificationMessage();
+
+      if (messages.length === 0) {
+        this.stopQueue();
+        return;
+      }
+    }, 1000);
+  }
+
+  stopQueue() {
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
     }
+  }
 
-    addAlertNotification(message: AlertNotificationMessage){
-        this.alertNotificationMessages.set([{ id: uuidv4(), text: message.message, showSuccess: message.showSuccess }, ...this.alertNotificationMessages()]);
-        this.startQueue();
-    }
-
-    startQueue(){
-        if(this.intervalId !== null) return;
-
-        this.intervalId = window.setInterval(() => {
-            const messages = this.alertNotificationMessages();
-            if(messages.length === 0) {
-                this.stopQueue();
-                return;
-            };
-
-            this.removeFirstAlertNotificationMessage();
-
-            if(messages.length === 0) {
-                this.stopQueue();
-                return;
-            };
-        }, 1000)
-    }
-
-    stopQueue() {
-        if(this.intervalId !== null){
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-        }
-    }
-
-    removeFirstAlertNotificationMessage() {
-        this.alertNotificationMessages.update(messages => messages.slice(0, -1));
-    }
+  removeFirstAlertNotificationMessage() {
+    this.alertNotificationMessages.update((messages) => messages.slice(0, -1));
+  }
 }
