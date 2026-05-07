@@ -1,0 +1,97 @@
+<div class="add-cookie-modal">
+  <modal-header [title]="headerTitle" (onClose)="handleClose()"></modal-header>
+
+  <div class="add-cookie-content">
+    <div class="cookie-form-grid">
+      <div class="field">
+        <label class="pandora-text" for="cookie-domain">Домен<span class="required">*</span></label>
+        <input
+          id="cookie-domain"
+          class="pandora-input field-input"
+          type="text"
+          [(ngModel)]="cookieModel.domain"
+          [disabled]="!isAddCookie"
+          [ngClass]="{ disabled: !isAddCookie }"
+          name="domain"
+        />
+      </div>
+
+      <div class="field">
+        <label class="pandora-text" for="cookie-path">Путь</label>
+        <input
+          id="cookie-path"
+          class="pandora-input field-input"
+          type="text"
+          [(ngModel)]="cookieModel.path"
+          [disabled]="!isAddCookie"
+          [ngClass]="{ disabled: !isAddCookie }"
+          name="path"
+        />
+      </div>
+
+      <div class="field">
+        <label class="pandora-text" for="cookie-name"
+          >Название<span class="required">*</span></label
+        >
+        <input
+          id="cookie-name"
+          class="pandora-input field-input"
+          type="text"
+          [(ngModel)]="cookieModel.name"
+          [disabled]="!isAddCookie"
+          [ngClass]="{ disabled: !isAddCookie }"
+          name="name"
+        />
+      </div>
+
+      <div class="field">
+        <label class="pandora-text" for="cookie-value"
+          >Значение<span class="required">*</span></label
+        >
+        <input
+          id="cookie-value"
+          class="pandora-input field-input"
+          type="text"
+          [(ngModel)]="cookieModel.value"
+          name="value"
+        />
+      </div>
+
+      <div class="field field-wide">
+        <label class="pandora-text" for="cookie-expiration">Когда истекает</label>
+        <input
+          id="cookie-expiration"
+          class="pandora-input field-input"
+          type="datetime-local"
+          [(ngModel)]="cookieModel.expiresAt"
+          name="expiresAt"
+        />
+      </div>
+    </div>
+
+    <div class="flags-row">
+      <label class="checkbox-option">
+        <input type="checkbox" [(ngModel)]="cookieModel.secure" name="secure" />
+        <span class="checkbox-label">Secure</span>
+      </label>
+
+      <label class="checkbox-option">
+        <input type="checkbox" [(ngModel)]="cookieModel.httpOnly" name="httpOnly" />
+        <span class="checkbox-label">HTTP Only</span>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button (click)="handleClose()" class="modal-close-button action-button pointer">
+        Закрыть
+      </button>
+
+      <button
+        (click)="handleSaveCookie()"
+        class="modal-positive-action-button action-button pointer"
+      >
+        Сохранить
+      </button>
+    </div>
+  </div>
+</div>

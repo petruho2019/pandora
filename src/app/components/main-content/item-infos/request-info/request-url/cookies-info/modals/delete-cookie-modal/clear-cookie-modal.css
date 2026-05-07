@@ -1,0 +1,39 @@
+.delete-cookie-modal {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  border-radius: 8px;
+  min-width: 400px;
+  max-width: 400px;
+  z-index: 1001;
+  border: var(--modal-border-style);
+  background-color: var(--modal-background-color);
+}
+
+.delete-cookie-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  padding: 16px;
+}
+
+.delete-cookie-warning-text {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+}
+
+.warning-icon {
+    fill: #bbb;
+}
+
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 32px;
+}
