@@ -69,7 +69,10 @@ const createWindow = () => {
   );
 
   win.maximize();
-  win.webContents.openDevTools();
+
+  if (isDev) {
+    win.webContents.openDevTools();
+  }
 
   win.on('closed', () => {
     win = null;

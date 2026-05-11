@@ -99,6 +99,7 @@ export type HttpConfigPayload = {
   data: any;
   controllerId: string;
   req: HttpRequestModel;
+  cookiesHeader: string;
 };
 
 export type HttpResponseModelWrapper = {
@@ -124,6 +125,7 @@ export type HttpResponseModel = {
         }
       >
     | axios.AxiosResponseHeaders;
+  cookies: CookieModel[];
 };
 
 export interface CookieModel {

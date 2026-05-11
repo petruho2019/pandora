@@ -73,7 +73,7 @@
 
 .selected {
     background-color: var(--background-color-contrasting);
-    color: var(--contrasting-color);
+    color: rgb(106, 170, 223)
 }
 
 .delimiter-line {

@@ -65,7 +65,6 @@ export class DescriptionContent {
   });
 
   toggleCollectionActions(event: MouseEvent, coll: Collection, trigger: HTMLElement) {
-    console.log(`toggleCollectionActions collectionId: ${coll.id}`);
     event.stopPropagation();
     this.actionMenuService.openedId$.pipe(take(1)).subscribe((current) => {
       console.log(`Current: ${current}`);

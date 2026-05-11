@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import FormData from 'form-data';
 import {
   AuthItem,
   BodyItem,
+  CookieModel,
   HttpConfigPayload,
   HttpRequestModel,
   HttpResponseModelWrapper,
@@ -17,10 +17,9 @@ import { ResponseService } from '../response-service';
 import { RequestModel } from '../../shared/models/requests/request';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestElectronService } from './request-electron-service';
-import { FilesElectronService } from './files-electron-service';
-import { getFileNameFromPath } from '../../src/app/app';
 import { StopwatchService } from '../stopwatch-service';
-import { ResultT } from '../../shared/models/result';
+import { Store } from '@ngrx/store';
+import { addCookieModal } from '../../src/app/store/actions/modal-actions/cookie-modal.actions';
 
 type BuiltBody = {
   data?: any;
@@ -35,11 +34,21 @@ type BuiltAuth = {
 export class SendRequestService {
   private responseService = inject(ResponseService);
   private requestElectronService = inject(RequestElectronService);
-  private filesElectronService = inject(FilesElectronService);
   private stopwatchService = inject(StopwatchService);
+  private store = inject(Store);
 
-  async sendRequest(req: HttpRequestModel, selectedBody: BodyItem, selectedAuth: AuthItem) {
-    const { body, headers } = this.buildHttpClientOptions(req, selectedBody, selectedAuth);
+  async sendRequest(
+    req: HttpRequestModel,
+    selectedBody: BodyItem,
+    selectedAuth: AuthItem,
+    cookies: CookieModel[],
+  ): Promise<HttpResponseModelWrapper> {
+    const { body, headers, cookiesHeader } = this.buildHttpClientOptions(
+      req,
+      selectedBody,
+      selectedAuth,
+      cookies,
+    );
 
     console.log(`Отправляем запрос по url ${req.url}`);
 
@@ -47,9 +56,19 @@ export class SendRequestService {
 
     this.responseService.addStartedResponse(req, controllerId);
 
-    const response = await this.sendRequestByHttpMethod(req, body, headers, controllerId);
+    const response = await this.sendRequestByHttpMethod(
+      req,
+      body,
+      headers,
+      controllerId,
+      cookiesHeader,
+    );
 
     this.responseService.addFinishedResponse(response);
+
+    if (response.responseResult.isSuccess) {
+      this.handleResponseCookies(response.req.url, response.responseResult.body!.cookies);
+    }
 
     return response;
   }
@@ -59,6 +78,7 @@ export class SendRequestService {
     body: any,
     headers: Record<string, string>,
     controllerId: string,
+    cookiesHeader: string,
   ): Promise<HttpResponseModelWrapper> {
     const config: HttpConfigPayload = {
       method: req.method as any,
@@ -67,6 +87,7 @@ export class SendRequestService {
       data: body,
       controllerId: controllerId,
       req: req,
+      cookiesHeader,
     };
 
     this.stopwatchService.start(req.id);
@@ -182,8 +203,6 @@ export class SendRequestService {
 
     this.stopwatchService.stop(req.id);
 
-    console.log(`Ответ на url: ${req.url}: ${JSON.stringify(result, null, 2)}`);
-
     return result;
   }
 
@@ -191,13 +210,15 @@ export class SendRequestService {
     request: HttpRequestModel,
     selectedBody: BodyItem,
     selectedAuth: AuthItem,
-  ): { body?: any; headers: Record<string, string> } {
+    cookies: CookieModel[],
+  ): { body?: any; headers: Record<string, string>; cookiesHeader: string } {
     const activeBody = request.body[selectedBody.kind] ?? request.body['none'];
 
     const activeAuth = request.auth[selectedAuth.kind] ?? request.auth['none'];
 
     const builtBody = this.buildBody(activeBody);
     const builtAuth = this.buildAuth(activeAuth);
+    const cookiesHeader = this.buildCookiesHeader(cookies, request.url);
 
     const headers: Record<string, string> = {};
 
@@ -214,6 +235,7 @@ export class SendRequestService {
     return {
       body: request.method === 'GET' || request.method === 'HEAD' ? undefined : builtBody.data,
       headers,
+      cookiesHeader,
     };
   }
 
@@ -242,6 +264,30 @@ export class SendRequestService {
 
       default:
         return {};
+    }
+  }
+
+  private handleResponseCookies(reqUrl: string, cookies: CookieModel[]) {
+    let domain = '';
+
+    try {
+      domain = new URL(reqUrl).hostname;
+    } catch {}
+
+    for (const cookie of cookies) {
+      const cookieToAdd: CookieModel = {
+        ...cookie,
+        domain: cookie.domain || domain,
+      };
+
+      this.store.dispatch(
+        addCookieModal({
+          actionData: {
+            body: { cookie: cookieToAdd, fromServer: true },
+            modalOverlayRefs: [],
+          },
+        }),
+      );
     }
   }
 
@@ -328,192 +374,21 @@ export class SendRequestService {
         return {};
     }
   }
+
+  private buildCookiesHeader(cookies: CookieModel[], url: string): string {
+    try {
+      const urlObj = new URL(url);
+
+      const cookiesJoined = cookies
+        .filter((c) => c.domain === urlObj.hostname)
+        .map((c) => `${encodeURIComponent(c.name)}=${c.value};`)
+        .join(' ');
+
+      console.log(`${cookiesJoined}`);
+
+      return cookiesJoined;
+    } catch (error) {
+      return '';
+    }
+  }
 }
-
-// {                  Пример ответа когда ошибка
-//   "req": {
-//     "id": "36917f74-c09b-4575-a6fd-be68827369bf",
-//     "name": "Без названия 2",
-//     "auth": {
-//       "none": {
-//         "kind": "none",
-//         "name": "Без аутентификации"
-//       }
-//     },
-//     "url": "http://localhost:5250/test-form-file",
-//     "type": "HTTP",
-//     "collectionId": "cc21cc73-dc46-469d-98d1-efe227863fd0",
-//     "method": "GET",
-//     "headers": [],
-//     "body": {
-//       "none": {
-//         "kind": "none",
-//         "group": "Other",
-//         "name": "Без тела"
-//       },
-//       "file": {
-//         "kind": "file",
-//         "name": "Файл",
-//         "files": [
-//           {
-//             "id": "531e8a2c-bf95-4f6c-aab7-a8ffbd2ab2c8",
-//             "isActive": true,
-//             "name": "",
-//             "value": "",
-//             "fileInfo": {
-//               "path": "C:\\Users\\vladg\\Downloads\\file1.txt",
-//               "contentType": "1"
-//             }
-//           },
-//           {
-//             "id": "bd53d178-083e-41ab-95b1-8742151c5700",
-//             "isActive": false,
-//             "name": "",
-//             "value": "",
-//             "fileInfo": {
-//               "path": "C:\\Users\\vladg\\Downloads\\file2.txt",
-//               "contentType": "2"
-//             }
-//           }
-//         ],
-//         "group": "Other"
-//       },
-//       "multipart-form": {
-//         "kind": "multipart-form",
-//         "name": "Составная форма",
-//         "fields": [
-//           {
-//             "id": "11557651-c9c9-49ff-bd6a-0c031ece5984",
-//             "type": "file",
-//             "key": "asd",
-//             "path": "C:\\Users\\vladg\\Downloads\\file1.txt",
-//             "isActive": true,
-//             "contentType": null
-//           },
-//           {
-//             "id": "80cada4e-55b5-4724-bd62-dc9756a04483",
-//             "type": "text",
-//             "key": "",
-//             "value": "",
-//             "isActive": true,
-//             "contentType": null
-//           }
-//         ],
-//         "group": "Form"
-//       }
-//     },
-//     "fileName": "Без названия 2",
-//     "params": []
-//   },
-//   "controllerId": "2bb19fc9-0c6d-4bb5-a957-7ebeb2b253e5",
-//   "responseResult": {
-//     "body": {
-//       "status": 405,
-//       "statusText": "Method Not Allowed",
-//       "headers": {
-//         "content-length": "0",
-//         "date": "Tue, 05 May 2026 19:53:26 GMT",
-//         "server": "Kestrel",
-//         "allow": "POST"
-//       },
-//       "body": "\"\""
-//     },
-//     "error": null,
-//     "isSuccess": true,
-//     "isFailure": false
-//   }
-// }
-
-// {                                  Пример ответа когда ОКЕЙ
-//   "req": {
-//     "id": "36917f74-c09b-4575-a6fd-be68827369bf",
-//     "name": "Без названия 2",
-//     "auth": {
-//       "none": {
-//         "kind": "none",
-//         "name": "Без аутентификации"
-//       }
-//     },
-//     "url": "http://localhost:5250/test-form-file",
-//     "type": "HTTP",
-//     "collectionId": "cc21cc73-dc46-469d-98d1-efe227863fd0",
-//     "method": "POST",
-//     "headers": [],
-//     "body": {
-//       "none": {
-//         "kind": "none",
-//         "group": "Other",
-//         "name": "Без тела"
-//       },
-//       "file": {
-//         "kind": "file",
-//         "name": "Файл",
-//         "files": [
-//           {
-//             "id": "531e8a2c-bf95-4f6c-aab7-a8ffbd2ab2c8",
-//             "isActive": true,
-//             "name": "",
-//             "value": "",
-//             "fileInfo": {
-//               "path": "C:\\Users\\vladg\\Downloads\\file1.txt",
-//               "contentType": "1"
-//             }
-//           },
-//           {
-//             "id": "bd53d178-083e-41ab-95b1-8742151c5700",
-//             "isActive": false,
-//             "name": "",
-//             "value": "",
-//             "fileInfo": {
-//               "path": "C:\\Users\\vladg\\Downloads\\file2.txt",
-//               "contentType": "2"
-//             }
-//           }
-//         ],
-//         "group": "Other"
-//       },
-//       "multipart-form": {
-//         "kind": "multipart-form",
-//         "name": "Составная форма",
-//         "fields": [
-//           {
-//             "id": "11557651-c9c9-49ff-bd6a-0c031ece5984",
-//             "type": "file",
-//             "key": "asd",
-//             "path": "C:\\Users\\vladg\\Downloads\\file1.txt",
-//             "isActive": true,
-//             "contentType": null
-//           },
-//           {
-//             "id": "80cada4e-55b5-4724-bd62-dc9756a04483",
-//             "type": "text",
-//             "key": "",
-//             "value": "",
-//             "isActive": true,
-//             "contentType": null
-//           }
-//         ],
-//         "group": "Form"
-//       }
-//     },
-//     "fileName": "Без названия 2",
-//     "params": []
-//   },
-//   "controllerId": "b3a4a54b-2d5d-4dbf-ad27-d38f8b5b8426",
-//   "responseResult": {
-//     "body": {
-//       "status": 200,
-//       "statusText": "OK",
-//       "headers": {
-//         "content-type": "application/json; charset=utf-8",
-//         "date": "Tue, 05 May 2026 19:54:23 GMT",
-//         "server": "Kestrel",
-//         "transfer-encoding": "chunked"
-//       },
-//       "body": "{\n  \"fileName\": \"file1.txt\",\n  \"contentType\": \"text/plain\",\n  \"length\": 0\n}"
-//     },
-//     "error": null,
-//     "isSuccess": true,
-//     "isFailure": false
-//   }
-// }

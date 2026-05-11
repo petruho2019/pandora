@@ -37,8 +37,6 @@ export function initializeCollection(
   ipcMain.handle('load-collections', async (): Promise<Collection[]> => {
     const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
 
-    console.log(`Collections from store ${JSON.stringify(collectionsFromStore)}`);
-
     const [validCollections, isCollectionPathsValid] =
       await validateCollectionPaths(collectionsFromStore);
 
@@ -46,12 +44,8 @@ export function initializeCollection(
       console.log(`Store updated: ${validCollections.length} collections`);
       collectionStore.set(COLLECTIONS_KEY, validCollections);
 
-      //console.log(`Valid collections: ${JSON.stringify(validCollections)}`);
-
       return validCollections;
     } else {
-      console.log(`Collections from store are valid: ${JSON.stringify(collectionsFromStore)}`);
-
       return collectionsFromStore;
     }
   });
@@ -279,8 +273,6 @@ export function initializeCollection(
   ipcMain.handle(
     'rename-collection',
     (event, collectionInfo: RenameDto): ResultT<Collection, string> => {
-      console.log(`rename-collection: ${JSON.stringify(collectionInfo)}`);
-
       if (!collectionInfo.name) {
         return buildFailureResultT(`Название коллeкции обязательно`);
       }
@@ -298,8 +290,6 @@ export function initializeCollection(
         collectionFromStore,
       );
 
-      console.log(`\n Collections from store with renamed item: ${collectionsFromStore}`);
-
       // collectionsFromStore.push(newCollection);
       // store.set(COLLECTIONS_KEY, collectionsFromStore);
 
@@ -309,8 +299,6 @@ export function initializeCollection(
 
   //region open-collection-in-fs
   ipcMain.handle('open-collection-in-fs', async (event, collectionId: string) => {
-    console.log(`Trying to open collection in fs: ${collectionId}`);
-
     const coll = collectionStore.get(COLLECTIONS_KEY, []).find((c) => c.id === collectionId);
 
     if (!coll) return buildFailureResultT('Коллекция не найдена');

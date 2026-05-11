@@ -18,14 +18,14 @@ html, body {
 :root {
   --modal-border-style: 1px solid rgba(105, 105, 105, 0.315);
   --border-style: 1px solid rgba(155, 155, 155, 0.215);
-  --contrasting-color: rgb(59,176,143);   /*9370d8 норм*/  /*7366bd агонь*/ /*9d81ba агонь*/ /*9966cc агонь 1a4780 норм 007cad подходит 3b5998 подходит биг 324ab2 тоже 3a75c4 тож */
+  --contrasting-color: rgb(34,113,179);   /*1a4780, 007cad подходит  324ab2 тоже 3a75c4 тож , 4285B4 */
   --modal-background-color: #202020;
   --main-background-color: #222222;
   --background-color: rgb(51, 51, 51);
   --action-icon-color: #d1d1d1; 
   --delete-color: rgb(255, 98, 98);
   --action-background-color: rgba(155, 155, 155, 0.150);
-  --background-color-contrasting: rgba(59,176,143, 0.10);
+  --background-color-contrasting: rgba(34,113,179, 0.10);
   --modal-top: 250px;
 }
 

@@ -1,4 +1,12 @@
-import { Component, inject, Input, OnInit, TemplateRef, viewChild, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnInit,
+  TemplateRef,
+  viewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { take } from 'rxjs';
@@ -14,30 +22,46 @@ import { RequestModel, RequestTypes } from '../../../../../../shared/models/requ
 import { Collection } from '../../../../../../shared/models/collections/collection';
 import { openRequestInFS } from '../../../../store/actions/requests.actions';
 import { RenameDto } from '../../../../../../shared/models/dto/shared-dtos';
-import { CloneRequestDto, DeleteRequestDto, RenameRequestDto } from '../../../../../../shared/models/requests/dto/request-dtos';
-import { cloneRequest, deleteRequest, renameRequest } from '../../../../store/actions/modal-actions/request-modal.actions';
-import { DeleteRequestModal } from "../modals/delete-request-modal/delete-request-modal";
+import {
+  CloneRequestDto,
+  DeleteRequestDto,
+  RenameRequestDto,
+} from '../../../../../../shared/models/requests/dto/request-dtos';
+import {
+  cloneRequest,
+  deleteRequest,
+  renameRequest,
+} from '../../../../store/actions/modal-actions/request-modal.actions';
+import { DeleteRequestModal } from '../modals/delete-request-modal/delete-request-modal';
 import { TabItemService } from '../../../../../../services/tab-item-service';
 import { WorkspaceFacadeService } from '../../../../../../services/workspace-facade-service';
 import { buildOverlayRef } from '../../../../app';
 
 @Component({
   selector: 'request-item',
-  imports: [NgClass, AsyncPipe, FormsModule, CloneRequestModal, RenameModal, CdkDrag, CdkDragHandle, DeleteRequestModal],
+  imports: [
+    NgClass,
+    AsyncPipe,
+    FormsModule,
+    CloneRequestModal,
+    RenameModal,
+    CdkDrag,
+    CdkDragHandle,
+    DeleteRequestModal,
+  ],
   templateUrl: './request-item.html',
   styleUrl: './request-item.css',
 })
 export class RequestCollectionItem implements OnInit {
-
   public blurService = inject(BlurService);
-  private actionsMenuService = inject(ActionMenuService)
-  private overlay = inject(Overlay)
+  private actionsMenuService = inject(ActionMenuService);
+  private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
   private store = inject(Store);
   private tabItemService = inject(TabItemService);
   private workspaceFacadeService = inject(WorkspaceFacadeService);
 
-  renameHeader: string = "Переименовать запрос";
+  renameHeader: string = 'Переименовать запрос';
 
   public currentOpenRequestId$ = this.actionsMenuService.openedId$;
 
@@ -57,47 +81,54 @@ export class RequestCollectionItem implements OnInit {
 
   canBeEdit: boolean = false;
   newRequestFolderName: string;
-  renameRequestNamePlacholder: string = "Введите новое название запроса";
+  renameRequestNamePlacholder: string = 'Введите новое название запроса';
 
   ngOnInit(): void {
     this.newRequestFolderName = this.request.name;
   }
 
-  isHttp(): boolean{
+  isHttp(): boolean {
     return this.request.type === RequestTypes.HTTP;
   }
 
-  onBlurRequest(){
+  onBlurRequest() {
     this.blurService.setCurrentBlurId(this.request.id);
   }
 
-  toggleActions($event: MouseEvent, trigger: HTMLElement){
-    console.log(`toggleActions reqId: ${this.request.id}`);
+  toggleActions($event: MouseEvent, trigger: HTMLElement) {
     $event.stopPropagation();
-    this.actionsMenuService.openedId$.pipe(take(1)).subscribe(current => {
+    this.actionsMenuService.openedId$.pipe(take(1)).subscribe((current) => {
       console.log(`Current: ${current}`);
-        current === this.request.id ? this.actionsMenuService.close() : this.actionsMenuService.open(this.request.id, trigger, this.actionsPortal(), this.viewContainerRef, [
-        {
-          originX: 'end',
-          originY: 'bottom',
-          overlayX: 'start',
-          overlayY: 'top',
-          offsetX: 8,
-          offsetY: 4
-        }
-      ]);
+      current === this.request.id
+        ? this.actionsMenuService.close()
+        : this.actionsMenuService.open(
+            this.request.id,
+            trigger,
+            this.actionsPortal(),
+            this.viewContainerRef,
+            [
+              {
+                originX: 'end',
+                originY: 'bottom',
+                overlayX: 'start',
+                overlayY: 'top',
+                offsetX: 8,
+                offsetY: 4,
+              },
+            ],
+          );
     });
   }
 
-  addRequestTabItem(){
+  addRequestTabItem() {
     this.workspaceFacadeService.addTabItem(this.request, this.collection);
   }
 
-  setRequestTabItemIsNotReplaceable(){
+  setRequestTabItemIsNotReplaceable() {
     this.tabItemService.setRequestTabItemNotReplaceable(this.request, this.collection);
   }
 
-  showRenameModal(){
+  showRenameModal() {
     this.actionsMenuService.close();
 
     this.renameOverlayRef = buildOverlayRef(this.overlay);
@@ -105,7 +136,7 @@ export class RequestCollectionItem implements OnInit {
     this.renameOverlayRef.attach(portal);
   }
 
-  showCloneModal(){
+  showCloneModal() {
     this.actionsMenuService.close();
 
     this.cloneOverlayRef = buildOverlayRef(this.overlay);
@@ -114,7 +145,11 @@ export class RequestCollectionItem implements OnInit {
   }
 
   showRequestInFS() {
-    this.store.dispatch(openRequestInFS({requestInfo: {requestId: this.request.id, collectionPath: this.collection.path}}));
+    this.store.dispatch(
+      openRequestInFS({
+        requestInfo: { requestId: this.request.id, collectionPath: this.collection.path },
+      }),
+    );
     this.actionsMenuService.close();
   }
 
@@ -126,7 +161,7 @@ export class RequestCollectionItem implements OnInit {
     this.deleteOverlayRef.attach(portal);
   }
 
-  handleRename(requestInfoFromModal: RenameDto){
+  handleRename(requestInfoFromModal: RenameDto) {
     //this.newRequestFolderName = this.request.name;
 
     const requestInfo: RenameRequestDto = {
@@ -134,36 +169,45 @@ export class RequestCollectionItem implements OnInit {
       newName: requestInfoFromModal.name,
       collectionPath: this.collection.path,
       oldFileName: this.request.name,
-      newFileName: this.newRequestFolderName
-    } 
+      newFileName: this.newRequestFolderName,
+    };
 
-    this.store.dispatch(renameRequest({actionData: { body: requestInfo, modalOverlayRefs: [this.renameOverlayRef] }}));
+    this.store.dispatch(
+      renameRequest({
+        actionData: { body: requestInfo, modalOverlayRefs: [this.renameOverlayRef] },
+      }),
+    );
   }
 
-  handleClone(requestInfo: CloneRequestDto){
+  handleClone(requestInfo: CloneRequestDto) {
     requestInfo.requestId = this.request.id;
     requestInfo.collectionPath = this.collection.path;
 
-    this.store.dispatch(cloneRequest({ actionData: { body: requestInfo , modalOverlayRefs: [this.cloneOverlayRef] }  }));
+    this.store.dispatch(
+      cloneRequest({ actionData: { body: requestInfo, modalOverlayRefs: [this.cloneOverlayRef] } }),
+    );
   }
 
-  handleDelete(requestId: string){
+  handleDelete(requestId: string) {
     console.log(`Удаление запроса ${requestId}`);
 
-    const requestInfo : DeleteRequestDto = {
+    const requestInfo: DeleteRequestDto = {
       requestId: requestId,
-      collectionPath: this.collection.path
+      collectionPath: this.collection.path,
     };
 
-    this.store.dispatch(deleteRequest({ actionData: { modalOverlayRefs: [this.deleteOverlayRef], body: requestInfo } }))
+    this.store.dispatch(
+      deleteRequest({
+        actionData: { modalOverlayRefs: [this.deleteOverlayRef], body: requestInfo },
+      }),
+    );
   }
 
-  changeFolderNameEditMode(){
+  changeFolderNameEditMode() {
     this.canBeEdit = !this.canBeEdit;
   }
 
   onRightClick($event: MouseEvent, trigger: HTMLElement) {
     this.toggleActions($event, trigger);
   }
-
 }

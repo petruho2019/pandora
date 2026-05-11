@@ -162,7 +162,6 @@
 }
 
 .send:not(.sended) {
-    color: #181818;
     background-color: var(--contrasting-color);
 }
 

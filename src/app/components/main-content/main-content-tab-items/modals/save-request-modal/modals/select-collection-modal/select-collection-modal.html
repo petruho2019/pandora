@@ -15,7 +15,7 @@
         >
         <span
           style="color: rgb(170, 170, 170)"
-          class="pointer"
+          class="pointer text-ellipsis"
           (click)="removeSelectedCollection()"
           >{{ getCollName() }}</span
         >
@@ -82,7 +82,11 @@ z"
                   ></path>
                 </svg>
 
-                <span style="font-weight: 600; font-size: 13px">{{ col.name }}</span>
+                <span
+                  style="font-weight: 600; font-size: 13px; margin-left: 12px"
+                  class="text-ellipsis"
+                  >{{ col.name }}</span
+                >
               </div>
             }
           </div>

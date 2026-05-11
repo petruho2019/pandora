@@ -75,15 +75,6 @@ export class App implements OnInit {
   closeActions() {
     this.actionMenuService.close();
   }
-
-  test() {
-    this.alertNotificationService.addAlertNotification({
-      message: `
-    Коллекция с таким именем уже существует по пути
-    D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests`,
-      showSuccess: true,
-    });
-  }
 }
 
 export function buildOverlayRef(overlay: Overlay, top?: string): OverlayRef {

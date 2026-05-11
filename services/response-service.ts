@@ -32,8 +32,6 @@ export class ResponseService {
         time: null,
       },
     }));
-
-    console.log(`Запрос на url: ${req.url} отправлен`);
   }
 
   addFinishedResponse(responseWrapper: HttpResponseModelWrapper) {

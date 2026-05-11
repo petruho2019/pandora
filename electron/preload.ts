@@ -45,7 +45,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   fileExists: (path: string) => ipcRenderer.invoke('file-exists', path),
   getFileStream: (path: string) => ipcRenderer.invoke('get-file-stream', path),
 
-  addCookie: (cookie: CookieModel) => ipcRenderer.invoke('add-cookie', cookie),
+  addCookie: (cookieInfo: { fromServer: boolean; cookie: CookieModel }) =>
+    ipcRenderer.invoke('add-cookie', cookieInfo),
   modifyCookie: (cookie: CookieModel) => ipcRenderer.invoke('modify-cookie', cookie),
   deleteCookie: (cookie: CookieModel) => ipcRenderer.invoke('delete-cookie', cookie),
   deleteDomain: (domainName: string) => ipcRenderer.invoke('delete-domain', domainName),

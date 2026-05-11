@@ -26,6 +26,7 @@ export class AddCookieModal implements OnInit {
 
   @Input() isAddCookie: boolean;
   @Input({ required: false }) cookieToModify: CookieModel;
+  @Input() domainNameToAddCookie: string | null;
 
   @Output() onClose = new EventEmitter<void>();
   @Output() onSave = new EventEmitter<CookieModel>();
@@ -55,6 +56,10 @@ export class AddCookieModal implements OnInit {
         secure: this.cookieToModify.secure,
         httpOnly: this.cookieToModify.httpOnly,
       };
+
+    if (this.domainNameToAddCookie) {
+      this.cookieModel.domain = this.domainNameToAddCookie;
+    }
   }
 
   handleClose(): void {

@@ -1,18 +1,18 @@
 import {
   Component,
   computed,
+  effect,
   EventEmitter,
   HostListener,
   inject,
-  Input,
-  OnInit,
+  OnChanges,
   Output,
-  signal,
   SimpleChanges,
   TemplateRef,
   viewChild,
   ViewContainerRef,
 } from '@angular/core';
+import { v4 as uuidv4 } from 'uuid';
 import { ModalHeader } from '../../../../../reuseable/modals/modal-header/modal-header';
 import { CookieModel } from '../../../../../../../../shared/models/requests/http/http-request-model';
 import { AddCookieModal } from './modals/add-cookie-modal/add-or-modify-cookie-modal';
@@ -20,15 +20,17 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { buildOverlayRef } from '../../../../../../app';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Store } from '@ngrx/store';
-import { loadCookies } from '../../../../../../store/actions/cookies.actions';
 import { selectAll } from '../../../../../../store/selectors/cookies.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TEST_COOKIES } from '../../../../../../store/reducers/cookie.reducer';
 import { ClearCookieModal } from './modals/delete-cookie-modal/delete-cookie-modal';
 import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
 import { AlertNotificationService } from '../../../../../../../../services/alert-notification-service';
+import { CloseModalIcon } from '../../../../../reuseable/close-modal-icon/close-modal-icon';
+import { NgClass } from '@angular/common';
 
 export interface CookieDomainGroup {
+  id: string;
   domain: string;
   cookies: CookieModel[];
 }
@@ -50,11 +52,11 @@ export interface DeleteDomainActionDto {
 
 @Component({
   selector: 'cookies-info',
-  imports: [ModalHeader, AddCookieModal, ClearCookieModal, CdkCopyToClipboard],
+  imports: [AddCookieModal, ClearCookieModal, CdkCopyToClipboard, CloseModalIcon, NgClass],
   templateUrl: './cookies-info.html',
   styleUrl: './cookies-info.css',
 })
-export class CookieInfo implements OnInit {
+export class CookieInfo {
   private overlay = inject(Overlay);
   private viewContainerRef = inject(ViewContainerRef);
   private store = inject(Store);
@@ -66,13 +68,9 @@ export class CookieInfo implements OnInit {
   @Output() onDeleteCookie = new EventEmitter<DeleteCookieActionDto>();
   @Output() onDeleteDomain = new EventEmitter<DeleteDomainActionDto>();
 
-  ngOnInit(): void {
-    // this.store.dispatch(loadCookies());
-  }
-
   private cookies$ = this.store.select(selectAll);
-  // public cookies = toSignal(this.cookies$);
-  public cookies = signal<CookieModel[]>(TEST_COOKIES);
+  public cookies = toSignal(this.cookies$);
+  // public cookies = signal<CookieModel[]>(TEST_COOKIES);
 
   cookieGroups = computed(() => {
     try {
@@ -82,6 +80,7 @@ export class CookieInfo implements OnInit {
         if (cookieGroup.find((cg) => cg.domain === cook.domain)) continue;
 
         cookieGroup.push({
+          id: uuidv4(),
           domain: cook.domain,
           cookies: this.cookies()!.filter((c) => c.domain === cook.domain),
         });
@@ -100,6 +99,7 @@ export class CookieInfo implements OnInit {
 
   addCookiePortal = viewChild.required<TemplateRef<any>>('addOrModifyCookie');
   addCookieOverlayRef: OverlayRef;
+  domainNameToAddCookie: string | null;
 
   modifyCookiePortal = viewChild.required<TemplateRef<any>>('addOrModifyCookie');
   modifyCookieOverlayRef: OverlayRef;
@@ -118,11 +118,29 @@ export class CookieInfo implements OnInit {
 
   protected expandedDomains = new Set<string>();
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['cookieGroups']) {
-      this.syncExpandedDomains();
+  private syncExpandedDomainsEffect = effect(() => {
+    const groups = this.cookieGroups();
+
+    if (!groups.length) {
+      this.expandedDomains.clear();
+      return;
     }
-  }
+
+    const existingDomains = new Set(groups.map((group) => group.domain));
+    const nextExpanded = new Set<string>();
+
+    for (const domain of this.expandedDomains) {
+      if (existingDomains.has(domain)) {
+        nextExpanded.add(domain);
+      }
+    }
+
+    this.expandedDomains = nextExpanded;
+
+    if (this.expandedDomains.size === 0) {
+      this.expandedDomains.add(groups[0].domain);
+    }
+  });
 
   handleClose(): void {
     this.onClose.emit();
@@ -198,8 +216,10 @@ export class CookieInfo implements OnInit {
     this.deleteCookieOverlayRef.attach(portal);
   }
 
-  showAddCookieModal() {
+  showAddCookieModal(domainNameToAddCookie?: string) {
     this.isAddCookie = true;
+    this.domainNameToAddCookie = domainNameToAddCookie === undefined ? null : domainNameToAddCookie;
+    console.log(`Добавляем куку в домен: ${this.domainNameToAddCookie}`);
 
     this.addCookieOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.addCookiePortal(), this.viewContainerRef);

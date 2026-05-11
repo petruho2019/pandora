@@ -39,7 +39,7 @@ const INITIAL_TEST_STATE: CollectionState = {
   entities: {
     'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b': {
       id: 'dc378aa8-b42e-468a-bb5d-5dad6e0f9b7b',
-      name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhg',
+      name: 'TEST 1 ajsdgajkshgdjkhagdkjgsajkdgjakgsdkjgasjdhgsdf;kjjhsdlkjfj;lsdfgjk;lkdsjfhl;kjdjsfgl;kjdsfg;jsdfglkjsdhfgljkshdfgkjhhsdfgkjhsdfjkghsdkjfghksdjfghkjsdfghkjsdfhgjksdhfgkjsdhfgkjsdfhgkjdshfgkjdshfgkjdgfs',
       path: 'D:\\1\\Developer\\silver\\Silver.Client\\collections_for_tests\\TEST 1',
     } as Collection,
 

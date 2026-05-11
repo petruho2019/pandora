@@ -127,7 +127,11 @@ export const cookieReducer = createReducer(
   initialState,
 
   on(loadCookiesSuccess, (state, { cookeis }) => cookieAdapter.addMany(cookeis, state)),
-  on(addCookieModalSuccess, (state, { addedCookie }) => cookieAdapter.addOne(addedCookie, state)),
+  on(addCookieModalSuccess, (state, { addedCookie }) => {
+    if (!addedCookie) return state;
+
+    return cookieAdapter.addOne(addedCookie, state);
+  }),
   on(modifyCookieModalSuccess, (state, { modifiedCookie }) =>
     cookieAdapter.updateOne(
       {

@@ -35,10 +35,6 @@ import {
   renameCollectionModal,
 } from '../../../store/actions/modal-actions/collections-modal.actions';
 import { createHttpRequest } from '../../../store/actions/modal-actions/request-modal.actions';
-import {
-  buildDefaultAuth,
-  buildDefaultBody,
-} from '../../../../../shared/models/requests/http/http-request-model';
 import { INITIAL_REQUESTS_STATE } from '../../../store/reducers/requests.reducer';
 
 @Component({

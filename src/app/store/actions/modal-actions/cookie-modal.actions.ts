@@ -8,11 +8,11 @@ import {
 
 export const addCookieModal = createAction(
   '[Cookie] Add',
-  props<{ actionData: ModalActionDataT<CookieModel> }>(),
+  props<{ actionData: ModalActionDataT<{ cookie: CookieModel; fromServer?: boolean }> }>(),
 );
 export const addCookieModalSuccess = createAction(
   '[Cookie] Add Success',
-  props<{ addedCookie: CookieModel }>(),
+  props<{ addedCookie: CookieModel | null }>(),
 );
 export const addCookieModalFailure = createAction(
   '[Cookie] Add Failure',

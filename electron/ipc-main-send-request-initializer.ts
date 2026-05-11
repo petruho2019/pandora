@@ -1,8 +1,9 @@
 import { IpcMain } from 'electron';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import FormData from 'form-data';
 import { buildFailureResultT, buildSuccessResultT, ResultT } from '../shared/models/result';
 import {
+  CookieModel,
   HttpConfigPayload,
   HttpResponseModel,
   HttpResponseModelWrapper,
@@ -11,6 +12,9 @@ import { RequestModel } from '../shared/models/requests/request';
 import * as fs from 'fs';
 import * as path from 'path';
 import { lookup } from 'mime-types';
+import { wrapper } from 'axios-cookiejar-support';
+import { CookieJar } from 'tough-cookie';
+import { v4 as uuidv4 } from 'uuid';
 
 type FilePayload = {
   kind: 'file';
@@ -29,6 +33,12 @@ type MultipartPayload = {
     contentType?: string;
   }>;
 };
+
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    jar?: CookieJar;
+  }
+}
 
 export function initializeSendRequest(ipcMain: IpcMain) {
   const controllers = new Map<string, AbortController>();
@@ -50,15 +60,18 @@ export function initializeSendRequest(ipcMain: IpcMain) {
           headers: {
             ...(configPayload.headers || {}),
             ...(resolvedBody.headers || {}),
+            Cookie: configPayload.cookiesHeader,
           },
           data: resolvedBody.data,
           signal: controller.signal,
           validateStatus: () => true,
         });
 
-        console.log(`response: ${res.status}`);
+        const cookies = (res.headers as any).getSetCookie();
 
-        const resultResponseModel = handleResponse(res, configPayload.req)!;
+        console.log(`Cookies: ${JSON.stringify(cookies, null, 2)}`);
+
+        const resultResponseModel = handleResponse(res, parseCookies(cookies))!;
 
         return {
           req: configPayload.req,
@@ -89,6 +102,68 @@ export function initializeSendRequest(ipcMain: IpcMain) {
   });
 
   // region functions
+
+  function parseCookies(cookieStrings: string[]): CookieModel[] {
+    return cookieStrings.map((cookieString) => {
+      const parts = cookieString
+        .split(';')
+        .map((x) => x.trim())
+        .filter(Boolean);
+
+      const [nameValue, ...attributes] = parts;
+
+      const [name = '', value = ''] = nameValue.split('=');
+
+      const cookie: CookieModel = {
+        id: uuidv4(),
+        name,
+        value,
+
+        path: '/',
+        domain: '',
+
+        expiresAt: null,
+
+        secure: false,
+        httpOnly: false,
+      };
+
+      for (const attr of attributes) {
+        const [rawKey, ...rawValue] = attr.split('=');
+
+        const key = rawKey.toLowerCase().trim();
+        const value = rawValue.join('=').trim();
+
+        switch (key) {
+          case 'path':
+            cookie.path = value;
+            break;
+
+          case 'domain':
+            cookie.domain = value;
+            break;
+
+          case 'expires':
+            cookie.expiresAt = value || null;
+            break;
+
+          case 'max-age':
+            cookie.expiresAt = new Date(Date.now() + Number(value) * 1000).toISOString();
+            break;
+
+          case 'secure':
+            cookie.secure = true;
+            break;
+
+          case 'httponly':
+            cookie.httpOnly = true;
+            break;
+        }
+      }
+
+      return cookie;
+    });
+  }
 
   async function resolveRequestBody(
     data: any,
@@ -183,13 +258,13 @@ export function initializeSendRequest(ipcMain: IpcMain) {
 
   function handleResponse(
     res: AxiosResponse<string>,
-    req: RequestModel,
+    cookies: CookieModel[],
   ): ResultT<HttpResponseModel, string> {
     console.log('Response Status:', res.status);
     console.log('Response Status Text:', res.statusText);
     console.log('Response Headers:', res.headers);
     console.log('Request URL:', res.config.url);
-    console.log('Raw Response Data:', res.data);
+    console.log('Cookies:', cookies);
 
     let responseData: string = res.data;
 
@@ -204,6 +279,7 @@ export function initializeSendRequest(ipcMain: IpcMain) {
       statusText: res.statusText,
       headers: res.headers,
       body: responseData,
+      cookies: cookies,
     });
   }
 

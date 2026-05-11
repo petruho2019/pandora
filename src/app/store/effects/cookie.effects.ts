@@ -14,7 +14,7 @@ import {
   modifyCookieModalFailure,
   modifyCookieModalSuccess,
 } from '../actions/modal-actions/cookie-modal.actions';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, concatMap, from, map, of, switchMap } from 'rxjs';
 import { CookieElectronService } from '../../../../services/electron/cookie-electron-service';
 import { OverlayRef } from '@angular/cdk/overlay';
 import { closeModal } from '../actions/modal-actions/modal.actions';
@@ -30,11 +30,16 @@ export class CookieEffects {
   addCookie$ = createEffect(() =>
     this.actions$.pipe(
       ofType(addCookieModal),
-      switchMap(({ actionData }) => {
-        return from(this.cookieElectronService.addCookie(actionData.body)).pipe(
+      concatMap(({ actionData }) => {
+        return from(
+          this.cookieElectronService.addCookie(actionData.body.cookie, actionData.body.fromServer),
+        ).pipe(
           map((addCookieResult) => {
             if (addCookieResult.isSuccess) {
-              this.dispatchModalSuccess('Cookie успешно добавлена');
+              if (!addCookieResult.body) {
+                return addCookieModalSuccess({ addedCookie: null });
+              }
+
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
               return addCookieModalSuccess({ addedCookie: addCookieResult.body! });
             } else {

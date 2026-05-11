@@ -24,7 +24,7 @@
     border-radius: 4px;
     border: var(--border-style);
     background-color: var(--background-color-contrasting);
-    color: var(--contrasting-color);
+    color: rgb(106, 170, 223);
 }
 
 .action-icon {
@@ -32,7 +32,7 @@
     flex: 0 0 12px;
     display: block;
     margin-right: 6px;
-    fill: var(--contrasting-color);
+    fill: rgb(106, 170, 223);
 }
 
 .collections-info-con {
@@ -80,6 +80,12 @@
     stroke: white;
 }
 
+.collection-item-info {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+}
+
 .collection-item-header {
     display: flex;
     align-items: center;
@@ -87,14 +93,15 @@
 }
 
 .collection-name {
-    overflow-x: hidden;
-    text-overflow: ellipsis;
+    max-width: 70%;
 }
 
 .collection-path {
     margin-top: 2px;
     color: #bbb; 
-    font-size: 12px
+    font-size: 12px;
+    max-width: 70%;
+
 }
 
 .collection-actions {

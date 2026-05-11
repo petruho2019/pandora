@@ -1,0 +1,84 @@
+.collection-info-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-height: 100%;
+    margin-bottom: 12px;
+}
+
+.collection-tab-items {
+    padding: 16px 8px 8px 14px;
+}
+
+.collection-info-con {
+    padding: 20px 8px 10px 14px;
+}
+
+.collection-info-header {
+    display: flex;
+    width: 90%;
+}
+
+.collection-icon {
+  flex: 0 0 20px;
+  display: block;
+  margin-right: 10px;
+  stroke-width: 0.1px;
+  stroke: white;
+}
+
+.coll-info {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.location,
+.request-quantity {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.icon-con {
+    display: flex;
+    padding: 12px;
+    border-radius: 6px;
+    
+}
+
+.location-icon-con {
+    background-color: rgba(48, 71, 102, 0.3);
+    border: rgba(48, 71, 102, 0.5) 1px solid;
+}
+
+.location-icon {
+    flex: 0 0 14px;
+    stroke: rgb(88, 135, 192);
+    stroke-width: 0.2px;
+    fill: rgb(88, 135, 192);
+}
+
+.request-icon-con {
+    background-color: rgba(119, 65, 97, 0.3);
+    border: rgba(119, 65, 97, 0.5) 1px solid;
+}
+
+.request-icon {
+    flex: 0 0 14px;
+    height: 14px;
+
+    stroke: rgb(235, 133, 192);
+    stroke-width: 0.2px;
+    fill: rgb(235, 133, 192);
+}
+
+.coll-path-info,
+.request-quantity-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}

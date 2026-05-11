@@ -5,19 +5,16 @@ import {
   TableRow,
 } from './../../../../../../shared/models/requests/request';
 import {
-  ChangeDetectorRef,
   Component,
   computed,
   EventEmitter,
   HostListener,
   inject,
   input,
-  Input,
   model,
   OnChanges,
   OnInit,
   Output,
-  signal,
   SimpleChanges,
 } from '@angular/core';
 import { RequestUrl } from './request-url/request-url';
@@ -30,7 +27,6 @@ import {
   BodyItem,
   CookieModel,
   HttpMethod,
-  HttpRequestModel,
 } from '../../../../../../shared/models/requests/http/http-request-model';
 import { RequestBody as RequestBodyComponent } from './tab-items/request-body/request-body';
 import { isEqual } from 'lodash';
@@ -44,7 +40,10 @@ import {
   MultipartField,
 } from '../../../../../../shared/models/requests/http/body';
 import { TabItemService } from '../../../../../../services/tab-item-service';
-import { BODY_KIND } from '../../../../../../shared/models/constants';
+import {
+  BODY_KIND,
+  GENERAL_INFORMATION_WORKSPACE_ID,
+} from '../../../../../../shared/models/constants';
 import { SendRequestService } from '../../../../../../services/electron/send-request-service';
 import { RequestStateService } from '../../../../../../services/request-state-service';
 import { RequestAuth } from './tab-items/request-auth/request-auth';
@@ -54,9 +53,7 @@ import {
   BasicAuth,
   BearerAuth,
 } from '../../../../../../shared/models/requests/http/auth';
-import { v4 as uuidv4 } from 'uuid';
 import { ResponseService } from '../../../../../../services/response-service';
-import { TabItem } from '../../../../../../shared/models/utils';
 import { Store } from '@ngrx/store';
 import {
   addCookieModal,
@@ -69,6 +66,9 @@ import {
   DeleteCookieActionDto,
   DeleteDomainActionDto,
 } from './request-url/cookies-info/cookies-info';
+import { selectAll } from '../../../../store/selectors/cookies.selectors';
+import { loadCookies } from '../../../../store/actions/cookies.actions';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'request-info',
@@ -91,14 +91,15 @@ export class RequestInfo implements OnInit, OnChanges {
   selectedBody = model<Record<string, BodyItem>>();
   selectedAuthType = model<Record<string, AuthItem>>();
 
-  @Output() selectedRequestSettingTabItemChanged = new EventEmitter<{
+  @Output() onSelectedRequestSettingTabItemChanged = new EventEmitter<{
     tabType: RequestSettingsTabItemsType;
     reqId: string;
   }>();
 
-  @Output() selectedBodyItemChanged = new EventEmitter<{ bodyItem: BodyItem; reqId: string }>();
-  @Output() selectedAuthItemChanged = new EventEmitter<{ authItem: AuthItem; reqId: string }>();
-  @Output() saveReq = new EventEmitter<RequestModel>();
+  @Output() onSelectedBodyItemChanged = new EventEmitter<{ bodyItem: BodyItem; reqId: string }>();
+  @Output() onSelectedAuthItemChanged = new EventEmitter<{ authItem: AuthItem; reqId: string }>();
+  @Output() onSaveReq = new EventEmitter<RequestModel>();
+  @Output() onCreateRequestTabItem = new EventEmitter();
 
   public isShowBodyTypes: boolean = false;
   public isShowAuthTypes: boolean = false;
@@ -116,6 +117,7 @@ export class RequestInfo implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.selectedBody()![this.req()!.id] = this.req()!.body[BODY_KIND.NONE];
+    this.store.dispatch(loadCookies());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -225,7 +227,7 @@ export class RequestInfo implements OnInit, OnChanges {
       [this.req()!.id]: tabItem,
     }));
 
-    this.selectedRequestSettingTabItemChanged.emit({
+    this.onSelectedRequestSettingTabItemChanged.emit({
       tabType: tabItem,
       reqId: this.req()!.id,
     });
@@ -234,8 +236,6 @@ export class RequestInfo implements OnInit, OnChanges {
   selectBodyType(body: BodyItem) {
     const newBody = structuredClone(body);
 
-    console.log(`Устанавливаем новый боди у запроса`);
-
     this.selectedBody.update((bis) => ({
       ...bis,
       [this.req()!.id]: newBody,
@@ -243,14 +243,12 @@ export class RequestInfo implements OnInit, OnChanges {
 
     this.isShowBodyTypes = false;
 
-    this.selectedBodyItemChanged.emit({ bodyItem: newBody, reqId: this.req()!.id });
+    this.onSelectedBodyItemChanged.emit({ bodyItem: newBody, reqId: this.req()!.id });
 
     this.checkIsReqChanged();
   }
   selectAuthType(auth: AuthItem) {
     const newAuth = structuredClone(auth);
-
-    console.log(`Устанавливаем новый auth у запроса`);
 
     this.selectedAuthType.update((ais) => ({
       ...ais,
@@ -259,7 +257,7 @@ export class RequestInfo implements OnInit, OnChanges {
 
     this.isShowAuthTypes = false;
 
-    this.selectedAuthItemChanged.emit({ authItem: newAuth, reqId: this.req()!.id });
+    this.onSelectedAuthItemChanged.emit({ authItem: newAuth, reqId: this.req()!.id });
 
     this.checkIsReqChanged();
   }
@@ -294,7 +292,7 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   handleSaveRequest() {
-    this.saveReq.emit(this.req()!);
+    this.onSaveReq.emit(this.req()!);
   }
 
   handleMethodChanged(newHttpMethod: HttpMethod) {
@@ -303,35 +301,51 @@ export class RequestInfo implements OnInit, OnChanges {
     this.tabItemService.updateRequest(this.req()!.id, { method: newHttpMethod });
   }
   handleUrlChanged(newUrl: string) {
-    const startParamsIndex = newUrl.indexOf('?');
-    let newParams: TableRow[] = [];
+    const [_, query = ''] = newUrl.split('?');
+    const urlParams = query ? query.split('&').filter(Boolean) : [];
+    const sourceParams = this.req()!.params;
 
-    if (startParamsIndex !== -1) {
-      const urlParams = newUrl.slice(newUrl.indexOf('?') + 1, newUrl.length);
+    const newParams: TableRow[] = [];
+    let urlIndex = 0;
 
-      newParams = urlParams.split('&').reduce<TableRow[]>((params, param, index) => {
-        let [key, value] = param.split('=');
+    if (sourceParams) {
+      for (const sourceParam of sourceParams) {
+        if (!sourceParam.isActive) {
+          newParams.push(sourceParam);
+          continue;
+        }
 
-        const sourceParam = this.req()!.params[index];
+        const currentParam = urlParams[urlIndex];
 
-        if (sourceParam) {
-          params[index] = {
-            ...sourceParam,
-            name: key ?? '',
-            value: value ?? '',
-          };
+        if (!currentParam) {
+          continue;
+        }
+
+        const [name = '', value = ''] = currentParam.split('=', 2);
+
+        if (name === sourceParam.name && value === sourceParam.value) {
+          newParams.push(sourceParam);
         } else {
-          params.push({
-            id: uuidv4(),
-            isActive: true,
-            name: key ?? '',
-            value: value ?? '',
-            fileInfo: null,
+          newParams.push({
+            ...sourceParam,
+            name,
+            value,
           });
         }
 
-        return params;
-      }, []);
+        urlIndex++;
+      }
+    }
+
+    for (; urlIndex < urlParams.length; urlIndex++) {
+      const [name = '', value = ''] = urlParams[urlIndex].split('=', 2);
+
+      newParams.push({
+        ...sourceParams?.[0],
+        name,
+        value,
+        isActive: true,
+      });
     }
 
     this.req()!.url = newUrl;
@@ -451,7 +465,13 @@ export class RequestInfo implements OnInit, OnChanges {
     const startRequestParamsIndex = this.req()!.url.lastIndexOf('?');
 
     if (urlParams === '?') {
-      const newUrl = this.req()!.url.slice(0, startRequestParamsIndex);
+      if (startRequestParamsIndex === -1) {
+        this.req()!.url = this.req()!.url;
+        this.tabItemService.updateRequest(this.req()!.id, { url: this.req()!.url });
+        return;
+      }
+
+      const newUrl = this.req()!.url.slice(0, startRequestParamsIndex + 1);
       this.req()!.url = newUrl;
       this.tabItemService.updateRequest(this.req()!.id, { url: newUrl });
       return;
@@ -470,7 +490,7 @@ export class RequestInfo implements OnInit, OnChanges {
 
   handleAddCookie(cookie: CookieModel, overlayRef: OverlayRef) {
     this.store.dispatch(
-      addCookieModal({ actionData: { body: cookie, modalOverlayRefs: [overlayRef] } }),
+      addCookieModal({ actionData: { body: { cookie: cookie }, modalOverlayRefs: [overlayRef] } }),
     );
   }
 
@@ -496,11 +516,18 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   async handleSendRequest() {
-    await this.sendRequestService.sendRequest(
-      this.req()!,
-      this.selectedBody()![this.req()!.id],
-      this.selectedAuthType()![this.req()!.id],
-    );
+    this.store
+      .select(selectAll)
+      .pipe(take(1))
+      .subscribe(
+        async (cookies) =>
+          await this.sendRequestService.sendRequest(
+            this.req()!,
+            this.selectedBody()![this.req()!.id],
+            this.selectedAuthType()![this.req()!.id],
+            cookies,
+          ),
+      );
   }
 
   async handleCancelRequest() {
@@ -542,10 +569,8 @@ export class RequestInfo implements OnInit, OnChanges {
     });
   }
 
-  @HostListener('document:click')
-  public closeBodyTypes() {
-    this.isShowBodyTypes = false;
-    this.isShowAuthTypes = false;
+  handleCreateRequestTabItem() {
+    this.onCreateRequestTabItem.emit();
   }
 
   isEmptyRow(row: TableRow) {
@@ -617,11 +642,24 @@ export class RequestInfo implements OnInit, OnChanges {
     this.requestStateService.setRequestChanged(req, changed);
   }
 
+  @HostListener('document:click')
+  public closeBodyTypes() {
+    this.isShowBodyTypes = false;
+    this.isShowAuthTypes = false;
+  }
+
   @HostListener('window:keydown', ['$event'])
-  handleGlobalKeyDown(event: KeyboardEvent) {
+  handleRequestKeyDown(event: KeyboardEvent) {
     if (event.ctrlKey && event.key === 'Enter') {
+      console.log(`Обрабатываем ctrl + Enter`);
       event.preventDefault();
       this.handleSendRequest();
+    }
+
+    if (event.ctrlKey && event.key === 'r') {
+      console.log(`Обрабатываем ctrl + R`);
+      event.preventDefault();
+      this.handleCreateRequestTabItem();
     }
   }
 }

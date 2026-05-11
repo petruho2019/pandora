@@ -38,6 +38,11 @@
     max-height: 150px;
 }
 
+.collection-item-icon {
+    min-width: 14px;
+
+}
+
 .collection-item {
     display: flex;
     align-items: center;
@@ -48,12 +53,9 @@
     transition: border-color, 0.15s;
 }
 
+
 .collection-item:hover {
     border-color: rgb(130, 130, 130);
-}
-
-.collection-item-icon {
-    margin-right: 10px;
 }
 
 .modal-actions {

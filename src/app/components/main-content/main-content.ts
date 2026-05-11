@@ -48,6 +48,7 @@ import { RequestResponseInfo } from './request-response-info/request-response-in
 import { CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
 import { take } from 'rxjs';
 import { RequestStateService } from '../../../../services/request-state-service';
+import { CollectionInfo } from "./item-infos/collection-info/collection-info";
 
 @Component({
   selector: 'main-content',
@@ -60,7 +61,8 @@ import { RequestStateService } from '../../../../services/request-state-service'
     RequestInfo,
     RequestResponseInfo,
     CdkDrag,
-  ],
+    CollectionInfo
+],
 })
 export class MainContent {
   private tabItemService = inject(TabItemService);
@@ -107,6 +109,10 @@ export class MainContent {
 
     return tabItem?.request?.request;
   });
+
+  currentCollWorkspace = computed(() => {
+    return this.workspaceInfoService.activeWorkspace()?.item;
+  })
 
   private _ = effect(() => {
     const tabItem = this.tabItemService.getActiveTabItem(
@@ -166,6 +172,13 @@ export class MainContent {
     return tabItem!.tabType === TabItemTypes.Request;
   }
 
+  isCollectionActiveTabItem() {
+    const tabItem = this.tabItemService.getActiveTabItem(
+      this.workspaceInfoService.activeWorkspaceId(),
+    );
+    return tabItem!.tabType === TabItemTypes.CollectionSettings;
+  }
+
   getRequestModel() {
     const tabItem = this.tabItemService.getActiveTabItem(
       this.workspaceInfoService.activeWorkspaceId(),
@@ -201,7 +214,6 @@ export class MainContent {
 
   handleSaveRequest(tabItem: TabItem, needCloseTabItem: boolean, reqAlreadyInStore: boolean) {
     if (reqAlreadyInStore) {
-      console.log(`Обновляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
       this.store
         .select(selectCollection(tabItem.request!.request!.collectionId!))
         .subscribe((col) => {
@@ -218,7 +230,6 @@ export class MainContent {
           );
         });
     } else {
-      console.log(`Добавляем запрос в fs: ${JSON.stringify(tabItem.request!.request!, null, 2)}`);
       this.store
         .select(selectCollection(tabItem.request!.request!.collectionId!))
         .subscribe((col) => {
@@ -293,6 +304,10 @@ export class MainContent {
 
   handleOpenCollection() {
     this.openCollection.emit();
+  }
+
+  handleAddDefaultRequestTabItem() {
+    this.mainContentTabItems.addRequestTabItem();
   }
 
   getMainContentWidth() {

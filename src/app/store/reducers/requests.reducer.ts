@@ -600,7 +600,6 @@ export const initialState: RequestState = {
 export const requestsReducer = createReducer(
   initialState,
   on(loadRequestsSuccess, (state, { loadedRequests: requests, collectionId }) => {
-    console.log(`Запросы: ${JSON.stringify(requests)}, id коллекции: ${collectionId}`);
     state.loadedByCollectionId.set(collectionId, true);
     return requestAdapter.addMany(requests, state);
   }),
@@ -619,9 +618,7 @@ export const requestsReducer = createReducer(
 
   on(moveRequest, (state, { fromIndex: fromIndex, toIndex: toIndex }) => {
     const requests = Object.values(state.entities);
-    console.log(`Запросы перед перемещением: ${JSON.stringify(requests)}`);
     moveItemInArray(requests, fromIndex, toIndex);
-    console.log(`Запросы после перемещения: ${JSON.stringify(requests)}`);
     return requestAdapter.setAll(requests as RequestModel[], state);
   }),
 

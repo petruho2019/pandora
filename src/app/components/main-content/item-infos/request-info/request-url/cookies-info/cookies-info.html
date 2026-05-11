@@ -1,9 +1,24 @@
-<div class="cookie-info-modal">
-  <modal-header [title]="headerTitle" (onClose)="handleClose()"></modal-header>
+<div class="cookie-info-modal" [style.min-width.px]="cookieGroups().length !== 0 ? 1200 : 400">
+  <div class="modal-header">
+    <div
+      class="modal-header-content"
+      [ngClass]="{ 'justify-space-between': cookieGroups().length === 0 }"
+    >
+      <p style="font-weight: 550">{{ headerTitle }}</p>
+
+      @if (cookieGroups().length !== 0) {
+        <button class="add-cookie-header-button pointer" (click)="showAddCookieModal()">
+          Добавить cookie
+        </button>
+      }
+
+      <close-modal-icon (close)="handleClose()"></close-modal-icon>
+    </div>
+  </div>
 
   <div class="cookie-info-content">
     <div class="cookie-domain-list scroll">
-      @for (group of cookieGroups(); track group.domain) {
+      @for (group of cookieGroups(); track group.id) {
         <section class="domain-card">
           <div
             class="domain-header"
@@ -27,7 +42,7 @@
                   class="icon-button add"
                   title="Добавить cookie"
                   aria-label="Добавить cookie"
-                  (click)="showAddCookieModal(); $event.stopPropagation()"
+                  (click)="showAddCookieModal(group.domain); $event.stopPropagation()"
                 >
                   <svg
                     class="action-icon-color add-cookie-icon"
@@ -164,13 +179,10 @@ Z"
 
                           <td>
                             <div
-                              class="cookie-value text-ellipsis"
+                              class="cookie-value text-ellipsis pointer"
                               [cdkCopyToClipboard]="cookie.value"
                               (cdkCopyToClipboardCopied)="addAlertNotificationCopiedSuccess()"
                             >
-                              {{ cookie.value }}
-                            </div>
-                            <div class="cookie-full-value">
                               {{ cookie.value }}
                             </div>
                           </td>
@@ -347,6 +359,7 @@ Z"
     (onModify)="handleAddOrModifyCookie($event)"
     [isAddCookie]="isAddCookie"
     [cookieToModify]="cookieToModify"
+    [domainNameToAddCookie]="domainNameToAddCookie"
     animate.enter="enter-animation"
     animate.leave="leave-animation"
   >

@@ -8,7 +8,7 @@ export class StopwatchService {
       {
         ms: number;
         sec: number;
-        intervalId: NodeJS.Timeout | null;
+        intervalId: number | null;
       }
     >
   >({});
@@ -59,8 +59,6 @@ export class StopwatchService {
 
     if (current?.intervalId) {
       clearInterval(current.intervalId);
-
-      console.log(`Очистили интервал ${current.intervalId}`);
     }
   }
 

@@ -10,7 +10,6 @@ import {
   HostListener,
   inject,
   input,
-  Input,
   OnInit,
   Output,
   QueryList,
@@ -31,16 +30,14 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import {
   DEFAULT_SIDEBAR_WIDTH_PX,
   GENERAL_INFORMATION_DESCRIPTION_TAB_ITEM_ID,
-  MIN_SIDEBAR_WIDTH_PX,
 } from '../../../../../shared/models/constants';
 import { RequestStateService } from '../../../../../services/request-state-service';
 import { SaveRequestModal } from './modals/save-request-modal/save-request-modal';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Store } from '@ngrx/store';
 import { SelectCollectionModal } from './modals/save-request-modal/modals/select-collection-modal/select-collection-modal';
 import { Subscription } from 'rxjs';
-import { App, buildOverlayRef } from '../../../app';
+import { buildOverlayRef } from '../../../app';
 @Component({
   selector: 'main-content-tab-items',
   imports: [NgClass, CdkDropList, CdkDrag, SaveRequestModal, SelectCollectionModal],
@@ -285,5 +282,9 @@ export class MainContentTabItems implements OnInit, DoCheck, AfterViewInit {
   handleCloseSelectCollection() {
     this.selectCollectionModalSubscription?.unsubscribe();
     this.selectCollectionOverlayRef.detach();
+  }
+
+  isReqChanged(reqId: string) {
+    return this.requestStateService.isRequestChanged(reqId);
   }
 }

@@ -4,8 +4,8 @@ import { ResultT } from '../../shared/models/result';
 
 @Injectable({ providedIn: 'root' })
 export class CookieElectronService {
-  addCookie(cookie: CookieModel): Promise<ResultT<CookieModel, string>> {
-    return (window as any).electronAPI?.addCookie(cookie);
+  addCookie(cookie: CookieModel, fromServer?: boolean): Promise<ResultT<CookieModel, string>> {
+    return (window as any).electronAPI?.addCookie({ fromServer: fromServer, cookie: cookie });
   }
   modifyCookie(cookie: CookieModel): Promise<ResultT<CookieModel, string>> {
     return (window as any).electronAPI?.modifyCookie(cookie);

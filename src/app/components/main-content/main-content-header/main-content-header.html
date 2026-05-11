@@ -37,6 +37,7 @@
           <span
             class="select-workspace pointer text-ellipsis"
             (click)="setWorkspace(workspaceTypes.Collection, coll)"
+            [ngClass]="{ selected: activeWorkspace()?.id === coll.id }"
             >{{ coll.name }}</span
           >
         }

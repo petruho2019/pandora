@@ -14,18 +14,27 @@ export function initializeCookies(store: ElectronStore<CookieElectronSchema>, ip
   //#region add
   ipcMain.handle(
     'add-cookie',
-    async (event, cookie: CookieModel): Promise<ResultT<CookieModel, string>> => {
-      console.log(`add-cookie, ${JSON.stringify(cookie, null, 2)}`);
+    async (
+      event,
+      cookieInfo: { fromServer: boolean; cookie: CookieModel },
+    ): Promise<ResultT<CookieModel | null, string>> => {
+      const { cookie, fromServer } = cookieInfo;
+
       const cookiesFromStore = store.get(COOKIES_KEY, []);
 
       if (!cookie.domain) return buildFailureResultT('Домен не может быть пустым');
       if (!cookie.name) return buildFailureResultT('Название не может быть пустым');
+      if (fromServer && !cookie.value) return buildSuccessResultT(null);
       if (!cookie.value) return buildFailureResultT('Значение не может быть пустым');
 
       for (const cfs of cookiesFromStore) {
-        if (cookie.domain === cfs.domain && cookie.name === cfs.name)
+        if (cookie.domain === cfs.domain && cookie.name === cfs.name) {
+          if (fromServer) return buildSuccessResultT(null);
           return buildFailureResultT('В данном домене уже есть cookie с таким названием');
+        }
       }
+
+      console.log(`Cookie to add: ${cookie.name}`);
 
       cookiesFromStore.push(cookie);
       store.set(COOKIES_KEY, cookiesFromStore);

@@ -16,6 +16,10 @@
     ></description-content>
   }
 
+  @if (isCollectionActiveTabItem()) {
+    <collection-info [coll]="currentCollWorkspace()!"></collection-info>
+  }
+
   @if (isRequestActiveTabItem()) {
     <div #reqInfo [style.height.px]="reqInfoHeight()[currentRequest()!.id]">
       <request-info
@@ -24,12 +28,13 @@
         [selectedTabItem]="selectedSettingRequestTabItems()"
         [selectedAuthType]="selectedAuthType()"
         [selectedBody]="selectedRequestBody()"
-        (selectedRequestSettingTabItemChanged)="
+        (onSelectedRequestSettingTabItemChanged)="
           handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)
         "
-        (selectedBodyItemChanged)="handleSelectedBodyItemChanged($event.bodyItem, $event.reqId)"
-        (selectedAuthItemChanged)="handleSelectedAuthItemChanged($event.authItem, $event.reqId)"
-        (saveReq)="handleClickSaveRequestIcon($event)"
+        (onSelectedBodyItemChanged)="handleSelectedBodyItemChanged($event.bodyItem, $event.reqId)"
+        (onSelectedAuthItemChanged)="handleSelectedAuthItemChanged($event.authItem, $event.reqId)"
+        (onSaveReq)="handleClickSaveRequestIcon($event)"
+        (onCreateRequestTabItem)="handleAddDefaultRequestTabItem()"
       ></request-info>
     </div>
 
