@@ -414,7 +414,6 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   handleTextBodyChanged(value: string) {
-    console.log(`Обрабатываем text body value changed`);
     const body = buildTextBody(value);
     this.req()!.body[BODY_KIND.TEXT] = body;
     this.tabItemService.updateRequest(this.req()!.id, {
@@ -662,13 +661,11 @@ export class RequestInfo implements OnInit, OnChanges {
   @HostListener('window:keydown', ['$event'])
   handleRequestKeyDown(event: KeyboardEvent) {
     if (event.ctrlKey && event.key === 'Enter') {
-      console.log(`Обрабатываем ctrl + Enter`);
       event.preventDefault();
       this.handleSendRequest();
     }
 
     if (event.ctrlKey && event.key === 'r') {
-      console.log(`Обрабатываем ctrl + R`);
       event.preventDefault();
       this.handleCreateRequestTabItem();
     }

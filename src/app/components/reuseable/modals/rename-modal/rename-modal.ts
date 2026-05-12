@@ -1,6 +1,6 @@
 import { RenameDto } from './../../../../../../shared/models/dto/shared-dtos';
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
-import { ModalHeader } from "../modal-header/modal-header";
+import { ModalHeader } from '../modal-header/modal-header';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -10,7 +10,6 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './rename-modal.css',
 })
 export class RenameModal {
-  
   @Input() headerTitle: string;
   @Input() itemId: string;
   @Input() newName: string;
@@ -18,20 +17,17 @@ export class RenameModal {
   @Output() onClose = new EventEmitter();
   @Output() onRename = new EventEmitter<RenameDto>();
 
-  rename(){
-    console.log(`Rename , name: ${this.newName}`);
-
-    this.onRename.emit({name: this.newName, id: this.itemId});
+  rename() {
+    this.onRename.emit({ name: this.newName, id: this.itemId });
     this.close();
   }
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    if(event.key === 'Escape')
-      this.close();
+    if (event.key === 'Escape') this.close();
   }
 
-  close(){
+  close() {
     this.onClose.emit();
   }
 }

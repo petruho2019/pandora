@@ -195,8 +195,6 @@ export class MainContent {
         },
       }));
 
-      console.log(`Добавляем дефолтный auth None`);
-
       this.collectionAuthInfos.update((info) => ({
         ...info,
         [collId]: structuredClone(
@@ -280,7 +278,6 @@ export class MainContent {
   }
 
   handleSaveRequest(tabItem: TabItem, needCloseTabItem: boolean, reqAlreadyInStore: boolean) {
-    console.log(`Сохранение запроса! handleSaveRequest лог`);
     if (reqAlreadyInStore) {
       this.store
         .select(selectCollection(tabItem.request!.request!.collectionId!))
@@ -363,8 +360,6 @@ export class MainContent {
   }
 
   handleSelectedCollectionAuthItemChanged(authItem: AuthItem) {
-    console.log(`Изменили authItem: ${JSON.stringify(authItem, null, 2)}`);
-
     this.selectedCollectionAuthItem.update((items) => ({
       ...items,
       [this.currentCollTabItem()!.id]: authItem,
@@ -374,8 +369,6 @@ export class MainContent {
   }
 
   handleSelectedAuthChanged(authItem: AuthItem) {
-    console.log(`Ввели значение: ${JSON.stringify(authItem, null, 2)}`);
-
     const collId = this.currentCollTabItem()!.id;
 
     this.collectionAuthInfos.update((infos) => ({

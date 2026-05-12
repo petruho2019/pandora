@@ -121,7 +121,6 @@ export class SideBarContent {
   }
 
   handleRenameCollection(overlay: OverlayRef, collectionInfo: RenameDto) {
-    console.log(`handleRenameCollection ${JSON.stringify(collectionInfo)}`);
     this.store.dispatch(
       renameCollectionModal({ actionData: { modalOverlayRefs: [overlay], body: collectionInfo } }),
     );

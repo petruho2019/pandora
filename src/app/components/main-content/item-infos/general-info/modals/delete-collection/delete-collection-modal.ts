@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
-import { ModalHeader } from "../../../../../reuseable/modals/modal-header/modal-header";
+import { ModalHeader } from '../../../../../reuseable/modals/modal-header/modal-header';
 import { DeleteCollectionDto } from '../../../../../../../../shared/models/collections/dto/collection-action-dtos';
 import { FormsModule } from '@angular/forms';
 import { NgClass, NgStyle, NgIf } from '@angular/common';
@@ -11,7 +11,6 @@ import { NgClass, NgStyle, NgIf } from '@angular/common';
   styleUrl: './delete-collection-modal.css',
 })
 export class DeleteCollection {
-
   public headerTitle = 'Удалить коллекцию';
 
   public deleteTemplate: string = '';
@@ -21,18 +20,16 @@ export class DeleteCollection {
   @Output() onClose = new EventEmitter();
   @Output() onDelete = new EventEmitter();
 
-  deleteCollection(){
-    console.log(`Удаление коллекции из модального компонента`);
+  deleteCollection() {
     this.onDelete.emit(this.collectionInfo.collectionId);
   }
 
-  close(){
+  close() {
     this.onClose.emit();
   }
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    if(event.key === 'Escape')
-      this.close();
+    if (event.key === 'Escape') this.close();
   }
 }

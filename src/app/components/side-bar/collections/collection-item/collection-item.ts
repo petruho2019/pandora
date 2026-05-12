@@ -110,7 +110,6 @@ export class CollectionItem {
     this.stopPropagation(event);
 
     this.actionsMenuService.openedId$.pipe(take(1)).subscribe((current) => {
-      console.log(`Current: ${current}`);
       current === id
         ? this.actionsMenuService.close()
         : this.actionsMenuService.open(

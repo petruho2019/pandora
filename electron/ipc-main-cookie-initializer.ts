@@ -34,8 +34,6 @@ export function initializeCookies(store: ElectronStore<CookieElectronSchema>, ip
         }
       }
 
-      console.log(`Cookie to add: ${cookie.name}`);
-
       cookiesFromStore.push(cookie);
       store.set(COOKIES_KEY, cookiesFromStore);
 
@@ -47,8 +45,6 @@ export function initializeCookies(store: ElectronStore<CookieElectronSchema>, ip
   ipcMain.handle(
     'modify-cookie',
     async (event, cookie: CookieModel): Promise<ResultT<CookieModel, string>> => {
-      console.log(`modify-cookie, ${JSON.stringify(cookie, null, 2)}`);
-
       const cookiesFromStore = store.get(COOKIES_KEY, []);
 
       if (!cookie.value) return buildFailureResultT('Значение не может быть пустым');
@@ -74,8 +70,6 @@ export function initializeCookies(store: ElectronStore<CookieElectronSchema>, ip
   ipcMain.handle(
     'delete-cookie',
     async (event, cookieId: string): Promise<ResultT<CookieModel[], string>> => {
-      console.log(`delete-cookie, ${cookieId}`);
-
       let cookiesFromStore = store.get(COOKIES_KEY, []);
       const cookieModelById = cookiesFromStore.find((c) => c.id === cookieId);
 
@@ -93,8 +87,6 @@ export function initializeCookies(store: ElectronStore<CookieElectronSchema>, ip
   ipcMain.handle(
     'delete-domain',
     async (event, domainName: string): Promise<ResultT<CookieModel[], string>> => {
-      console.log(`delete-domain, ${domainName}`);
-
       let cookiesFromStore = store.get(COOKIES_KEY, []);
 
       if (!domainName) return buildFailureResultT('Ошибка при очищении домена');

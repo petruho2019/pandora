@@ -77,8 +77,6 @@ export class ResponseService {
     const current = this._responses()[req.id];
     if (!current) return;
 
-    console.log(`Отменяем запрос: ${JSON.stringify(this._responses()[req.id])}`);
-
     this.requestElectronService.cancelRequest(this._responses()[req.id]?.controllerId);
 
     this._responses.update((responses) => ({

@@ -42,8 +42,6 @@ export function initializeCollection(
   ipcMain.handle('load-collections', async (): Promise<Collection[]> => {
     const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
 
-    console.log(`collectionsFromStore: ${JSON.stringify(collectionsFromStore, null, 2)}`);
-
     const [validCollections, isCollectionPathsValid] =
       await validateCollectionPaths(collectionsFromStore);
 
@@ -103,8 +101,6 @@ export function initializeCollection(
         return buildFailureResultT('Не удалось создать папку коллекции');
       }
 
-      console.log(`Full path to the collection ${fullCollectionPath}`);
-
       var createCollectionConfigFileResult = await createCollectionConfigFile(
         fullCollectionPath,
         collectionName,
@@ -129,8 +125,6 @@ export function initializeCollection(
   //#region remove-collection
 
   ipcMain.handle('remove-collection', (event, collectionId: string): Collection[] => {
-    console.log(`Remove collection, collectionId: ${collectionId}`);
-
     const collections = collectionStore.get(COLLECTIONS_KEY, []);
     const filtered = collections.filter((item) => item.id !== collectionId);
     collectionStore.set(COLLECTIONS_KEY, filtered);
@@ -183,8 +177,6 @@ export function initializeCollection(
 
       var openedCollection = mapCollection(collectionPath, collectionConfigResult.body!);
 
-      console.log(`Opened collection: ${openedCollection.path}`);
-
       collections.push(openedCollection);
       collectionStore.set(COLLECTIONS_KEY, collections);
 
@@ -216,8 +208,6 @@ export function initializeCollection(
       if (!collectionFromStore) return buildFailureResultT(`Коллекция не найдена`);
 
       const newCollectionPath = path.join(collectionInfo.collectionPath, collectionInfo.folderName);
-
-      console.log(`Old path ${collectionFromStore.path} and new path ${newCollectionPath}`);
 
       //if(collectionFromStore.path === newCollectionPath) return buildFailureResultT("В данной папке уже есть коллекция");
 
@@ -264,8 +254,6 @@ export function initializeCollection(
         await deleteFolder(newCollectionPath);
         return buildFailureResultT(copiedRequestsResult.error!);
       }
-
-      console.log(`copiedRequestsResult: ${JSON.stringify(copiedRequestsResult)}`);
 
       const requestsFromStore = requestStore.get(REQUESTS_KEY, []);
       requestsFromStore.push(...copiedRequestsResult.body!);
@@ -317,12 +305,10 @@ export function initializeCollection(
 
     switch (platformName) {
       case 'win':
-        console.log(`before spawn`);
         spawn('explorer.exe', [coll.path], {
           stdio: 'ignore',
           detached: true,
         });
-        console.log(`after spawn`);
         break;
       case 'linux':
         spawn('xdg-open', [coll.path]);
@@ -504,7 +490,6 @@ async function getCollectionConfigFile(
 }
 
 async function getRequestsByPath(collectionPath: string): Promise<ResultT<RequestModel[], string>> {
-  console.log(`changeCollectionIdAndRequestIdInRequests`);
   let requestFiles: fs.Dirent[];
   let requests: RequestModel[] = [];
   try {
@@ -515,8 +500,6 @@ async function getRequestsByPath(collectionPath: string): Promise<ResultT<Reques
   }
 
   for (const requestFileInfo of requestFiles) {
-    console.log(`Found ${requestFileInfo.name}`);
-
     if (!requestFileInfo.isFile()) {
       console.log(`Found ${requestFileInfo.name} not file, will skip`);
       continue;
@@ -533,8 +516,6 @@ async function getRequestsByPath(collectionPath: string): Promise<ResultT<Reques
       ) as RequestModel;
 
       const requestModel = HttpRequestSchema.parse(raw) as RequestModel;
-
-      console.log(`Request ${requestFileInfo.name} valid, will add to store`);
 
       requests.push(requestModel);
     } catch (error) {
@@ -561,7 +542,6 @@ async function copyRequests(
   newCollectionPath: string,
   newCollectionId: string,
 ): Promise<ResultT<RequestModel[], string>> {
-  console.log(`changeCollectionIdAndRequestIdInRequests`);
   let requestFiles: fs.Dirent[];
 
   try {
@@ -592,8 +572,6 @@ async function copyRequests(
       ) as RequestModel;
 
       const requestModel = HttpRequestSchema.parse(raw) as RequestModel;
-
-      console.log(`Request ${requestFileInfo.name} has parsed, will write`);
 
       requestModel.collectionId = newCollectionId;
       requestModel.id = uuidv4();

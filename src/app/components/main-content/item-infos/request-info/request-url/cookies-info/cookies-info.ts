@@ -219,7 +219,6 @@ export class CookieInfo {
   showAddCookieModal(domainNameToAddCookie?: string) {
     this.isAddCookie = true;
     this.domainNameToAddCookie = domainNameToAddCookie === undefined ? null : domainNameToAddCookie;
-    console.log(`Добавляем куку в домен: ${this.domainNameToAddCookie}`);
 
     this.addCookieOverlayRef = buildOverlayRef(this.overlay);
     const portal = new TemplatePortal(this.addCookiePortal(), this.viewContainerRef);

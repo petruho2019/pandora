@@ -180,15 +180,6 @@ export class PandoraTable implements AfterViewChecked, OnChanges, OnInit {
   }
 
   addFile(row: TableRow) {
-    // const input = event.target as HTMLInputElement;
-    // const file = input.files?.[0];
-
-    // if (file) {
-    //   row!.fileInfo!.fileValue = file;
-    // }
-
-    console.log(`Добавляем файл в tr: ${row.id}`);
-
     this.store.dispatch(
       addFile({ tableRowId: row.id, reqId: this.reqId!, contentType: row.fileInfo!.contentType }),
     );

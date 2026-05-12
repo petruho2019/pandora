@@ -38,7 +38,6 @@ export class SideBarHeader {
     event.stopPropagation();
 
     this.actionsMenuService.openedId$.pipe(take(1)).subscribe((current) => {
-      console.log(`Current: ${current}`);
       current === this.HEADER_MENU_ID
         ? this.actionsMenuService.close()
         : this.actionsMenuService.open(

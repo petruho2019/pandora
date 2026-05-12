@@ -69,8 +69,6 @@ export function initializeSendRequest(ipcMain: IpcMain) {
 
         const cookies = (res.headers as any).getSetCookie();
 
-        console.log(`Cookies: ${JSON.stringify(cookies, null, 2)}`);
-
         const resultResponseModel = handleResponse(res, parseCookies(cookies))!;
 
         return {
@@ -94,7 +92,6 @@ export function initializeSendRequest(ipcMain: IpcMain) {
   // region cancel-request
 
   ipcMain.handle('cancel-request', (_e, id: string | null) => {
-    console.log(`cancel-request withId: ${id}`);
     if (id) {
       controllers.get(id)!.abort();
       controllers.delete(id);

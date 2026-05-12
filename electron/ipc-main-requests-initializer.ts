@@ -138,8 +138,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
   ipcMain.handle(
     'load-requests',
     async (event, collectionInfo: LoadRequestDto): Promise<ResultT<RequestModel[], string>> => {
-      console.log(`${collectionInfo.collectionPath}`);
-
       if (!path.isAbsolute(collectionInfo.collectionPath))
         return buildFailureResultT(`Путь до коллекции должен быть абсолютным`);
       if (!collectionInfo.collectionId) return buildFailureResultT(`Collection id is null!`);
@@ -165,7 +163,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
             ) as RequestModel;
 
             requestsFromCollectionPath.push(HttpRequestSchema.parse(raw) as RequestModel);
-            console.log(`File with name: ${fileInfo.name} successfully loaded`);
           } catch (error) {
             if (error instanceof ZodError) {
               return buildFailureResultT(
@@ -195,8 +192,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
     async (event, requestInfo: RenameRequestDto): Promise<ResultT<RequestModel, string>> => {
       validateRenameRequestDto(requestInfo);
 
-      console.log(`Rename request ${JSON.stringify(requestInfo)}`);
-
       const requestFromStore = store.get(REQUESTS_KEY, []);
       const requestById = requestFromStore.find((r) => r.id === requestInfo.requestId);
 
@@ -204,8 +199,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
 
       requestById.name = requestInfo.newName;
       requestById.fileName = requestInfo.newFileName;
-
-      console.log(`new request: ${JSON.stringify(requestById)}`);
 
       try {
         await fs.promises.rename(
@@ -232,8 +225,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
       );
       store.set(REQUESTS_KEY, requestFromStore);
 
-      console.log(`New requests ${JSON.stringify(requestFromStore)}`);
-
       return buildSuccessResultT(requestById);
     },
   );
@@ -242,8 +233,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
   ipcMain.handle(
     'clone-request',
     async (event, requestInfo: CloneRequestDto): Promise<ResultT<RequestModel, string>> => {
-      console.log(`ipc-main-requests-initializer clone request: ${JSON.stringify(requestInfo)}`);
-
       if (!requestInfo.newFileName)
         return buildFailureResultT(`Новое название файла не может быть пустым`);
       if (!requestInfo.newName) return buildFailureResultT(`Новое название не может быть пустым`);
@@ -311,12 +300,10 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
 
       switch (platformName) {
         case 'win':
-          console.log(`before spawn`);
           spawn('explorer.exe', ['/select,', fullPath], {
             stdio: 'ignore',
             detached: true,
           });
-          console.log(`after spawn`);
           break;
         case 'linux':
           spawn('xdg-open', [fullPath]);
@@ -337,8 +324,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
   ipcMain.handle(
     'delete-request',
     async (event, requestInfo: DeleteRequestDto): Promise<ResultT<RequestModel[], string>> => {
-      console.log(`Trying to delete request ${requestInfo.requestId}`);
-
       const request = store.get(REQUESTS_KEY, []).find((r) => r.id === requestInfo.requestId);
 
       if (!request) return buildFailureResultT('Ошибка при удалении запроса');
@@ -355,7 +340,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
 
       try {
         await fs.promises.unlink(fullPath);
-        console.log(`Request successfully deleted`);
       } catch (error) {
         console.log(`Request already deleted, skip`);
       }
@@ -372,8 +356,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
   ipcMain.handle(
     'update-request',
     async (event, reqInfo: UpdateRequestInfoDto): Promise<ResultT<RequestModel, string>> => {
-      console.log(`Trying to update request ${JSON.stringify(reqInfo, null, 2)}`);
-
       if (reqInfo.req.name.trim().length === 0) {
         return buildFailureResultT('Название запроса не может быть пустым');
       }
@@ -383,7 +365,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
       const request = requestFromStore.find((r) => r.id === reqInfo.req.id);
 
       if (!request) {
-        console.log(`Request not found in store`);
         return buildFailureResultT('Ошибка при сохранении запроса');
       }
 
@@ -403,7 +384,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
           JSON.stringify(reqInfo.req, null, 2),
           { encoding: 'utf8' },
         );
-        console.log(`Request successfully updated`);
       } catch (error) {
         console.log(error);
         return buildFailureResultT('Ошибка при сохранении запроса');

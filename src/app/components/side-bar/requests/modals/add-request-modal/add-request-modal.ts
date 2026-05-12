@@ -3,7 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ModalHeader } from '../../../../reuseable/modals/modal-header/modal-header';
 import { CreateRequestInfo } from '../../../../../../../shared/models/event-models/add-request-info';
-import { buildDefaultAuth, buildDefaultBody, HttpMethod } from '../../../../../../../shared/models/requests/http/http-request-model';
+import {
+  buildDefaultAuth,
+  buildDefaultBody,
+  HttpMethod,
+} from '../../../../../../../shared/models/requests/http/http-request-model';
 import { NgClass } from '@angular/common';
 import { RequestType, RequestTypes } from '../../../../../../../shared/models/requests/request';
 
@@ -16,24 +20,16 @@ import { RequestType, RequestTypes } from '../../../../../../../shared/models/re
 export class AddRequestModal {
   @Output() close = new EventEmitter<void>();
   @Output() create = new EventEmitter<CreateRequestInfo>();
-  @Input() collectionId: string; 
-  @Input() collectionPath: string; 
+  @Input() collectionId: string;
+  @Input() collectionPath: string;
 
-  headerTitle: string = "Добавить запрос"
+  headerTitle: string = 'Добавить запрос';
 
   type: RequestType = RequestTypes.HTTP;
   name = '';
   url = '';
   selectedMethod: HttpMethod = 'GET';
-  methods: HttpMethod[] = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'HEAD',
-    'OPTIONS',
-  ];
+  methods: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
   showMethods = false;
 
@@ -47,10 +43,7 @@ export class AddRequestModal {
   }
 
   onCreate() {
-    console.log(`OnCreate add-request-modal , ${this.type}`);
-
     if (this.type === RequestTypes.HTTP) {
-      console.log(`Create request http`);
       this.create.emit({
         type: RequestTypes.HTTP,
         name: this.name.trim(),
@@ -60,7 +53,7 @@ export class AddRequestModal {
         collectionPath: this.collectionPath,
         body: buildDefaultBody(),
         auth: buildDefaultAuth(),
-        id: null
+        id: null,
       });
     }
 
@@ -86,7 +79,6 @@ export class AddRequestModal {
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
-    if(event.key === 'Escape')
-      this.close.emit();
+    if (event.key === 'Escape') this.close.emit();
   }
 }

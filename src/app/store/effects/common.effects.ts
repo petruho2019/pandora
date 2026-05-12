@@ -43,7 +43,6 @@ export class CommonEffects {
       switchMap(({ tableRowId, reqId, contentType }) =>
         from(this.commonElectronService.openFile()).pipe(
           map((result) => {
-            console.log(`Результат добавления файла: ${JSON.stringify(result, null, 2)}`);
             return result.isSuccess
               ? addFileSuccess({
                   fileDto: { tableRowId, reqId, filePath: result.body!, contentType: contentType },

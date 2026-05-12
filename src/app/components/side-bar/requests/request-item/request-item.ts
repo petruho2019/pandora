@@ -98,7 +98,6 @@ export class RequestCollectionItem implements OnInit {
   toggleActions($event: MouseEvent, trigger: HTMLElement) {
     $event.stopPropagation();
     this.actionsMenuService.openedId$.pipe(take(1)).subscribe((current) => {
-      console.log(`Current: ${current}`);
       current === this.request.id
         ? this.actionsMenuService.close()
         : this.actionsMenuService.open(
@@ -189,8 +188,6 @@ export class RequestCollectionItem implements OnInit {
   }
 
   handleDelete(requestId: string) {
-    console.log(`Удаление запроса ${requestId}`);
-
     const requestInfo: DeleteRequestDto = {
       requestId: requestId,
       collectionPath: this.collection.path,

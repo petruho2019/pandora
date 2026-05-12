@@ -143,7 +143,6 @@ export class RequestEffects {
       switchMap(({ actionData }) => {
         return from(this.electronService.cloneRequest(actionData.body)).pipe(
           map((cloneRequestResult) => {
-            console.log(`Результат клонирования: ${JSON.stringify(cloneRequestResult)}`);
             if (cloneRequestResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
               this.dispatchModalSuccess('Запрос успешно склонирован');
@@ -151,7 +150,6 @@ export class RequestEffects {
                 clonedRequest: cloneRequestResult.body as RequestModel,
               });
             } else {
-              console.log(`else в cloneRequest$`);
               this.dispatchModalFailure(cloneRequestResult.error!);
               return cloneRequestFailure({ errorMessage: cloneRequestResult.error! });
             }
@@ -172,10 +170,8 @@ export class RequestEffects {
       debounceTime(300),
       distinctUntilChanged(),
       switchMap(({ requestInfo }) => {
-        console.log(`Effect openRequestInFS`);
         return from(this.electronService.openRequestInFS(requestInfo)).pipe(
           map((openRequestInFsResult) => {
-            console.log(`openRequestInFsResult ${JSON.stringify(openRequestInFsResult)}`);
             if (openRequestInFsResult.isSuccess) return openRequestInFSSuccess();
             else {
               this.dispatchModalFailure(openRequestInFsResult.errorMessage!);
@@ -200,7 +196,6 @@ export class RequestEffects {
       switchMap(({ actionData }) => {
         return from(this.electronService.deleteRequest(actionData.body)).pipe(
           map((deleteRequestResult) => {
-            console.log(`deleteRequestResult ${JSON.stringify(deleteRequestResult)}`);
             if (deleteRequestResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
               this.dispatchModalSuccess('Запрос успешно удален');

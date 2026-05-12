@@ -102,18 +102,14 @@ export class CollectionEffects {
     this.actions$.pipe(
       ofType(openCollection),
       exhaustMap(() => {
-        console.log(`Open collection , select folder`);
         return from(this.electronService.selectFolder()).pipe(
           map((path) => ({ path })),
           catchError((err) => {
-            console.error('Диалог закрыт или ошибка', err);
             return of({ path: null });
           }),
         );
       }),
       switchMap(({ path }) => {
-        console.log(`Selected folder: ${path}`);
-
         if (!path) {
           return of(openCollectionCancel());
         }
@@ -161,13 +157,9 @@ export class CollectionEffects {
   cloneCollection$ = createEffect(() =>
     this.actions$.pipe(
       ofType(cloneCollectionModal),
-      tap(() => {
-        console.log(`CloneCollectionEffect!!`);
-      }),
       switchMap(({ actionData }) =>
         from(this.electronService.cloneCollection(actionData.body)).pipe(
           map((clonecollectionResult) => {
-            console.log(`Clone result ${JSON.stringify(clonecollectionResult)}`);
             if (clonecollectionResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
               this.dispatchSuccess('Коллекция успешно склонированна');
@@ -231,10 +223,6 @@ export class CollectionEffects {
       switchMap(({ actionData }) =>
         from(this.electronService.deleteCollection(actionData.body)).pipe(
           map((deleteCollectionResult) => {
-            console.log(
-              `Effect из удаление коллекции: ${JSON.stringify(deleteCollectionResult, null, 2)}`,
-            );
-
             if (deleteCollectionResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
               this.dispatchSuccess('Коллекция успешно удалена');

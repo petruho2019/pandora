@@ -131,10 +131,6 @@ export class SendRequestService {
       headers[row.name] = row.value;
     }
 
-    console.log(
-      `Auth: ${JSON.stringify(builtAuth, null, 2)}, выбранный auth коллекции: ${JSON.stringify(selectedCollectionAuth, null, 2)}`,
-    );
-
     Object.assign(headers, builtBody.headers || {});
     Object.assign(headers, builtAuth.headers || {});
     Object.assign(headers, collHeaders || {});
@@ -147,13 +143,10 @@ export class SendRequestService {
   }
 
   private buildAuth(auth: AuthItem): BuiltAuth {
-    console.log(`Билдим auth: ${JSON.stringify(auth, null, 2)}`);
-
     switch (auth.kind) {
       case 'basic':
         if (auth.username && auth.password) {
           const token = `${this.toBase64(auth.username)}:${this.toBase64(auth.password)}`;
-          console.log(`Добавляем хедер Authorization`);
           return {
             headers: {
               Authorization: `Basic ${token}`,
@@ -293,8 +286,6 @@ export class SendRequestService {
         .filter((c) => c.domain === urlObj.hostname)
         .map((c) => `${encodeURIComponent(c.name)}=${c.value};`)
         .join(' ');
-
-      console.log(`${cookiesJoined}`);
 
       return cookiesJoined;
     } catch (error) {

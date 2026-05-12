@@ -12,7 +12,6 @@ export const filesReducer = createReducer(
   initialState,
 
   on(addFileSuccess, (state, { fileDto }) => {
-    console.log(`filesReducer добавляем file: ${JSON.stringify(fileDto, null, 2)}`);
     return filesAdapter.addOne(
       {
         id: uuidv4(),
