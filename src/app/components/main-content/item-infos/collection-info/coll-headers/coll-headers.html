@@ -1,0 +1,12 @@
+<div class="headers-con">
+  <span style="color: #bbb; font-size: 13px"
+    >Добавте заголовоки которые будут отправлены с каждым запросом коллекции</span
+  >
+
+  <div class="pandora-table-wrapper">
+    <pandora-table [initialData]="tableInitialData()" (tableChanged)="handleHeadersChanged($event)">
+    </pandora-table>
+  </div>
+
+  <div class="save-button pointer" (click)="saveHeaders()">Сохранить</div>
+</div>
