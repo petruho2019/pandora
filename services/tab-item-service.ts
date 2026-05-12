@@ -236,4 +236,28 @@ export class TabItemService {
       return newState;
     });
   }
+
+  updateCollection(collId: string, patch: Partial<Collection>) {
+    this._tabItemsByWorkspaceId.update((state) => {
+      const newState: Record<string, TabItem[]> = {};
+
+      for (const workspaceId in state) {
+        newState[workspaceId] = state[workspaceId].map((tab) => {
+          if (!tab.collection) return tab;
+
+          if (tab.collection!.id !== collId) return tab;
+
+          return {
+            ...tab,
+            collection: {
+              ...tab.collection,
+              ...patch,
+            },
+          };
+        });
+      }
+
+      return newState;
+    });
+  }
 }

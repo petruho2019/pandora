@@ -15,6 +15,7 @@ import {
   OnChanges,
   OnInit,
   Output,
+  Signal,
   SimpleChanges,
 } from '@angular/core';
 import { RequestUrl } from './request-url/request-url';
@@ -50,8 +51,8 @@ import { RequestAuth } from './tab-items/request-auth/request-auth';
 import { BasicAuthInfoDto } from '../../../../../../shared/models/requests/dto/request-dtos';
 import {
   AUTH_KIND,
-  BasicAuth,
-  BearerAuth,
+  HttpBasicAuth,
+  HttpBearerAuth,
 } from '../../../../../../shared/models/requests/http/auth';
 import { ResponseService } from '../../../../../../services/response-service';
 import { Store } from '@ngrx/store';
@@ -69,6 +70,8 @@ import {
 import { selectAll } from '../../../../store/selectors/cookies.selectors';
 import { loadCookies } from '../../../../store/actions/cookies.actions';
 import { take } from 'rxjs';
+import { selectCollection } from '../../../../store/selectors/collections.selectors';
+import { Collection } from '../../../../../../shared/models/collections/collection';
 
 @Component({
   selector: 'request-info',
@@ -90,6 +93,7 @@ export class RequestInfo implements OnInit, OnChanges {
   selectedTabItem = model<Record<string, RequestSettingsTabItemsType>>();
   selectedBody = model<Record<string, BodyItem>>();
   selectedAuthType = model<Record<string, AuthItem>>();
+  selectedCollectionAuth = input<AuthItem>();
 
   @Output() onSelectedRequestSettingTabItemChanged = new EventEmitter<{
     tabType: RequestSettingsTabItemsType;
@@ -516,6 +520,11 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   async handleSendRequest() {
+    let coll: Signal<Collection | undefined>;
+    if (this.req()!.collectionId) {
+      coll = this.store.selectSignal(selectCollection(this.req()!.collectionId!));
+    }
+
     this.store
       .select(selectAll)
       .pipe(take(1))
@@ -526,6 +535,8 @@ export class RequestInfo implements OnInit, OnChanges {
             this.selectedBody()![this.req()!.id],
             this.selectedAuthType()![this.req()!.id],
             cookies,
+            coll(),
+            this.selectedCollectionAuth()!,
           ),
       );
   }
@@ -535,7 +546,7 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   handleBasicAuthChanged(credInfo: BasicAuthInfoDto) {
-    const auth: BasicAuth = {
+    const auth: HttpBasicAuth = {
       kind: 'basic',
       name: 'Базовая',
       username: credInfo.username,
@@ -553,7 +564,7 @@ export class RequestInfo implements OnInit, OnChanges {
   }
 
   handleBearerAuthChaned(token: string | null) {
-    const auth: BearerAuth = {
+    const auth: HttpBearerAuth = {
       kind: 'bearer',
       name: 'Bearer токен',
       token: token,

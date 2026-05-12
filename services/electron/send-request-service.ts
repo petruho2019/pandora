@@ -14,12 +14,13 @@ import {
   FileBody,
 } from '../../shared/models/requests/http/body';
 import { ResponseService } from '../response-service';
-import { RequestModel } from '../../shared/models/requests/request';
+import { RequestModel, TableRow } from '../../shared/models/requests/request';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestElectronService } from './request-electron-service';
 import { StopwatchService } from '../stopwatch-service';
 import { Store } from '@ngrx/store';
 import { addCookieModal } from '../../src/app/store/actions/modal-actions/cookie-modal.actions';
+import { Collection } from '../../shared/models/collections/collection';
 
 type BuiltBody = {
   data?: any;
@@ -42,12 +43,16 @@ export class SendRequestService {
     selectedBody: BodyItem,
     selectedAuth: AuthItem,
     cookies: CookieModel[],
+    coll: Collection | undefined,
+    selectedCollectionAuth: AuthItem,
   ): Promise<HttpResponseModelWrapper> {
     const { body, headers, cookiesHeader } = this.buildHttpClientOptions(
       req,
       selectedBody,
       selectedAuth,
       cookies,
+      coll,
+      selectedCollectionAuth,
     );
 
     console.log(`Отправляем запрос по url ${req.url}`);
@@ -92,114 +97,7 @@ export class SendRequestService {
 
     this.stopwatchService.start(req.id);
 
-    const result = true
-      ? await this.requestElectronService.sendRequest(config)
-      : JSON.parse(`{
-  "req": {
-    "id": "0a836e78-9a56-497b-bb21-f6a58e3cdeed",
-    "name": "asdasd",
-    "auth": {
-      "none": {
-        "kind": "none",
-        "name": "Без аутентификации"
-      },
-      "bearer": {
-        "kind": "bearer",
-        "name": "Bearer токен",
-        "token": "asdasdasdasd"
-      },
-      "basic": {
-        "kind": "basic",
-        "name": "Базовая",
-        "username": "asd",
-        "password": "asd"
-      }
-    },
-    "url": "http://localhost:5250/text",
-    "type": "HTTP",
-    "collectionId": "cc21cc73-dc46-469d-98d1-efe227863fd0",
-    "method": "GET",
-    "headers": [],
-    "body": {
-      "none": {
-        "kind": "none",
-        "group": "Other",
-        "name": "Без тела"
-      },
-      "json": {
-        "kind": "json",
-        "contentType": "application/json",
-        "group": "Raw",
-        "name": "Json",
-        "value": "asd"
-      },
-      "multipart-form": {
-        "kind": "multipart-form",
-        "name": "Составная форма",
-        "fields": [
-          {
-            "id": "420d25df-e011-4409-8a64-e42f3890b45c",
-            "type": "text",
-            "key": "",
-            "value": "",
-            "isActive": true,
-            "contentType": null
-          }
-        ],
-        "group": "Form"
-      },
-      "file": {
-        "kind": "file",
-        "name": "Файл",
-        "files": [],
-        "group": "Other"
-      }
-    },
-    "fileName": "asdasd",
-    "params": []
-  },
-  "controllerId": "f5a876af-2ef8-4ce2-abc1-3e3e57cad7e6",
-  "responseResult": {
-    "body": {
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "content-length": "13",
-        "content-type": "text/plain; charset=utf-8",
-        "date": "Tue, 05 May 2026 20:13:40 GMT",
-        "server": "Kestrel"
-      },
-      "body": "slkdfnhsl
-      фыв
-      фыв
-      
-      фыв
-      
-      фыв
-      
-      фыв
-      
-      фы
-      в
-      фы
-      в
-      фы
-      в
-      фы
-      в
-      ф
-      ыв
-      ф
-      ыв
-      
-      фы
-      в,jdf"
-    },
-    "error": null,
-    "isSuccess": true,
-    "isFailure": false
-  }
-}`);
+    const result = await this.requestElectronService.sendRequest(config);
 
     this.stopwatchService.stop(req.id);
 
@@ -211,14 +109,18 @@ export class SendRequestService {
     selectedBody: BodyItem,
     selectedAuth: AuthItem,
     cookies: CookieModel[],
+    coll: Collection | undefined,
+    selectedCollectionAuth: AuthItem,
   ): { body?: any; headers: Record<string, string>; cookiesHeader: string } {
     const activeBody = request.body[selectedBody.kind] ?? request.body['none'];
 
     const activeAuth = request.auth[selectedAuth.kind] ?? request.auth['none'];
 
     const builtBody = this.buildBody(activeBody);
-    const builtAuth = this.buildAuth(activeAuth);
+    let builtAuth = this.buildAuth(activeAuth);
     const cookiesHeader = this.buildCookiesHeader(cookies, request.url);
+    const collHeaders = this.buildCollHeaders(coll);
+    if (!builtAuth.headers) builtAuth = this.buildAuth(selectedCollectionAuth);
 
     const headers: Record<string, string> = {};
 
@@ -229,8 +131,13 @@ export class SendRequestService {
       headers[row.name] = row.value;
     }
 
+    console.log(
+      `Auth: ${JSON.stringify(builtAuth, null, 2)}, выбранный auth коллекции: ${JSON.stringify(selectedCollectionAuth, null, 2)}`,
+    );
+
     Object.assign(headers, builtBody.headers || {});
     Object.assign(headers, builtAuth.headers || {});
+    Object.assign(headers, collHeaders || {});
 
     return {
       body: request.method === 'GET' || request.method === 'HEAD' ? undefined : builtBody.data,
@@ -240,10 +147,13 @@ export class SendRequestService {
   }
 
   private buildAuth(auth: AuthItem): BuiltAuth {
+    console.log(`Билдим auth: ${JSON.stringify(auth, null, 2)}`);
+
     switch (auth.kind) {
       case 'basic':
         if (auth.username && auth.password) {
-          const token = btoa(`${auth.username}:${auth.password}`);
+          const token = `${this.toBase64(auth.username)}:${this.toBase64(auth.password)}`;
+          console.log(`Добавляем хедер Authorization`);
           return {
             headers: {
               Authorization: `Basic ${token}`,
@@ -390,5 +300,34 @@ export class SendRequestService {
     } catch (error) {
       return '';
     }
+  }
+
+  private buildCollHeaders(coll: Collection | undefined): Record<string, string> {
+    if (!Boolean(coll)) return {};
+
+    const headers = this.mapTableRowToHeaderRecord(
+      coll?.collectionConfig.collectionSettings.headers ?? [],
+    );
+
+    return headers;
+  }
+
+  private mapTableRowToHeaderRecord(rows: TableRow[]): Record<string, string> {
+    const headers: Record<string, string> = {};
+
+    for (const row of rows) {
+      if (Boolean(row.name) && row.isActive) headers[row.name] = row.value;
+    }
+
+    return headers;
+  }
+
+  private toBase64(txt: string) {
+    const uint8Array = new TextEncoder().encode(txt);
+    let binary = '';
+
+    for (let i = 0; i < uint8Array.length; ++i) binary += String.fromCharCode(uint8Array[i]);
+
+    return btoa(binary);
   }
 }

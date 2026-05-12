@@ -1,25 +1,25 @@
-export interface BasicAuth {
-    kind: 'basic',
-    name: 'Базовая'
-    username: string | null ,
-    password: string | null
+export interface HttpBasicAuth {
+  kind: 'basic';
+  name: 'Базовая';
+  username: string | null;
+  password: string | null;
 }
 
-export interface BearerAuth {
-    kind: 'bearer',
-    name: 'Bearer токен',
-    token: string | null,
+export interface HttpBearerAuth {
+  kind: 'bearer';
+  name: 'Bearer токен';
+  token: string | null;
 }
 
-export interface InheritAuth {
-    kind: 'inherit',
-    name: 'Наследовать из коллекции',
-    authTypeFromColl: AuthKind,
+export interface HttpInheritAuth {
+  kind: 'inherit';
+  name: 'Наследовать из коллекции';
+  authTypeFromColl: AuthKind;
 }
 
-export interface NoAuth {
-    kind: 'none',
-    name: 'Без аутентификации'
+export interface HttpNoAuth {
+  kind: 'none';
+  name: 'Без аутентификации';
 }
 
 export const AUTH_KIND = {
@@ -29,4 +29,4 @@ export const AUTH_KIND = {
   NONE: 'none' as const,
 } as const;
 
-export type AuthKind = typeof AUTH_KIND[keyof typeof AUTH_KIND];
+export type AuthKind = (typeof AUTH_KIND)[keyof typeof AUTH_KIND];

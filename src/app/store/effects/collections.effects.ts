@@ -21,6 +21,12 @@ import {
   openCollectionFailure,
   openCollectionInFS,
   openCollectionSuccess,
+  updateCollectionAuth,
+  updateCollectionAuthFailure,
+  updateCollectionAuthSuccess,
+  updateCollectionHeaders,
+  updateCollectionHeadersFailure,
+  updateCollectionHeadersSuccess,
 } from '../actions/collections.actions';
 import {
   addCollectionModal,
@@ -59,7 +65,7 @@ export class CollectionEffects {
           }),
           catchError((error) => {
             const errorMessage = 'Непредвиденная ошибка при загрузке коллекций';
-            this.dispatchModalFailure(errorMessage);
+            this.dispatchFailure(errorMessage);
             return of(loadCollectionsFailure({ errorMessage: errorMessage }));
           }),
         ),
@@ -75,16 +81,16 @@ export class CollectionEffects {
           map((addCollectionResult) => {
             if (addCollectionResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
-              this.dispatchModalSuccess('Коллекция успешно добавлена');
+              this.dispatchSuccess('Коллекция успешно добавлена');
               return addCollectionModalSuccess({ addedCollection: addCollectionResult.body! });
             } else {
-              this.dispatchModalFailure(addCollectionResult.error!);
+              this.dispatchFailure(addCollectionResult.error!);
               return addCollectionModalFailure({ errorMessage: addCollectionResult.error! });
             }
           }),
           catchError((err) => {
             const errorMessage = 'Непредвиденная ошибка при добавлении коллекций';
-            this.dispatchModalFailure(errorMessage);
+            this.dispatchFailure(errorMessage);
             return of(addCollectionModalFailure({ errorMessage: errorMessage }));
           }),
         ),
@@ -115,16 +121,16 @@ export class CollectionEffects {
         return from(this.electronService.openCollection({ collectionPath: path })).pipe(
           map((openCollectionResult) => {
             if (openCollectionResult.isSuccess) {
-              this.dispatchModalSuccess('Коллекция успешно открыта');
+              this.dispatchSuccess('Коллекция успешно открыта');
               return openCollectionSuccess({ collection: openCollectionResult.body! });
             } else {
-              this.dispatchModalFailure(openCollectionResult.error!);
+              this.dispatchFailure(openCollectionResult.error!);
               return openCollectionFailure({ errorMessage: openCollectionResult.error });
             }
           }),
           catchError((err) => {
             const errorMessage = 'Непредвиденная ошибка при открытии коллекций';
-            this.dispatchModalFailure(errorMessage);
+            this.dispatchFailure(errorMessage);
             return of(openCollectionFailure({ errorMessage: errorMessage }));
           }),
         );
@@ -139,12 +145,12 @@ export class CollectionEffects {
         from(this.electronService.removeCollection(actionData.body.collectionId)).pipe(
           map((collections) => {
             this.dispatchCloseModal(actionData.modalOverlayRefs!);
-            this.dispatchModalSuccess('Коллекция успешно закрыта');
+            this.dispatchSuccess('Коллекция успешно закрыта');
             return closeCollectionModalSuccess({ newCollections: collections });
           }),
           catchError(() => {
             const errorMessage = 'Непредвиденная ошибка при удалении коллекций';
-            this.dispatchModalFailure(errorMessage);
+            this.dispatchFailure(errorMessage);
             return of(closeCollectionModalFailure({ errorMessage: errorMessage }));
           }), // Скорее всего невозможна
         ),
@@ -164,16 +170,16 @@ export class CollectionEffects {
             console.log(`Clone result ${JSON.stringify(clonecollectionResult)}`);
             if (clonecollectionResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
-              this.dispatchModalSuccess('Коллекция успешно склонированна');
+              this.dispatchSuccess('Коллекция успешно склонированна');
               return cloneCollectionModalSuccess({ clonedCollection: clonecollectionResult.body! });
             } else {
-              this.dispatchModalFailure(clonecollectionResult.error!);
+              this.dispatchFailure(clonecollectionResult.error!);
               return cloneCollectionModalFailure({ errorMessage: clonecollectionResult.error! });
             }
           }),
           catchError((err) => {
             const errorMessage = 'Непредвиденная ошибка при клонировании коллекций';
-            this.dispatchModalFailure(errorMessage);
+            this.dispatchFailure(errorMessage);
             return of(cloneCollectionModalFailure({ errorMessage: errorMessage }));
           }),
         ),
@@ -189,18 +195,18 @@ export class CollectionEffects {
           map((renameCollectionResult) => {
             if (renameCollectionResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
-              this.dispatchModalSuccess('Коллекция успешно переименована');
+              this.dispatchSuccess('Коллекция успешно переименована');
               return renameCollectionModalSuccess({
                 renamedCollection: renameCollectionResult.body!,
               });
             } else {
-              this.dispatchModalFailure(renameCollectionResult.error!);
+              this.dispatchFailure(renameCollectionResult.error!);
               return renameCollectionModalFailure({ errorMessage: renameCollectionResult.error! });
             }
           }),
           catchError((err) => {
             const errorMessage = 'Непредвиденная ошибка при переименовании коллекции';
-            this.dispatchModalFailure(errorMessage);
+            this.dispatchFailure(errorMessage);
             return of(renameCollectionModalFailure({ errorMessage: errorMessage }));
           }),
         ),
@@ -231,22 +237,72 @@ export class CollectionEffects {
 
             if (deleteCollectionResult.isSuccess) {
               this.dispatchCloseModal(actionData.modalOverlayRefs!);
-              this.dispatchModalSuccess('Коллекция успешно удалена');
+              this.dispatchSuccess('Коллекция успешно удалена');
               return deleteCollectionModalSuccess({ newCollections: deleteCollectionResult.body! });
             } else {
-              this.dispatchModalFailure(deleteCollectionResult.error!);
+              this.dispatchFailure(deleteCollectionResult.error!);
               return deleteCollectionModalFailure({ errorMessage: deleteCollectionResult.error! });
             }
           }),
           catchError((err) => {
             const errorMessage = 'Непредвиденная ошибка при удалении коллекции';
-            this.dispatchModalFailure(errorMessage);
+            this.dispatchFailure(errorMessage);
             return of(deleteCollectionModalFailure({ errorMessage: errorMessage }));
           }),
         ),
       ),
     ),
-  ); //
+  );
+
+  updateCollectionHeaders$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateCollectionHeaders),
+      switchMap(({ updateDto }) => {
+        const { collId, headers } = updateDto;
+        return from(this.electronService.updateCollectionHeaders(collId, headers)).pipe(
+          map((updateHeadersResult) => {
+            if (updateHeadersResult.isSuccess) {
+              this.dispatchSuccess('Заголовки успешно сохранены');
+              return updateCollectionHeadersSuccess({ coll: updateHeadersResult.body! });
+            } else {
+              this.dispatchFailure(updateHeadersResult.error!);
+              return updateCollectionHeadersFailure({ errorMessage: updateHeadersResult.error! });
+            }
+          }),
+          catchError(() => {
+            const errorMessage = 'Непредвиденная ошибка при сохранении заголовков';
+            this.dispatchFailure(errorMessage);
+            return of(updateCollectionHeadersFailure({ errorMessage: errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  updateCollectionAuth$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateCollectionAuth),
+      switchMap(({ updateDto }) => {
+        const { collId, auth } = updateDto;
+        return from(this.electronService.updateCollectionAuth(collId, auth)).pipe(
+          map((updateAuthResult) => {
+            if (updateAuthResult.isSuccess) {
+              this.dispatchSuccess('Аутентификация успешно сохранена');
+              return updateCollectionAuthSuccess({ coll: updateAuthResult.body! });
+            } else {
+              this.dispatchFailure(updateAuthResult.error!);
+              return updateCollectionAuthFailure({ errorMessage: updateAuthResult.error! });
+            }
+          }),
+          catchError(() => {
+            const errorMessage = 'Непредвиденная ошибка при сохранении аутентификации';
+            this.dispatchFailure(errorMessage);
+            return of(updateCollectionAuthFailure({ errorMessage: errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
 
   dispatchCloseModal(modalOverlayRef: OverlayRef[]) {
     modalOverlayRef.forEach((ref) => {
@@ -254,13 +310,13 @@ export class CollectionEffects {
     });
   }
 
-  dispatchModalSuccess(successMessage: string) {
+  dispatchSuccess(successMessage: string) {
     this.store.dispatch(
       addAlertNotificationMessage({ message: { message: successMessage, showSuccess: true } }),
     );
   }
 
-  dispatchModalFailure(errorMessage: string) {
+  dispatchFailure(errorMessage: string) {
     this.store.dispatch(
       addAlertNotificationMessage({ message: { message: errorMessage, showSuccess: false } }),
     );

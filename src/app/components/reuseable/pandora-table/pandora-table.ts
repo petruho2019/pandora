@@ -38,7 +38,7 @@ export class PandoraTable implements AfterViewChecked, OnChanges, OnInit {
 
   @Output() tableChanged = new EventEmitter<TableRow[]>();
 
-  @Input({ required: true }) reqId: string;
+  @Input() reqId: string;
   @Input() canAddFile: boolean;
   @Input() canChangeContentType: boolean;
   @Input() initialData: TableRow[] | null = null;

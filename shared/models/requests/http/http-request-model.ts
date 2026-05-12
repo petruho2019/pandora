@@ -9,7 +9,7 @@ import {
   TextBody,
   XmlBody,
 } from './body';
-import { BasicAuth, BearerAuth, InheritAuth, NoAuth } from './auth';
+import { HttpBasicAuth, HttpBearerAuth, HttpInheritAuth, HttpNoAuth } from './auth';
 import * as axios from 'axios';
 import { ResultT } from '../../result';
 
@@ -30,7 +30,7 @@ export type BodyItem =
   | FormUrlEncodedBody
   | MultipartBody;
 
-export type AuthItem = BasicAuth | BearerAuth | InheritAuth | NoAuth;
+export type AuthItem = HttpBasicAuth | HttpBearerAuth | HttpInheritAuth | HttpNoAuth;
 
 export type BodyGroup = {
   name: string;

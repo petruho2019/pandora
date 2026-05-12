@@ -4,7 +4,7 @@
     type="text"
     id="token"
     class="pandora-input"
-    [(ngModel)]="token"
-    (input)="tokenChanged()"
+    [ngModel]="editableToken()"
+    (ngModelChange)="updateEditableToken($event)"
   />
 </div>

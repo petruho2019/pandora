@@ -2,6 +2,7 @@ import {
   RequestModel,
   RequestSettingsTabItems,
   RequestSettingsTabItemsType,
+  TableRow,
 } from './../../../../shared/models/requests/request';
 import {
   AfterViewInit,
@@ -48,7 +49,12 @@ import { RequestResponseInfo } from './request-response-info/request-response-in
 import { CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
 import { take } from 'rxjs';
 import { RequestStateService } from '../../../../services/request-state-service';
-import { CollectionInfo } from "./item-infos/collection-info/collection-info";
+import { CollectionInfo } from './item-infos/collection-info/collection-info';
+import {
+  Collection,
+  CollectionSettingsTabItems,
+  CollectionSettingsTabItemsType,
+} from '../../../../shared/models/collections/collection';
 
 @Component({
   selector: 'main-content',
@@ -61,8 +67,8 @@ import { CollectionInfo } from "./item-infos/collection-info/collection-info";
     RequestInfo,
     RequestResponseInfo,
     CdkDrag,
-    CollectionInfo
-],
+    CollectionInfo,
+  ],
 })
 export class MainContent {
   private tabItemService = inject(TabItemService);
@@ -77,9 +83,16 @@ export class MainContent {
   @Output() closeCollection = new EventEmitter();
 
   initialRequests = signal<Record<string, RequestModel>>({});
-  selectedSettingRequestTabItems = signal<Record<string, RequestSettingsTabItemsType>>({});
+  selectedRequestSettingTabItems = signal<Record<string, RequestSettingsTabItemsType>>({});
   selectedRequestBody = signal<Record<string, BodyItem>>({});
-  selectedAuthType = signal<Record<string, AuthItem>>({});
+  selectedRequestAuthType = signal<Record<string, AuthItem>>({});
+
+  initialColls = signal<Record<string, Collection>>({});
+  selectedCollectionSettingTabItems = signal<Record<string, CollectionSettingsTabItemsType>>({});
+  collectionAuthInfos = signal<Record<string, Record<string, AuthItem>>>({});
+  selectedCollectionAuthItem = signal<Record<string, AuthItem>>({});
+  collHeaders = signal<Record<string, TableRow[]>>({});
+
   reqInfoHeight = signal<Record<string, number>>({});
   reqResponseHeight = signal<Record<string, number>>({});
 
@@ -110,11 +123,12 @@ export class MainContent {
     return tabItem?.request?.request;
   });
 
-  currentCollWorkspace = computed(() => {
-    return this.workspaceInfoService.activeWorkspace()?.item;
-  })
+  currentCollTabItem = computed(() => {
+    const collId = this.workspaceInfoService.activeWorkspace()?.item?.id;
+    return this.tabItemService.getActiveTabItem(collId!)?.collection;
+  });
 
-  private _ = effect(() => {
+  private initialRequestsEffect = effect(() => {
     const tabItem = this.tabItemService.getActiveTabItem(
       this.workspaceInfoService.activeWorkspaceId(),
     );
@@ -126,7 +140,7 @@ export class MainContent {
     const current = this.initialRequests()[id];
 
     if (!current) {
-      this.selectedSettingRequestTabItems.update((ti) => ({
+      this.selectedRequestSettingTabItems.update((ti) => ({
         ...ti,
         [req.id]: RequestSettingsTabItems.PARAMS,
       }));
@@ -140,7 +154,7 @@ export class MainContent {
         },
       }));
 
-      this.selectedAuthType.update((ai) => ({
+      this.selectedRequestAuthType.update((ai) => ({
         ...ai,
         [req.id]: req.auth?.[AUTH_KIND.NONE] ?? {
           kind: AUTH_KIND.NONE,
@@ -151,6 +165,60 @@ export class MainContent {
       this.initialRequests.update((map) => ({
         ...map,
         [id]: structuredClone(req),
+      }));
+    }
+  });
+
+  private initialCollsEffect = effect(() => {
+    const collTabItem = this.tabItemService.getActiveTabItem(
+      this.workspaceInfoService.activeWorkspaceId(),
+    );
+
+    const coll = collTabItem?.collection;
+    if (!coll) return;
+
+    const collId = coll.id;
+    const currentCollTabItem = this.initialColls()[collId];
+
+    if (!currentCollTabItem) {
+      this.selectedCollectionSettingTabItems.update((ti) => ({
+        ...ti,
+        [collId]: CollectionSettingsTabItems.OVERVIEW,
+      }));
+
+      this.selectedCollectionAuthItem.update((ti) => ({
+        ...ti,
+        [coll.id]: coll.collectionConfig.collectionSettings.auth?.[BODY_KIND.NONE] ?? {
+          kind: BODY_KIND.NONE,
+          name: 'Без тела',
+          group: 'Other',
+        },
+      }));
+
+      console.log(`Добавляем дефолтный auth None`);
+
+      this.collectionAuthInfos.update((info) => ({
+        ...info,
+        [collId]: structuredClone(
+          coll.collectionConfig.collectionSettings.auth ?? {
+            [AUTH_KIND.NONE]: {
+              kind: AUTH_KIND.NONE,
+              name: 'Без аутентификации',
+            },
+          },
+        ),
+      }));
+
+      this.collHeaders.update((ch) => ({
+        ...ch,
+        [collId]:
+          this.workspaceInfoService.activeWorkspace()!.item!.collectionConfig.collectionSettings
+            .headers,
+      }));
+
+      this.initialColls.update((map) => ({
+        ...map,
+        [collId]: structuredClone(coll),
       }));
     }
   });
@@ -183,7 +251,6 @@ export class MainContent {
     const tabItem = this.tabItemService.getActiveTabItem(
       this.workspaceInfoService.activeWorkspaceId(),
     );
-    console.log(`Вызов метода getRequestModel, был получаен таб айтем : ${tabItem!.id}`);
     return tabItem!.request!.request!;
   }
 
@@ -213,6 +280,7 @@ export class MainContent {
   }
 
   handleSaveRequest(tabItem: TabItem, needCloseTabItem: boolean, reqAlreadyInStore: boolean) {
+    console.log(`Сохранение запроса! handleSaveRequest лог`);
     if (reqAlreadyInStore) {
       this.store
         .select(selectCollection(tabItem.request!.request!.collectionId!))
@@ -228,7 +296,8 @@ export class MainContent {
               },
             }),
           );
-        });
+        })
+        .unsubscribe();
     } else {
       this.store
         .select(selectCollection(tabItem.request!.request!.collectionId!))
@@ -237,14 +306,9 @@ export class MainContent {
             createHttpRequest({
               actionData: {
                 body: {
-                  id: tabItem.request!.request!.id,
+                  ...tabItem.request!.request!,
                   collectionId: tabItem.request!.request!.collectionId!,
-                  method: tabItem.request!.request!.method,
-                  url: tabItem.request!.request!.url,
-                  name: tabItem.request!.request!.name,
                   collectionPath: col!.path,
-                  auth: tabItem.request!.request!.auth,
-                  body: tabItem.request!.request!.body,
                   type: 'HTTP',
                 },
                 modalOverlayRefs: [
@@ -255,7 +319,8 @@ export class MainContent {
               },
             }),
           );
-        });
+        })
+        .unsubscribe();
     }
 
     this.requestStateService.setRequestNotChanged(tabItem.request!.request!);
@@ -267,11 +332,22 @@ export class MainContent {
     newTabItem: RequestSettingsTabItemsType,
     reqId: string,
   ) {
-    this.selectedSettingRequestTabItems.update((items) => ({
+    this.selectedRequestSettingTabItems.update((items) => ({
       ...items,
       [reqId]: newTabItem,
     }));
   }
+
+  handleSelectedCollectionSettingTabItemChanged(
+    newTabItem: CollectionSettingsTabItemsType,
+    collId: string,
+  ) {
+    this.selectedCollectionSettingTabItems.update((items) => ({
+      ...items,
+      [collId]: newTabItem,
+    }));
+  }
+
   handleSelectedBodyItemChanged(newBody: BodyItem, reqId: string) {
     this.selectedRequestBody.update((items) => ({
       ...items,
@@ -280,9 +356,34 @@ export class MainContent {
   }
 
   handleSelectedAuthItemChanged(newAuth: AuthItem, reqId: string) {
-    this.selectedAuthType.update((items) => ({
+    this.selectedRequestAuthType.update((items) => ({
       ...items,
       [reqId]: newAuth,
+    }));
+  }
+
+  handleSelectedCollectionAuthItemChanged(authItem: AuthItem) {
+    console.log(`Изменили authItem: ${JSON.stringify(authItem, null, 2)}`);
+
+    this.selectedCollectionAuthItem.update((items) => ({
+      ...items,
+      [this.currentCollTabItem()!.id]: authItem,
+    }));
+
+    this.handleSelectedAuthChanged(authItem);
+  }
+
+  handleSelectedAuthChanged(authItem: AuthItem) {
+    console.log(`Ввели значение: ${JSON.stringify(authItem, null, 2)}`);
+
+    const collId = this.currentCollTabItem()!.id;
+
+    this.collectionAuthInfos.update((infos) => ({
+      ...infos,
+      [collId]: {
+        ...infos[collId],
+        [authItem.kind]: authItem,
+      },
     }));
   }
 

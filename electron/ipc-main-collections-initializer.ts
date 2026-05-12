@@ -22,11 +22,16 @@ import yaml from 'js-yaml';
 import { CloneCollectionDto } from '../shared/models/collections/dto/collection-action-dtos';
 import { spawn } from 'child_process';
 import { platform } from 'os';
-import { RequestModel } from '../shared/models/requests/request';
+import { RequestModel, TableRow } from '../shared/models/requests/request';
 import { ZodError } from 'zod';
 import { COLLECTIONS_KEY, REQUESTS_KEY } from './main';
-import { HttpRequestSchema } from '../shared/models/requests/http/http-request-model';
+import {
+  AuthItem,
+  buildDefaultAuth,
+  HttpRequestSchema,
+} from '../shared/models/requests/http/http-request-model';
 import { CollectionsElectronSchema, RequestsElectronSchema } from '../shared/electron/schemes';
+import { AUTH_KIND } from '../shared/models/requests/http/auth';
 
 export function initializeCollection(
   collectionStore: ElectronStore<CollectionsElectronSchema>,
@@ -37,6 +42,8 @@ export function initializeCollection(
   ipcMain.handle('load-collections', async (): Promise<Collection[]> => {
     const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
 
+    console.log(`collectionsFromStore: ${JSON.stringify(collectionsFromStore, null, 2)}`);
+
     const [validCollections, isCollectionPathsValid] =
       await validateCollectionPaths(collectionsFromStore);
 
@@ -46,6 +53,8 @@ export function initializeCollection(
 
       return validCollections;
     } else {
+      console.log(`Store NOT updated: ${validCollections.length} collections`);
+
       return collectionsFromStore;
     }
   });
@@ -360,6 +369,123 @@ export function initializeCollection(
       return buildSuccessResultT(newCollections);
     },
   );
+
+  //#region update-headers
+
+  ipcMain.handle(
+    'update-headers',
+    async (event, collId: string, headers: TableRow[]): Promise<ResultT<Collection, string>> => {
+      if (!collId)
+        return buildFailureResultT('Непредвиденная ошибка при сохранении заголовков коллекции');
+
+      const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
+      const collectionFromStore = collectionsFromStore.find((c) => c.id === collId);
+
+      if (!collectionFromStore) return buildFailureResultT(`Коллекция не найдена`);
+
+      let collectionConfigResult = await getCollectionConfigFile(collectionFromStore.path);
+
+      if (collectionConfigResult.isFailure)
+        return buildFailureResultT(collectionConfigResult.error!);
+
+      let config = collectionConfigResult.body;
+
+      config!.collectionSettings.headers = headers;
+
+      try {
+        fs.promises.writeFile(
+          path.join(collectionFromStore.path, COLLECTION_CONFIG_FILE_NAME),
+          yaml.dump(config),
+          { encoding: 'utf-8' },
+        );
+      } catch (error: any) {
+        console.log(`Error code: ${error.code}`);
+        console.log(`Error: ${error}`);
+        return buildFailureResultT('Ошибка при сохранении заголовков');
+      }
+
+      const updatedColl: Collection = {
+        ...collectionFromStore,
+        collectionConfig: {
+          ...collectionFromStore.collectionConfig,
+          collectionSettings: {
+            ...collectionFromStore.collectionConfig.collectionSettings,
+            headers: headers,
+          },
+        },
+      };
+
+      collectionsFromStore.splice(
+        collectionsFromStore.indexOf(collectionFromStore),
+        1,
+        updatedColl,
+      );
+
+      collectionStore.set(COLLECTIONS_KEY, collectionsFromStore);
+
+      return buildSuccessResultT(updatedColl);
+    },
+  );
+
+  //#region update-auth
+
+  ipcMain.handle(
+    'update-auth',
+    async (event, collId: string, auth: AuthItem): Promise<ResultT<Collection, string>> => {
+      if (!collId)
+        return buildFailureResultT('Непредвиденная ошибка при сохранении аутентификации коллекции');
+
+      const collectionsFromStore = collectionStore.get(COLLECTIONS_KEY, []);
+      const collectionFromStore = collectionsFromStore.find((c) => c.id === collId);
+
+      if (!collectionFromStore) return buildFailureResultT(`Коллекция не найдена`);
+
+      let collectionConfigResult = await getCollectionConfigFile(collectionFromStore.path);
+
+      if (collectionConfigResult.isFailure)
+        return buildFailureResultT(collectionConfigResult.error!);
+
+      let config = collectionConfigResult.body;
+
+      config!.collectionSettings.auth[auth.kind] = auth;
+
+      try {
+        fs.promises.writeFile(
+          path.join(collectionFromStore.path, COLLECTION_CONFIG_FILE_NAME),
+          yaml.dump(config),
+          { encoding: 'utf-8' },
+        );
+      } catch (error: any) {
+        console.log(`Error code: ${error.code}`);
+        console.log(`Error: ${error}`);
+        return buildFailureResultT('Ошибка при сохранении аутентификации');
+      }
+
+      const updatedColl: Collection = {
+        ...collectionFromStore,
+        collectionConfig: {
+          ...collectionFromStore.collectionConfig,
+          collectionSettings: {
+            ...collectionFromStore.collectionConfig.collectionSettings,
+            auth: {
+              ...collectionFromStore.collectionConfig.collectionSettings.auth,
+              [auth.kind]: auth,
+            },
+          },
+        },
+      };
+
+      collectionsFromStore.splice(
+        collectionsFromStore.indexOf(collectionFromStore),
+        1,
+        updatedColl,
+      );
+
+      collectionStore.set(COLLECTIONS_KEY, collectionsFromStore);
+
+      return buildSuccessResultT(updatedColl);
+    },
+  );
 }
 
 //region functions
@@ -367,17 +493,14 @@ export function initializeCollection(
 async function getCollectionConfigFile(
   collPath: string,
 ): Promise<ResultT<CollectionYmlConfig, string>> {
-  let collectionConfig;
   try {
-    collectionConfig = yaml.load(
+    const collectionConfig = yaml.load(
       await fs.promises.readFile(path.join(collPath, COLLECTION_CONFIG_FILE_NAME), 'utf-8'),
     ) as CollectionYmlConfig;
-    console.log(`Config file found: ${JSON.stringify(collectionConfig)}`);
+    return buildSuccessResultT(collectionConfig);
   } catch {
     return buildFailureResultT(COLLECTION_CONFIG_FILE_FORMAT_ERROR);
   }
-
-  return buildSuccessResultT(collectionConfig);
 }
 
 async function getRequestsByPath(collectionPath: string): Promise<ResultT<RequestModel[], string>> {
@@ -544,6 +667,10 @@ function createCollectionConfigByCollection(collectionName: string): CollectionY
       id: uuidv4(),
       name: collectionName,
     },
+    collectionSettings: {
+      headers: [],
+      auth: buildDefaultAuth(),
+    },
   };
 }
 
@@ -600,6 +727,7 @@ function mapCollection(
     id: collectionConfigYml.collectionInfo.id,
     name: collectionConfigYml.collectionInfo.name,
     path: collectionPath,
+    collectionConfig: collectionConfigYml,
   };
 }
 

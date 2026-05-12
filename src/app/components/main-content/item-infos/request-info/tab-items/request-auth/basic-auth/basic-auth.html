@@ -5,8 +5,8 @@
       type="text"
       id="username"
       class="pandora-input"
-      [(ngModel)]="username"
-      (input)="credentialChanged()"
+      [ngModel]="editableCredentials().username"
+      (ngModelChange)="credentialsChanged({ username: $event })"
     />
   </div>
 
@@ -16,8 +16,8 @@
       [type]="isPasswordShow ? 'text' : 'password'"
       id="pass"
       class="pandora-input"
-      [(ngModel)]="password"
-      (input)="credentialChanged()"
+      [ngModel]="editableCredentials().password"
+      (ngModelChange)="credentialsChanged({ password: $event })"
     />
 
     @if (isPasswordShow) {

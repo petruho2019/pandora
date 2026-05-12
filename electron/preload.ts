@@ -10,7 +10,12 @@ import {
   RenameRequestDto,
   UpdateRequestInfoDto,
 } from '../shared/models/requests/dto/request-dtos';
-import { CookieModel, HttpConfigPayload } from '../shared/models/requests/http/http-request-model';
+import {
+  AuthItem,
+  CookieModel,
+  HttpConfigPayload,
+} from '../shared/models/requests/http/http-request-model';
+import { TableRow } from '../shared/models/requests/request';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   addCollection: (data: { name: string; path: string }) =>
@@ -40,6 +45,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateRequest: (reqInfo: UpdateRequestInfoDto) => ipcRenderer.invoke('update-request', reqInfo),
   sendRequest: (config: HttpConfigPayload) => ipcRenderer.invoke('send-request', config),
   cancelRequest: (id: string) => ipcRenderer.invoke('cancel-request', id),
+  updateCollectionHeaders: (collId: string, headers: TableRow[]) =>
+    ipcRenderer.invoke('update-headers', collId, headers),
+  updateCollectionAuth: (collId: string, auth: AuthItem) =>
+    ipcRenderer.invoke('update-auth', collId, auth),
 
   openFile: () => ipcRenderer.invoke('open-file'),
   fileExists: (path: string) => ipcRenderer.invoke('file-exists', path),

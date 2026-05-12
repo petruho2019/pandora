@@ -43,12 +43,4 @@ export interface TableRow {
   fileInfo: FileInfo | null;
 }
 
-export function buildHeader(tableRow: TableRow): TableRow {
-  return {
-    id: tableRow.id,
-    name: tableRow.name,
-    isActive: tableRow.isActive,
-    value: tableRow.value,
-    fileInfo: null,
-  };
-}
+

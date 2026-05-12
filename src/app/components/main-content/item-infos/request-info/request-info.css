@@ -96,6 +96,10 @@
     padding: 4px 10px 4px 20px;
 }
 
+.selectd-auth-con {
+    display: flex;
+}
+
 .auth-type-con {
     padding: 4px 8px 4px 8px;
 }
@@ -118,4 +122,12 @@
     width: 100%;
     max-width: 100%;
     max-height: 100%;
+}
+
+.icon {
+  flex: 0 0 10px;
+  display: block;
+  margin-left: 4px;
+  stroke-width: 0.1px;
+  stroke: white;
 }

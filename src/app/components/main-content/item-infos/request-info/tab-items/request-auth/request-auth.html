@@ -2,8 +2,14 @@
   @if (isNoAuth()) {
     Без аутентификации
   } @else if (isBasic()) {
-    <basic-auth [req]="req" (authChanged)="handleBasicAuthChanged($event)"></basic-auth>
+    <basic-auth
+      [basicAuth]="getBasicAuth()"
+      (authChanged)="handleBasicAuthChanged($event)"
+    ></basic-auth>
   } @else if (isBearer()) {
-    <bearer-auth [req]="req" (authChanged)="handleBearerAuthChaned($event)" ></bearer-auth>
+    <bearer-auth
+      [bearerAuth]="getBearerAuth()"
+      (authChanged)="handleBearerAuthChaned($event)"
+    ></bearer-auth>
   } @else if (isInherit()) {}
 </div>

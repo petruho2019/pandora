@@ -138,7 +138,6 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
   ipcMain.handle(
     'load-requests',
     async (event, collectionInfo: LoadRequestDto): Promise<ResultT<RequestModel[], string>> => {
-      console.log(`Load requests ${JSON.stringify(collectionInfo)}`);
       console.log(`${collectionInfo.collectionPath}`);
 
       if (!path.isAbsolute(collectionInfo.collectionPath))

@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, viewChild } from '@angular/core';
-import { RequestModel } from '../../../../../../../../../shared/models/requests/request';
+import { Component, EventEmitter, input, linkedSignal, Output } from '@angular/core';
 import { AUTH_KIND } from '../../../../../../../../../shared/models/requests/http/auth';
-import { BasicAuth as HttpBasicAuth } from '../../../../../../../../../shared/models/requests/http/auth';
+import { HttpBasicAuth as HttpBasicAuth } from '../../../../../../../../../shared/models/requests/http/auth';
 import { BasicAuthInfoDto } from '../../../../../../../../../shared/models/requests/dto/request-dtos';
 import { FormsModule } from '@angular/forms';
 
@@ -11,39 +10,22 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './basic-auth.html',
   styleUrl: './basic-auth.css',
 })
-export class BasicAuth implements OnChanges {
+export class BasicAuth {
+  basicAuth = input.required<HttpBasicAuth>();
 
-  @Input() req: RequestModel;
-  
   @Output() authChanged = new EventEmitter<BasicAuthInfoDto>();
-
-  username: string | null;
-  password: string | null;
 
   isPasswordShow: boolean = false;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['req']) {
-      const auth = this.req.auth[AUTH_KIND.BASIC] as HttpBasicAuth;
+  editableCredentials = linkedSignal(() => this.basicAuth() ?? { username: '', password: '' });
 
-      this.username = auth?.username;
-      this.password = auth?.password;
-    }
-  }
+  credentialsChanged(v: Partial<HttpBasicAuth>) {
+    this.editableCredentials.update((state) => ({ ...state, ...v }));
 
-  credentialChanged() {
-    this.authChanged.emit(this.buildDto());
-  }
-
-  buildDto() : BasicAuthInfoDto {
-    return {
-      username: this.username,
-      password: this.password
-    }
+    this.authChanged.emit(this.editableCredentials());
   }
 
   setPasswordShow() {
     this.isPasswordShow = !this.isPasswordShow;
   }
-
 }
