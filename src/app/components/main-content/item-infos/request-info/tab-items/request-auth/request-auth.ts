@@ -9,16 +9,18 @@ import {
 import { BasicAuth } from './basic-auth/basic-auth';
 import { BasicAuthInfoDto } from '../../../../../../../../shared/models/requests/dto/request-dtos';
 import { BearerAuth } from './bearer-auth/bearer-auth';
+import { InheritAuth } from "./inherit-auth/inherit-auth";
 
 @Component({
   selector: 'request-auth',
-  imports: [BasicAuth, BearerAuth],
+  imports: [BasicAuth, BearerAuth, InheritAuth],
   templateUrl: './request-auth.html',
   styleUrl: './request-auth.css',
 })
 export class RequestAuth {
   req = input<RequestModel>() as InputSignal<RequestModel>;
   selectedAuth = input<AuthItem>() as InputSignal<AuthItem>;
+  selectedCollectionAuth = input<AuthItem>();
 
   @Output() basicAuthChanged = new EventEmitter<BasicAuthInfoDto>();
   @Output() bearerAuthChanged = new EventEmitter<string | null>();

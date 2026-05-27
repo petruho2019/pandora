@@ -11,5 +11,7 @@
       [bearerAuth]="getBearerAuth()"
       (authChanged)="handleBearerAuthChaned($event)"
     ></bearer-auth>
-  } @else if (isInherit()) {}
+  } @else if (isInherit()) {
+    <inherit-auth [selectedCollectionAuth]="selectedCollectionAuth()"></inherit-auth>
+  }
 </div>
