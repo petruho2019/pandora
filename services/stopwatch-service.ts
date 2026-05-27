@@ -105,19 +105,6 @@ export class StopwatchService {
     });
   }
 
-  private clearTime(reqId: string) {
-    this._timeInfo.update((infos) => ({
-      ...infos,
-      [reqId]: {
-        ms: 0,
-        sec: 0,
-        min: 0,
-        hour: 0,
-        intervalId: null,
-      },
-    }));
-  }
-
   private getMsView(ms: number): string {
     return `${ms / 100}`;
   }

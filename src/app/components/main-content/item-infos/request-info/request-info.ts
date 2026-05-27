@@ -534,7 +534,7 @@ export class RequestInfo implements OnInit, OnChanges {
             this.selectedBody()![this.req()!.id],
             this.selectedAuthType()![this.req()!.id],
             cookies,
-            coll(),
+            coll?.(),
             this.selectedCollectionAuth()!,
           ),
       );

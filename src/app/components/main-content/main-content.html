@@ -40,11 +40,7 @@
         [selectedTabItem]="selectedRequestSettingTabItems()"
         [selectedAuthType]="selectedRequestAuthType()"
         [selectedBody]="selectedRequestBody()"
-        [selectedCollectionAuth]="
-          this.collectionAuthInfos()[this.currentCollTabItem()!.id][
-            this.selectedCollectionAuthItem()[this.currentCollTabItem()!.id].kind
-          ]
-        "
+        [selectedCollectionAuth]="getCurrentCollAuth()" 
         (onSelectedRequestSettingTabItemChanged)="
           handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)
         "

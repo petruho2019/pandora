@@ -341,7 +341,7 @@ export function initializeCollection(
         return buildFailureResultT(collectionConfigResult.error!);
 
       try {
-        fs.promises.rm(collectionFromStore.path, { recursive: true });
+        await fs.promises.rm(collectionFromStore.path, { recursive: true });
       } catch (error: any) {
         console.log(`Error code: ${error.code}`);
         console.log(`Error: ${error}`);
@@ -534,7 +534,7 @@ async function getRequestsByPath(collectionPath: string): Promise<ResultT<Reques
 }
 
 async function deleteFolder(path: string) {
-  await fs.promises.unlink(path);
+  await fs.promises.rm(path, { recursive: true, force: true });
 }
 
 async function copyRequests(

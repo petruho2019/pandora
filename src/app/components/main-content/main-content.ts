@@ -257,6 +257,7 @@ export class MainContent {
   }
 
   handleClickSaveRequestIcon(req: RequestModel) {
+    console.log(`Обрабатываем сохранение запроса: ${req.collectionId}`);
     if (req.collectionId) {
       const tabItem = this.tabItemService.getActiveTabItem(req.collectionId!)!;
       this.store
@@ -266,7 +267,10 @@ export class MainContent {
           if (r) {
             this.handleSaveRequest(tabItem, false, true);
           } else {
-            this.mainContentTabItems.showSaveRequest(tabItem);
+            this.mainContentTabItems.handleShowSelectCollection(
+              this.tabItemService.getActiveTabItem(req.collectionId!)!,
+              false,
+            );
           }
         });
     } else {
@@ -320,7 +324,6 @@ export class MainContent {
         .unsubscribe();
     }
 
-    this.requestStateService.setRequestNotChanged(tabItem.request!.request!);
 
     if (needCloseTabItem) this.mainContentTabItems.closeTabItem(tabItem);
   }
@@ -406,6 +409,16 @@ export class MainContent {
 
   getMainContentWidth() {
     return window.innerWidth - this.sidebarWidth();
+  }
+
+  getCurrentCollAuth() {
+    if (!this.currentCollTabItem()?.id) {
+      return;
+    }
+
+    return this.collectionAuthInfos()[this.currentCollTabItem()!.id][
+      this.selectedCollectionAuthItem()[this.currentCollTabItem()!.id].kind
+    ];
   }
 
   @HostListener('window:resize')

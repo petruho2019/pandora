@@ -291,7 +291,11 @@ html, body {
 }
 
 ngx-monaco-editor {
-  min-height: 80%;
   max-width: 80%;
 }
 
+ngx-monaco-editor .editor-container {
+  display: flex;
+  min-width: 125%;
+  flex: 1;
+}

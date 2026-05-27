@@ -14,6 +14,7 @@ import {
   AUTH_KIND,
   HttpBasicAuth,
   HttpBearerAuth,
+  HttpNoAuth,
 } from '../../../../../../../shared/models/requests/http/auth';
 import { BasicAuthInfoDto } from '../../../../../../../shared/models/requests/dto/request-dtos';
 import { AuthItem } from '../../../../../../../shared/models/requests/http/http-request-model';
@@ -36,7 +37,29 @@ export class CollAuth {
   public isShowAuthTypes = false;
 
   public authItems = computed(() => {
-    return Object.values(this.coll().collectionConfig.collectionSettings.auth);
+    return [
+      {
+        kind: 'basic',
+        name: 'Базовая',
+        username: (
+          this.coll().collectionConfig.collectionSettings.auth[AUTH_KIND.BASIC] as HttpBasicAuth
+        )?.username,
+        password: (
+          this.coll().collectionConfig.collectionSettings.auth[AUTH_KIND.BASIC] as HttpBasicAuth
+        )?.password,
+      } as HttpBasicAuth,
+      {
+        kind: 'bearer',
+        name: 'Bearer токен',
+        token: (
+          this.coll().collectionConfig.collectionSettings.auth[AUTH_KIND.BEARER] as HttpBearerAuth
+        )?.token,
+      } as HttpBearerAuth,
+      {
+        kind: 'none',
+        name: 'Без аутентификации',
+      } as HttpNoAuth,
+    ];
   });
 
   saveAuth() {
@@ -67,9 +90,6 @@ export class CollAuth {
   }
 
   getBasicAuth() {
-    console.log(
-      `getBasicAuth ${JSON.stringify(this.coll().collectionConfig.collectionSettings.auth[AUTH_KIND.BASIC] as HttpBasicAuth, null, 2)}`,
-    );
     return this.coll().collectionConfig.collectionSettings.auth[AUTH_KIND.BASIC] as HttpBasicAuth;
   }
 

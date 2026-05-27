@@ -46,6 +46,8 @@ export class SendRequestService {
     coll: Collection | undefined,
     selectedCollectionAuth: AuthItem,
   ): Promise<HttpResponseModelWrapper> {
+    console.log(`Выбранная аутентификация коллекции: ${selectedCollectionAuth?.kind}`);
+
     const { body, headers, cookiesHeader } = this.buildHttpClientOptions(
       req,
       selectedBody,
@@ -54,6 +56,8 @@ export class SendRequestService {
       coll,
       selectedCollectionAuth,
     );
+
+    console.log(`выбранная аутентификация: ${JSON.stringify(selectedAuth, null, 2)}`);
 
     console.log(`Отправляем запрос по url ${req.url}`);
 
@@ -120,6 +124,7 @@ export class SendRequestService {
     let builtAuth = this.buildAuth(activeAuth);
     const cookiesHeader = this.buildCookiesHeader(cookies, request.url);
     const collHeaders = this.buildCollHeaders(coll);
+
     if (!builtAuth.headers) builtAuth = this.buildAuth(selectedCollectionAuth);
 
     const headers: Record<string, string> = {};
@@ -143,10 +148,13 @@ export class SendRequestService {
   }
 
   private buildAuth(auth: AuthItem): BuiltAuth {
-    switch (auth.kind) {
+    switch (auth?.kind) {
       case 'basic':
         if (auth.username && auth.password) {
-          const token = `${this.toBase64(auth.username)}:${this.toBase64(auth.password)}`;
+          console.log(`Строим basic auth, ${auth.username}:${auth.password}`);
+          const raw = `${auth.username}:${auth.password}`;
+          const token = this.toBase64(raw);
+
           return {
             headers: {
               Authorization: `Basic ${token}`,
@@ -165,6 +173,8 @@ export class SendRequestService {
         }
         return {};
 
+      case 'inherit':
+      case 'none':
       default:
         return {};
     }
@@ -283,7 +293,7 @@ export class SendRequestService {
       const urlObj = new URL(url);
 
       const cookiesJoined = cookies
-        .filter((c) => c.domain === urlObj.hostname)
+        .filter((c) => urlObj.hostname === c.domain || urlObj.hostname.endsWith(`.${c.domain}`))
         .map((c) => `${encodeURIComponent(c.name)}=${c.value};`)
         .join(' ');
 
