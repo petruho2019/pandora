@@ -364,6 +364,8 @@ export function initializeRequest(store: ElectronStore<RequestsElectronSchema>, 
 
       const request = requestFromStore.find((r) => r.id === reqInfo.req.id);
 
+      console.log(`Request from store: ${JSON.stringify(request, null, 2)}`);
+
       if (!request) {
         return buildFailureResultT('Ошибка при сохранении запроса');
       }

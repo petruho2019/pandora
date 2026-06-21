@@ -233,9 +233,9 @@ export class SideBarContent {
     );
   }
 
-  dropRequest($event: CdkDragDrop<string[]>) {
+  dropRequest($event: CdkDragDrop<string[]>, collId: string) {
     this.store.dispatch(
-      moveRequest({ fromIndex: $event.previousIndex, toIndex: $event.currentIndex }),
+      moveRequest({ fromIndex: $event.previousIndex, toIndex: $event.currentIndex, collId }),
     );
   }
 }

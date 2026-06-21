@@ -18,6 +18,7 @@ import { AxiosResponse } from 'axios';
 import {
   HttpResponseModel,
   ResponseState,
+  statusTexts,
 } from '../../../../../shared/models/requests/http/http-request-model';
 import { StopwatchService } from '../../../../../services/stopwatch-service';
 import { NgClass } from '@angular/common';
@@ -231,5 +232,10 @@ export class RequestResponseInfo implements OnChanges {
       ?.body.replace(/\\r\\n/g, '\n')
       .replace(/\\n/g, '\n')
       .replace(/\\r/g, '\n');
+  }
+
+  getHttpStatusText(status: number) {
+    const text = statusTexts[status];
+    return text ? text : '';
   }
 }

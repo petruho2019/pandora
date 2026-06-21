@@ -15,6 +15,7 @@ import { lookup } from 'mime-types';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 import { v4 as uuidv4 } from 'uuid';
+import https from 'https';
 
 type FilePayload = {
   kind: 'file';
@@ -54,6 +55,9 @@ export function initializeSendRequest(ipcMain: IpcMain) {
       try {
         const resolvedBody = await resolveRequestBody(configPayload.data);
 
+        const agent = new https.Agent();
+        agent.options.rejectUnauthorized = false;
+
         const res = await axios.request({
           method: configPayload.method as any,
           url: configPayload.url,
@@ -64,6 +68,7 @@ export function initializeSendRequest(ipcMain: IpcMain) {
           },
           data: resolvedBody.data,
           signal: controller.signal,
+          httpsAgent: agent,
           validateStatus: () => true,
         });
 

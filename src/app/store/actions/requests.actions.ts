@@ -30,8 +30,7 @@ export const openRequestInFSFailure = createAction(
   props<{ errorMessage: string }>(),
 );
 
-
 export const moveRequest = createAction(
   '[Request] Move',
-  props<{ fromIndex: number; toIndex: number }>(),
+  props<{ fromIndex: number; toIndex: number; collId: string }>(),
 );

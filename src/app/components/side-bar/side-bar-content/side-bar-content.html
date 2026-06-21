@@ -5,20 +5,20 @@
     @if (this.collections$ | async; as collections) {
       @if (collections.length === 0) {
         <div class="no-collections">
-          <span>No collections found </span>
+          <span>Коллекции не найдены </span>
           <br />
           <span
             ><a
               style="text-decoration: underline"
               class="pointer"
               (click)="showAddCollectionModalRef()"
-              >Create</a
+              >Создать</a
             >
-            or
+            или
             <a style="text-decoration: underline" class="pointer" (click)="openCollectionRef()"
-              >open</a
+              >открыть</a
             >
-            collection</span
+            коллекцию</span
           >
         </div>
       } @else {
@@ -37,7 +37,7 @@
             ></collection-item>
 
             @if (openCollections()[coll.id]) {
-              <div class="requests" cdkDropList (cdkDropListDropped)="dropRequest($event)">
+              <div class="requests" cdkDropList (cdkDropListDropped)="dropRequest($event, coll.id)">
                 @for (req of this.requests()[coll.id]?.requests; track req.id) {
                   <request-item [request]="req" [collection]="coll"></request-item>
                 }

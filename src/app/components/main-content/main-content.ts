@@ -88,9 +88,11 @@ export class MainContent {
   selectedRequestAuthType = signal<Record<string, AuthItem>>({});
 
   initialColls = signal<Record<string, Collection>>({});
-  selectedCollectionSettingTabItems = signal<Record<string, CollectionSettingsTabItemsType>>({});
+  selectedCollectionSettingTabItem = signal<Record<string, CollectionSettingsTabItemsType>>({});
   collectionAuthInfos = signal<Record<string, Record<string, AuthItem>>>({});
   selectedCollectionAuthItem = signal<Record<string, AuthItem>>({});
+  collectionAuthDraftInfos = signal<Record<string, Record<string, AuthItem>>>({});
+  selectedCollectionAuthItemDraft = signal<Record<string, AuthItem>>({});
   collHeaders = signal<Record<string, TableRow[]>>({});
 
   reqInfoHeight = signal<Record<string, number>>({});
@@ -181,7 +183,7 @@ export class MainContent {
     const currentCollTabItem = this.initialColls()[collId];
 
     if (!currentCollTabItem) {
-      this.selectedCollectionSettingTabItems.update((ti) => ({
+      this.selectedCollectionSettingTabItem.update((ti) => ({
         ...ti,
         [collId]: CollectionSettingsTabItems.OVERVIEW,
       }));
@@ -196,6 +198,18 @@ export class MainContent {
       }));
 
       this.collectionAuthInfos.update((info) => ({
+        ...info,
+        [collId]: structuredClone(
+          coll.collectionConfig.collectionSettings.auth ?? {
+            [AUTH_KIND.NONE]: {
+              kind: AUTH_KIND.NONE,
+              name: 'Без аутентификации',
+            },
+          },
+        ),
+      }));
+
+      this.collectionAuthDraftInfos.update((info) => ({
         ...info,
         [collId]: structuredClone(
           coll.collectionConfig.collectionSettings.auth ?? {
@@ -286,6 +300,7 @@ export class MainContent {
       this.store
         .select(selectCollection(tabItem.request!.request!.collectionId!))
         .subscribe((col) => {
+          console.log(`Coll Id: ${col?.id}`);
           this.store.dispatch(
             updateRequest({
               actionData: {
@@ -324,7 +339,6 @@ export class MainContent {
         .unsubscribe();
     }
 
-
     if (needCloseTabItem) this.mainContentTabItems.closeTabItem(tabItem);
   }
 
@@ -342,7 +356,7 @@ export class MainContent {
     newTabItem: CollectionSettingsTabItemsType,
     collId: string,
   ) {
-    this.selectedCollectionSettingTabItems.update((items) => ({
+    this.selectedCollectionSettingTabItem.update((items) => ({
       ...items,
       [collId]: newTabItem,
     }));
@@ -363,23 +377,43 @@ export class MainContent {
   }
 
   handleSelectedCollectionAuthItemChanged(authItem: AuthItem) {
-    this.selectedCollectionAuthItem.update((items) => ({
+    this.selectedCollectionAuthItemDraft.update((items) => ({
       ...items,
       [this.currentCollTabItem()!.id]: authItem,
     }));
 
-    this.handleSelectedAuthChanged(authItem);
+    this.handleSelectedCollectionAuthChanged(authItem);
   }
 
-  handleSelectedAuthChanged(authItem: AuthItem) {
+  handleSelectedCollectionAuthChanged(authItem: AuthItem) {
     const collId = this.currentCollTabItem()!.id;
 
-    this.collectionAuthInfos.update((infos) => ({
+    this.collectionAuthDraftInfos.update((infos) => ({
       ...infos,
       [collId]: {
-        ...infos[collId],
+        ...(infos[collId] ?? {}),
         [authItem.kind]: authItem,
       },
+    }));
+
+    console.log(
+      `Обновили this.collectionAuthDraftInfos: ${JSON.stringify(this.collectionAuthDraftInfos(), null, 2)}`,
+    );
+  }
+
+  handleSaveCollectionAuth(event: { auth: AuthItem; collId: string }) {
+    console.log(`Обновляем collectionAuthInfos`);
+    this.collectionAuthInfos.update((infos) => ({
+      ...infos,
+      [event.collId]: {
+        ...(infos[event.collId] ?? {}),
+        [event.auth.kind]: event.auth,
+      },
+    }));
+
+    this.selectedCollectionAuthItem.update((items) => ({
+      ...items,
+      [event.collId]: event.auth,
     }));
   }
 

@@ -21,14 +21,18 @@
       [coll]="currentCollTabItem()!"
       [(collHeaders)]="collHeaders"
       [selectedAuthItem]="selectedCollectionAuthItem()[currentCollTabItem()!.id]"
+      [selectedCollectionAuthItemDraft]="
+        selectedCollectionAuthItemDraft()[currentCollTabItem()!.id]
+      "
       [collectionAuthInfos]="collectionAuthInfos()[currentCollTabItem()!.id]"
-      [selectedTabItem]="selectedCollectionSettingTabItems()"
-      [selectedCollectionSettingTabItems]="selectedCollectionSettingTabItems()"
+      [collectionAuthDraftInfos]="collectionAuthDraftInfos()[currentCollTabItem()!.id]"
+      [selectedTabItem]="selectedCollectionSettingTabItem()"
       (onSelectedCollectionSettingTabItemChanged)="
         handleSelectedCollectionSettingTabItemChanged($event.tabType, $event.collId)
       "
       (onSelectedAuthItemChanged)="handleSelectedCollectionAuthItemChanged($event)"
-      (onSelectedAuthChanged)="handleSelectedAuthChanged($event)"
+      (onSelectedAuthChanged)="handleSelectedCollectionAuthChanged($event)"
+      (onSaveAuth)="handleSaveCollectionAuth($event)"
     ></collection-info>
   }
 
@@ -40,7 +44,7 @@
         [selectedTabItem]="selectedRequestSettingTabItems()"
         [selectedAuthType]="selectedRequestAuthType()"
         [selectedBody]="selectedRequestBody()"
-        [selectedCollectionAuth]="getCurrentCollAuth()" 
+        [selectedCollectionAuth]="getCurrentCollAuth()"
         (onSelectedRequestSettingTabItemChanged)="
           handleSelectedRequestSettingTabItemChanged($event.tabType, $event.reqId)
         "

@@ -192,7 +192,11 @@ z"
   } @else if (isAuth()) {
     <coll-auth
       [coll]="coll()"
-      [selectedAuth]="collectionAuthInfos()[selectedAuthItem().kind]"
+      [selectedAuth]="
+        collectionAuthDraftInfos()?.[
+          selectedCollectionAuthItemDraft()?.kind ?? selectedAuthItem().kind
+        ] ?? collectionAuthInfos()[selectedAuthItem().kind]
+      "
       (onSaveAuth)="handleSaveAuth($event)"
       (onAuthChanged)="handleAuthChanged($event)"
       (onAuthItemChanged)="handleAuthItemChanged($event)"
@@ -200,6 +204,3 @@ z"
     </coll-auth>
   }
 </div>
-<!-- (authChanged)="handleCollAuthChanged($event)"
-      (basicAuthChanged)="handleBasicAuthChanged($event)"
-      (bearerAuthChanged)="handleBearerAuthChaned($event)" -->

@@ -616,10 +616,16 @@ export const requestsReducer = createReducer(
     ),
   ),
 
-  on(moveRequest, (state, { fromIndex: fromIndex, toIndex: toIndex }) => {
-    const requests = Object.values(state.entities);
-    moveItemInArray(requests, fromIndex, toIndex);
-    return requestAdapter.setAll(requests as RequestModel[], state);
+  on(moveRequest, (state, { fromIndex: fromIndex, toIndex: toIndex, collId: collId }) => {
+    const otherRequests = Object.values(state.entities).filter((e) => e!.collectionId !== collId);
+    const collectionRequests = Object.values(state.entities).filter(
+      (e) => e!.collectionId === collId,
+    );
+    moveItemInArray(collectionRequests, fromIndex, toIndex);
+    return requestAdapter.setAll(
+      collectionRequests.concat(...otherRequests) as RequestModel[],
+      state,
+    );
   }),
 
   on(cloneRequestSuccess, (state, { clonedRequest }) =>

@@ -29,12 +29,11 @@ export class CollectionInfo {
 
   public coll = model.required<Collection>();
   selectedTabItem = model<Record<string, CollectionSettingsTabItemsType>>();
-  selectedCollectionSettingTabItems = input.required<
-    Record<string, CollectionSettingsTabItemsType>
-  >({});
   selectedAuthItem = model.required<AuthItem>();
   collHeaders = model<Record<string, TableRow[]>>();
   collectionAuthInfos = model.required<Record<string, AuthItem>>();
+  collectionAuthDraftInfos = model<Record<string, AuthItem>>();
+  selectedCollectionAuthItemDraft = model<AuthItem>();
 
   public requestQuantity = this.store.select(selectTotal);
 
@@ -45,6 +44,7 @@ export class CollectionInfo {
 
   @Output() onSelectedAuthItemChanged = new EventEmitter<AuthItem>();
   @Output() onSelectedAuthChanged = new EventEmitter<AuthItem>();
+  @Output() onSaveAuth = new EventEmitter<{ auth: AuthItem; collId: string }>();
 
   public tabItems = Object.values(CollectionSettingsTabItems);
   public collectionSettingsTabItems = CollectionSettingsTabItems;
@@ -110,6 +110,8 @@ export class CollectionInfo {
     this.store.dispatch(
       updateCollectionAuth({ updateDto: { collId: this.coll()!.id, auth: auth } }),
     );
+
+    this.onSaveAuth.emit({ auth, collId: this.coll()!.id });
   }
 
   handleAuthItemChanged(auth: AuthItem) {
@@ -117,7 +119,6 @@ export class CollectionInfo {
   }
 
   handleAuthChanged(auth: AuthItem) {
-    this.coll().collectionConfig.collectionSettings.auth[auth.kind] = auth;
     this.onSelectedAuthChanged.emit(auth);
   }
 }

@@ -524,6 +524,12 @@ export class RequestInfo implements OnInit, OnChanges {
       coll = this.store.selectSignal(selectCollection(this.req()!.collectionId!));
     }
 
+    const test = this.selectedAuthType()![this.req()!.id];
+
+    console.log(
+      `Выбранный тип auth в coll: ${JSON.stringify(this.selectedAuthType()![this.req()!.id])}`,
+    );
+
     this.store
       .select(selectAll)
       .pipe(take(1))
